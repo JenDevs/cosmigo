@@ -2,13 +2,15 @@ const express = require("express");
 const cors = require("cors");
 
 const app = express();
+const port = 3000;
+
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {
-  res.send("Backend fungerar!");
-});
+const userRoutes = require("./routes/userRoutes");
+app.use(userRoutes);
 
-app.listen(3000, () => {
-  console.log("Server kör på http://localhost:3000");
-});
+// app.use(express.static('public'));
+
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
