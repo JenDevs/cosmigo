@@ -1,10 +1,13 @@
 <script setup>
 import Sidebar from "./components/Sidebar.vue";
+import WorkspaceView from "./components/Workspace.vue";
 </script>
 
 <template>
-  <Sidebar />
-  <!-- <router-view /> -->
+  <div class="layout">
+    <Sidebar />
+    <WorkspaceView />
+  </div>
 </template>
 
 <style>
@@ -15,6 +18,13 @@ body {
   padding: 0;
   max-height: 100vh;
 }
+
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
 h1 {
   color: white;
   text-align: center;
