@@ -1,24 +1,30 @@
 <script setup>
+import Sidebar from "./components/Sidebar.vue";
+import WorkspaceView from "./components/Workspace.vue";
 </script>
 
 <template>
-  <header>
-    <h1>Cosmigo</h1>
-    //Profile with name, level, and cosmigo mascot
-    //Todo
-    //Notes
-  </header>
-
+  <div class="layout">
+    <Sidebar />
+    <WorkspaceView />
+  </div>
 </template>
 
 <style>
-html, body {
-  background-color: black;
+html,
+body {
+  background-color: rgb(99, 99, 99);
   margin: 0;
   padding: 0;
   max-height: 100vh;
-
 }
+
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
 h1 {
   color: white;
   text-align: center;
