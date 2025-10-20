@@ -1,64 +1,62 @@
-function getNotes(userId) {
-  return fetch(`/api/notes?userId=${userId}`)
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error("Error fetching notes:", error);
-      throw error;
+const connectionMySQL = require("./../connectionMySQL");
+
+function getAllNotes(userId) {
+  return new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM Note WHERE userId = ?";
+    connectionMySQL.query(sql, [userId], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
     });
+  });
 }
 
-function getNote(noteId) {
-  return fetch("/api/notes/" + noteId)
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error("Error fetching note:", error);
-      throw error;
+function getNoteById(noteId) {
+  return new Promise((resolve, reject) => {
+    let sql = "SELECT * FROM Note WHERE noteId = ?";
+    connectionMySQL.query(sql, [noteId], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows[0]);
     });
+  });
 }
 
-function createNote(noteData) {
-  return fetch("/api/notes", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(noteData),
-  })
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error("Error creating note:", error);
-      throw error;
+function createNote(userId, noteTitle, noteContent) {
+  return new Promise((resolve, reject) => {
+    let sql =
+      "INSERT INTO Note (userId, noteTitle, noteContent) VALUES (?, ?, ?)";
+    let params = [userId, noteTitle, noteContent];
+    connectionMySQL.query(sql, params, (err, result) => {
+      if (err) reject(err);
+      else resolve({ noteId: result.insertId, userId, noteTitle, noteContent });
     });
+  });
 }
 
-function updateNote(noteId, noteData) {
-  return fetch(`/api/notes/${noteId}`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(noteData),
-  })
-    .then((response) => response.json())
-    .catch((error) => {
-      console.error("Error updating note:", error);
-      throw error;
+function updateNote(noteId, noteTitle, noteContent) {
+  return new Promise((resolve, reject) => {
+    let sql = "UPDATE Note SET noteTitle = ?, noteContent = ? WHERE noteId = ?";
+    let params = [noteTitle, noteContent, noteId];
+    connectionMySQL.query(sql, params, (err, result) => {
+      if (err) reject(err);
+      else resolve({ noteId, userId, noteTitle, noteContent });
     });
+  });
 }
 
 function deleteNote(noteId) {
-  return fetch(`/api/notes/${noteId}`, {
-    method: "DELETE",
-  })
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Error deleting note");
-      }
-    })
-    .catch((error) => {
-      console.error("Error deleting note:", error);
-      throw error;
+  return new Promise((resolve, reject) => {
+    let sql = "DELETE FROM Note WHERE noteId = ?";
+    connectionMySQL.query(sql, [noteId], (err, result) => {
+      if (err) reject(err);
+      else resolve();
     });
+  });
 }
 
-export { getNotes, createNote, updateNote, deleteNote };
+module.exports = {
+  getAllNotes,
+  getNoteById,
+  createNote,
+  updateNote,
+  deleteNote,
+};
