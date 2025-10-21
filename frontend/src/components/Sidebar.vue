@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import ProfileCard from "./ProfileCard.vue";
 //import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
+import QuizList from "./QuizList.vue";
+import { useQuizStore } from "@/stores/useQuizStore";
 
 const notes = ref([
   { id: 1, title: "Note 1", content: "Content for Note 1" },
@@ -13,6 +15,47 @@ const notes = ref([
 const deleteNote = (id) => {
   notes.value = notes.value.filter((note) => note.id !== id);
 };
+
+// QUIZZES
+
+//Pinia store
+const store = useQuizStore();
+
+// Ladda listan från backend via store
+const loading = ref(false);
+const error = ref("");
+
+async function loadQuizzes() {
+  loading.value = true;
+  error.value = "";
+  try {
+    await store.load();
+  } catch (e) {
+    error.value = "Could not get quizzes";
+    console.error(e);
+  } finally {
+    loading.value = false;
+  }
+}
+
+// välj quiz
+function selectQuiz(id) {
+  store.setCurrentById(id);
+}
+
+// ta bort quiz
+async function deleteQuiz(id) {
+  if (!confirm("Do you want to delete this quiz?")) return;
+  try {
+    await store.remove(id);
+  } catch (e) {
+    alert("Could not delete quiz.");
+    console.error(e);
+  }
+}
+
+// ladda quiz
+onMounted(loadQuizzes);
 </script>
 
 <template>
@@ -20,6 +63,15 @@ const deleteNote = (id) => {
     <ProfileCard />
     <!-- <TodoList /> -->
     <NoteList :notes="notes" @delete="deleteNote" />
+
+    <div class="quizzes-panel">
+      <QuizList
+        v-if="store.list.length > 0"
+        :quizzes="store.list"
+        @select="selectQuiz"
+        @delete="deleteQuiz"
+      />
+    </div>
   </aside>
 </template>
 

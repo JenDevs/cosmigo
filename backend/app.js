@@ -8,9 +8,15 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.get("/api/health", (_, res) => res.json({ ok: true }));
+
+// USERS
 const userRoutes = require("./routes/userRoutes");
-app.use(userRoutes);
+app.use("/api/users", userRoutes);
+
+// QUIZZES
+const quizRoutes = require("./routes/quizRoutes");
+app.use("/api/quizzes", quizRoutes); 
 
 // app.use(express.static('public'));
-
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
