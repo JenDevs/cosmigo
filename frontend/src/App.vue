@@ -1,20 +1,21 @@
 <script setup>
 import { ref } from 'vue';
 import PomodoroTimer from './components/PomodoroTimer.vue'
+import Sidebar from "./components/Sidebar.vue";
+import WorkspaceView from "./components/Workspace.vue";
 
 const showTimer = ref(false);
 
 </script>
 
 <template>
-  <header>
-    <h1>Cosmigo</h1>
-    <!-- Profile with name, level, and cosmigo mascot -->
-    <!-- ToDo -->
-    <!-- Notes -->
-  </header>
-  
 
+  <div class="layout">
+    <Sidebar />
+    <WorkspaceView />
+  </div>
+  
+  
     <button @click="showTimer = !showTimer" class="floatingClockButton">
     <img
       v-if="!showTimer"
@@ -35,13 +36,20 @@ const showTimer = ref(false);
 </template>
 
 <style>
-html, body {
-  background-color: black;
+html,
+body {
+  background-color: rgb(99, 99, 99);
   margin: 0;
   padding: 0;
   max-height: 100vh;
-
 }
+
+.layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
 h1 {
   color: white;
   text-align: center;
