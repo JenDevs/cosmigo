@@ -8,11 +8,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["delete"]);
-
-const deleteNote = (id) => {
-  emit("delete", id);
-};
+const emit = defineEmits(["delete", "new-note", "select"]);
 </script>
 
 <template>
@@ -20,21 +16,16 @@ const deleteNote = (id) => {
     <ul>
       <NoteItem
         v-for="note in notes"
-        :key="note.id"
-        :note="note"
-        @delete="deleteNote"
+        v-bind:key="note.id"
+        v-bind:note="note"
+        v-on:select="emit('select', note.id)"
+        v-on:delete="emit('delete', note.id)"
       />
     </ul>
   </div>
 </template>
 
 <style scoped>
-.note-list {
-  background-color: rgba(255, 255, 255, 0.12);
-  padding: 12px;
-  border-radius: 8px;
-  color: white;
-}
 .note-list ul {
   width: 100%;
   padding: 0;

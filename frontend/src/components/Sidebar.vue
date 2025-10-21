@@ -1,25 +1,30 @@
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
+//import { useNotes } from "../composables/note.js";
 import ProfileCard from "./ProfileCard.vue";
 //import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
+import { useNotesStore } from "../stores/useNotesStore";
+import { storeToRefs } from "pinia";
 
-const notes = ref([
-  { id: 1, title: "Note 1", content: "Content for Note 1" },
-  { id: 2, title: "Note 2", content: "Content for Note 2" },
-  { id: 3, title: "Note 3", content: "Content for Note 3" },
-]);
-
-const deleteNote = (id) => {
-  notes.value = notes.value.filter((note) => note.id !== id);
-};
+const notesStore = useNotesStore();
+const { notes } = storeToRefs(notesStore);
+const { selectNote, createNote, deleteNote } = notesStore;
 </script>
 
 <template>
   <aside class="sidebar">
     <ProfileCard />
     <!-- <TodoList /> -->
-    <NoteList :notes="notes" @delete="deleteNote" />
+    <div class="note-list-container">
+      <button class="new-note-btn" @click="createNote">New Note</button>
+      <NoteList
+        :notes="notes"
+        @select="selectNote"
+        @new-note="createNote"
+        @delete="deleteNote"
+      />
+    </div>
   </aside>
 </template>
 
@@ -38,5 +43,23 @@ const deleteNote = (id) => {
 
 .note-list {
   margin-top: auto;
+}
+
+.new-note-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.note-list-container {
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
 }
 </style>
