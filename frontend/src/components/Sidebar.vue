@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import ProfileCard from "./ProfileCard.vue";
-//import TodoList from "./TodoList.vue";
+import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
 
 const notes = ref([
@@ -18,7 +18,7 @@ const deleteNote = (id) => {
 <template>
   <aside class="sidebar">
     <ProfileCard />
-    <!-- <TodoList /> -->
+    <TodoList />
     <NoteList :notes="notes" @delete="deleteNote" />
   </aside>
 </template>
