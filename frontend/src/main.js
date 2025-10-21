@@ -12,5 +12,6 @@ app.use(PrimeVue, {
   },
 });
 app.use(router);
-app.use(PrimeVue);
+//TODO: Fix PrimeVue usage
+/* app.use(PrimeVue); */
 app.mount("#app");
