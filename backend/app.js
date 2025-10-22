@@ -12,6 +12,12 @@ app.get("/api/health", (_, res) => res.json({ ok: true }));
 
 // USERS
 const userRoutes = require("./routes/userRoutes");
+const todoRoutes = require("./routes/todoRoutes");
+
+//för annas routes crud todo
+app.use('/api', todoRoutes)
+
+//app.use(todoRoutes);
 app.use("/api/users", userRoutes);
 
 // QUIZZES

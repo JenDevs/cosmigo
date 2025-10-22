@@ -112,14 +112,16 @@ function newQuiz() {
 .workspace-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: rgb(42, 42, 48);
   padding: 1rem;
-  overflow: auto;
+  min-height: 100%;
 }
 
 /*_____________Toggle Editor______________________*/
+
 
 #toggle-editor {
   position: absolute;

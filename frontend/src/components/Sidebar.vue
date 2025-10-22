@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, inject } from "vue";
 import ProfileCard from "./ProfileCard.vue";
+import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
 import QuizList from "./QuizList.vue";
 import { useQuizStore } from "@/stores/useQuizStore";
@@ -56,7 +57,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
 <template>
   <aside class="sidebar">
     <ProfileCard />
-    <!-- <TodoList /> -->
+  <TodoList/>
     <!-- <NoteList :notes="notes" @delete="deleteNote" /> -->
 
     <div class="quizzes-panel">
@@ -85,7 +86,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
   flex-direction: column;
   justify-content: space-between;
   width: 300px;
-  height: 100vh;
+  height: 100%;
   background-color: rgb(63, 63, 70);
   padding: 12px;
   display: flex;
