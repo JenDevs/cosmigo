@@ -43,10 +43,11 @@ const timer = useTimerStore()
 
 <style scoped>
 .timeWrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  display: block;
+  margin: 0;
+  padding: 0;
+  min-height: auto;
+  position: static;
 }
 
 .timerCard {
@@ -66,13 +67,11 @@ const timer = useTimerStore()
 }
 
 .timer-critical {
-  color: red !important;
+  color: #d32f2f !important;
   animation: blink 1s infinite;
 }
 
 @keyframes blink {
-  50% {
-    opacity: 0;
-  }
+  50% { opacity: 0; }
 }
 </style>

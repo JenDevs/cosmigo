@@ -69,6 +69,7 @@ function applySettings() {
   border: 2px solid #B8A79C;
   border-radius: 6px;
   background: #f7f6f3;
+  color: #000000;
 }
 
 .settingsButtons {

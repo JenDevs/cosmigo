@@ -14,6 +14,10 @@ const showTimer = ref(false);
     <Sidebar />
     <WorkspaceView />
   </div>
+
+  <div v-if="showTimer" class="timer-wrapper">
+    <PomodoroTimer />
+  </div>
   
   
     <button @click="showTimer = !showTimer" class="floatingClockButton">
@@ -31,7 +35,7 @@ const showTimer = ref(false);
     />
   </button>
 
-  <PomodoroTimer v-if="showTimer" />
+  
 
 </template>
 
@@ -48,6 +52,7 @@ body {
   display: flex;
   height: 100vh;
   width: 100vw;
+  overflow: visible;
 }
 
 h1 {
@@ -65,9 +70,6 @@ header {
 
 button {
   background-color: white;
-  border-radius: 50%;
-  width: 45px;
-  height: 45px;
 }
 
 .floatingClockButton {
@@ -77,8 +79,8 @@ button {
   background-color: white;
   border: 2px solid black;
   border-radius: 50%;
-  width: 35px;
-  height: 35px;
+  width: 45px;
+  height: 45px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -88,13 +90,25 @@ button {
 }
 
 .clockIcon {
-  width: 28px;
-  height: 28px;
+  width: 35px;
+  height: 35px;
 }
 
 .floatingClockButton img {
-  width: 60%;
+  width: 70%;
   height: auto;
+}
+
+.timer-wrapper {
+  position: fixed;
+  top: 16px;       
+  right: 16px;    
+  z-index: 999999; 
+  background: none;
+  padding: 0;
+  margin: 0;
+  pointer-events: auto;
+  display: inline-block;
 }
 
 </style>

@@ -269,5 +269,7 @@ export const useTimerStore = defineStore("timer", () => {
     stopTimer,
     resetTimer,
     userSettings,
+    createPomodoro,
+    fetchPomodoro,
   };
 });

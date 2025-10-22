@@ -40,4 +40,13 @@ const props = defineProps({
   opacity: 0.8;
   margin: 0;
 }
+.timer-critical {
+  color: #d32f2f !important;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
 </style>

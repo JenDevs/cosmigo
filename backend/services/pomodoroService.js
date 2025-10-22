@@ -1,14 +1,19 @@
 const connectionMySQL = require("./../connectionMySQL");
 
+
+
+
 function getAllPomodoros() {
   return new Promise((resolve, reject) => {
     let sql = "SELECT * FROM pomodoro";
     connectionMySQL.query(sql, (err, rows) => {
-      if (err) reject(err);
-      else resolve(rows);
+      if (err) {
+        console.error("SQL ERROR in getAllPomodoros:", err);
+        reject(err);
+      } else resolve(rows);
     });
   });
-}
+} 
 
 function getPomodoroById(id) {
   return new Promise((resolve, reject) => {
