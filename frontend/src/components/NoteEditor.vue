@@ -55,7 +55,6 @@ watch(
       placeholder="Untitled"
     />
     <textarea class="content-area" v-model="activeNote.content" />
-    <button @click="$emit('save', activeNote)">Save</button>
     <p>Last saved at: {{ savedAtText }}</p>
   </div>
 
