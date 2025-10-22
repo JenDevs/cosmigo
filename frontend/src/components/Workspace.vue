@@ -1,8 +1,11 @@
 <script setup>
+import { onMounted, ref, watch } from "vue";
 import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
-import { ref } from "vue";
 import NoteEditor from "./NoteEditor.vue";
+import QuizEditor from "./QuizEditor.vue";
+import QuizPlayer from "./QuizPlayer.vue";
+import { useQuizStore } from "@/stores/useQuizStore";
 //import QuizEditor from './QuizEditor.vue';
 
 const notesStore = useNotesStore();
@@ -15,7 +18,56 @@ const props = defineProps({
   },
 });
 
+// växla mellan Note/Quiz
 const isQuizEditor = ref(false);
+
+//Pinia-store för quiz
+const store = useQuizStore();
+const { current } = storeToRefs(store);
+
+// quiz player state
+const playerOpen = ref(false);
+const playerTitle = ref("Quiz");
+const playerQuestions = ref([]);
+
+// ladda quiz när sidan öppnas
+onMounted(() => store.load());
+
+// reagera när quiz väljs i listan eller store
+watch(
+  () => useQuizStore.current?.id,
+  async (id) => {
+    if (!id) return;
+    try {
+      const full = await Quizzes.get(id);
+      selectedQuiz.value = full;
+      isQuizEditor.value = true;
+    } catch (e) {
+      console.error(e);
+      alert("Could not load quiz");
+    }
+  }
+);
+
+// starta quiz spelaren
+function onStart({ title, questions }) {
+  playerTitle.value = title;
+  playerQuestions.value = questions;
+  playerOpen.value = true;
+}
+
+// efter att quiz sparats i editorn
+function onSaved({ id, title }) {
+  store.setCurrentById(id);
+}
+
+// skapa nytt quiz
+function newQuiz() {
+  isQuizEditor.value = true;
+  useQuizStore.current = null;
+  selectedQuiz.value = null;
+  quizEditorRef.value?.resetQuiz();
+}
 </script>
 
 <template>
@@ -31,12 +83,28 @@ const isQuizEditor = ref(false);
         </span>
       </label>
     </div>
+
     <NoteEditor
       v-if="!isQuizEditor"
       :note="activeNote"
       @save="(note) => notesStore.updateNote(note)"
     />
-    <!-- <QuizEditor v-else /> -->
+
+    <!-- Quizeditor -->
+    <QuizEditor v-else 
+    :quiz="selectedQuiz" 
+    ref="quizEditorRef"
+    @start="onStart"
+    @saved="onSaved" 
+    />
+
+    <!-- Quizspelare -->
+    <QuizPlayer
+      :open="playerOpen"
+      :title="playerTitle"
+      :questions="playerQuestions"
+      @close="playerOpen = false"
+    />
   </div>
 </template>
 
