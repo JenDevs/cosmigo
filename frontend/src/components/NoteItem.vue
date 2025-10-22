@@ -8,17 +8,21 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["delete"]);
+const emit = defineEmits(["delete", "select"]);
 
 const handleDelete = () => {
   emit("delete", props.note.id);
 };
+
+const handleSelect = () => {
+  emit("select", props.note.id);
+};
 </script>
 
 <template>
-  <li class="note-item">
+  <li class="note-item" v-on:click="handleSelect">
     {{ props.note.title }}
-    <button class="delete-note-btn" @click.stop="handleDelete">×</button>
+    <button class="delete-note-btn" v-on:click.stop="handleDelete">×</button>
   </li>
 </template>
 

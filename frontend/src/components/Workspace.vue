@@ -1,7 +1,19 @@
 <script setup>
+import { useNotesStore } from "../stores/useNotesStore";
+import { storeToRefs } from "pinia";
 import { ref } from "vue";
 import NoteEditor from "./NoteEditor.vue";
 //import QuizEditor from './QuizEditor.vue';
+
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
+
+const props = defineProps({
+  activeNote: {
+    type: Object,
+    default: null,
+  },
+});
 
 const isQuizEditor = ref(false);
 </script>
@@ -21,8 +33,8 @@ const isQuizEditor = ref(false);
     </div>
     <NoteEditor
       v-if="!isQuizEditor"
-      :note="{ id: 1, title: 'Sample Note', content: 'This is a sample note.' }"
-      @save="(note) => console.log('Save note:', note)"
+      :note="activeNote"
+      @save="(note) => notesStore.updateNote(note)"
     />
     <!-- <QuizEditor v-else /> -->
   </div>

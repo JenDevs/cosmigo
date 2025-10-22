@@ -1,12 +1,12 @@
 <script setup>
 import Sidebar from "./components/Sidebar.vue";
-import WorkspaceView from "./components/Workspace.vue";
+import Workspace from "./components/Workspace.vue";
 </script>
 
 <template>
   <div class="layout">
     <Sidebar />
-    <WorkspaceView />
+    <Workspace />
   </div>
 </template>
 

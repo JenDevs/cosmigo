@@ -10,6 +10,8 @@ app.use(express.urlencoded({ extended: true }));
 
 const userRoutes = require("./routes/userRoutes");
 app.use(userRoutes);
+const noteRoutes = require("./routes/noteRoutes");
+app.use(noteRoutes);
 
 // app.use(express.static('public'));
 

@@ -1,45 +1,66 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useNotesStore } from "../stores/useNotesStore";
+import { computed } from "vue";
+
+const notesStore = useNotesStore();
+const activeNote = computed(() => notesStore.activeNote);
+
+const savedAt = computed(() =>
+  activeNote.value ? activeNote.value.updatedAt : null
+);
+const savedAtText = computed(() => {
+  if (!savedAt.value) return "—";
+  const d =
+    typeof savedAt.value === "number"
+      ? new Date(savedAt.value)
+      : new Date(String(savedAt.value));
+  return d.toLocaleString();
+});
 
 const props = defineProps({
   note: {
     type: Object,
-    required: true,
+    default: null,
   },
 });
 
-const emit = defineEmits(["save"]);
-
-const title = ref(props.note.title);
-const content = ref(props.note.content);
-
+let timeout;
 watch(
-  () => props.note,
-  (newNote) => {
-    title.value = newNote.title;
-    content.value = newNote.content;
-  }
+  () => notesStore.activeNote,
+  (newNote, oldNote) => {
+    if (!newNote) return;
+    // Watch content/title edits)
+    watch(
+      () => ({ title: newNote.title, content: newNote.content }),
+      (updated) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          notesStore.updateNote({ ...newNote });
+        }, 1000); // autosave 1s after user stops typing
+      },
+      { deep: true }
+    );
+  },
+  { immediate: true }
 );
-
-const saveNote = () => {
-  emit("save", {
-    id: props.note.id,
-    title: title.value,
-    content: content.value,
-  });
-};
 </script>
 
 <template>
-  <div class="note-editor">
-    <input v-model="title" placeholder="Title" class="title-input" />
-    <textarea
-      v-model="content"
-      placeholder="Write your note here..."
-      class="content-area"
+  <div v-if="activeNote" class="note-editor">
+    <input
+      class="title-input"
+      type="text"
+      v-model="activeNote.title"
+      placeholder="Untitled"
     />
-    <button @click="saveNote">💾 Save</button>
+    <textarea class="content-area" v-model="activeNote.content" />
+    <p>Last saved at: {{ savedAtText }}</p>
   </div>
+
+  <!-- <div v-else class="no-note">
+    <p>Select or create a note to begin.</p>
+  </div> -->
 </template>
 
 <style scoped>
