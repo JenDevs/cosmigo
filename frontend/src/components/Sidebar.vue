@@ -1,6 +1,5 @@
 <script setup>
 import { ref, inject } from "vue";
-//import { useNotes } from "../composables/note.js";
 import ProfileCard from "./ProfileCard.vue";
 //import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
@@ -9,6 +8,7 @@ import { storeToRefs } from "pinia";
 
 const notesStore = useNotesStore();
 const { notes } = storeToRefs(notesStore);
+
 const { selectNote, createNote, deleteNote } = notesStore;
 </script>
 

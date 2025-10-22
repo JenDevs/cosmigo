@@ -40,23 +40,31 @@ function createNote(userId, noteTitle, noteContent) {
 
 function updateNote(noteId, userId, noteTitle, noteContent) {
   return new Promise((resolve, reject) => {
-    const sql = `
+    const sqlUpdate = `
       UPDATE Note
-      SET noteTitle = ?, noteContent = ?
+      SET noteTitle = ?, noteContent = ?, updatedAt = CURRENT_TIMESTAMP
       WHERE noteId = ? AND userId = ?
     `;
     const params = [noteTitle, noteContent, Number(noteId), Number(userId)];
 
-    connectionMySQL.query(sql, params, (err, result) => {
+    connectionMySQL.query(sqlUpdate, params, (err, result) => {
       if (err) return reject(err);
       if (result.affectedRows === 0)
         return reject(new Error("Note not found or not authorized"));
-      resolve({
-        noteId: Number(noteId),
-        userId: Number(userId),
-        noteTitle,
-        noteContent,
-      });
+
+      const sqlSelect = `
+        SELECT noteId, userId, noteTitle, noteContent, updatedAt
+        FROM Note
+        WHERE noteId = ? AND userId = ?
+      `;
+      connectionMySQL.query(
+        sqlSelect,
+        [Number(noteId), Number(userId)],
+        (e2, rows) => {
+          if (e2) return reject(e2);
+          resolve(rows[0]); 
+        }
+      );
     });
   });
 }

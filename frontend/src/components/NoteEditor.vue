@@ -6,6 +6,18 @@ import { computed } from "vue";
 const notesStore = useNotesStore();
 const activeNote = computed(() => notesStore.activeNote);
 
+const savedAt = computed(() =>
+  activeNote.value ? activeNote.value.updatedAt : null
+);
+const savedAtText = computed(() => {
+  if (!savedAt.value) return "—";
+  const d =
+    typeof savedAt.value === "number"
+      ? new Date(savedAt.value)
+      : new Date(String(savedAt.value));
+  return d.toLocaleString();
+});
+
 const props = defineProps({
   note: {
     type: Object,
@@ -13,22 +25,22 @@ const props = defineProps({
   },
 });
 
-const title = ref();
-const content = ref();
-const savedAt = ref(null);
-
+let timeout;
 watch(
-  () => props.note,
-  (newNote) => {
-    if (newNote) {
-      title.value = newNote.title;
-      content.value = newNote.content;
-      savedAt.value = new Date();
-    } else {
-      title.value = "";
-      content.value = "";
-      savedAt.value = null;
-    }
+  () => notesStore.activeNote,
+  (newNote, oldNote) => {
+    if (!newNote) return;
+    // Watch content/title edits)
+    watch(
+      () => ({ title: newNote.title, content: newNote.content }),
+      (updated) => {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          notesStore.updateNote({ ...newNote });
+        }, 1000); // autosave 1s after user stops typing
+      },
+      { deep: true }
+    );
   },
   { immediate: true }
 );
@@ -44,12 +56,12 @@ watch(
     />
     <textarea class="content-area" v-model="activeNote.content" />
     <button @click="$emit('save', activeNote)">Save</button>
-    <p>Last saved at: {{ savedAt }}</p>
+    <p>Last saved at: {{ savedAtText }}</p>
   </div>
 
-  <div v-else class="no-note">
+  <!-- <div v-else class="no-note">
     <p>Select or create a note to begin.</p>
-  </div>
+  </div> -->
 </template>
 
 <style scoped>

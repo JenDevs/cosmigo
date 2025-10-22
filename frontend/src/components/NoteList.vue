@@ -1,4 +1,5 @@
 <script setup>
+import { defineProps, defineEmits, onMounted } from "vue";
 import NoteItem from "./NoteItem.vue";
 
 const props = defineProps({
@@ -17,9 +18,9 @@ const emit = defineEmits(["delete", "new-note", "select"]);
       <NoteItem
         v-for="note in notes"
         v-bind:key="note.id"
-        v-bind:note="note"
-        v-on:select="emit('select', note.id)"
-        v-on:delete="emit('delete', note.id)"
+        :note="note"
+        @select="emit('select', $event)"
+        @delete="emit('delete', $event)"
       />
     </ul>
   </div>

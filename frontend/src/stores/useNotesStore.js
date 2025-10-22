@@ -1,59 +1,93 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 export const useNotesStore = defineStore("notes", () => {
-  const notes = ref([
-    { id: 1, title: "First Note", content: "This is a dummy note." },
-    { id: 2, title: "Important note", content: "The game." },
-    {
-      id: 3,
-      title: "Happy",
-      content: "It finally works!",
-    },
-  ]);
-
+  const notes = ref([]);
   const activeNote = ref(notes.value[0] || null);
+  const isSaving = ref(false);
+  const mockUserId = 1;
 
-  // Backend-prepared
-  // async function fetchNotes() {
-  //   const res = await fetch('/api/notes')
-  //   notes.value = await res.json()
-  // }
-  //
-  // async function createNote() {
-  //   const res = await fetch('/api/notes', { method: 'POST' })
-  //   const newNote = await res.json()
-  //   notes.value.push(newNote)
-  //   activeNote.value = newNote
-  // }
+  async function fetchNotes() {
+    console.log("Fetching notes...");
+    const res = await fetch(`/api/users/1/notes`);
+    const raw = await res.json();
 
-  // Dummy fetch
-  function fetchNotes() {
-    // No fetch - dummy data for now
+    notes.value = raw.map((n) => ({
+      id: n.noteId,
+      title: n.noteTitle,
+      content: n.noteContent,
+      userId: n.userId,
+      updatedAt: n.updatedAt ? new Date(n.updatedAt).getTime() : 0,
+    }));
+    notes.value.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+    console.log("Fetched Notes:", notes.value);
+    activeNote.value = notes.value[0] || null;
+  }
+  onMounted(fetchNotes);
+
+  async function createNote() {
+    const title = "Untitled";
+    const content = "This is a new note.";
+    await fetch("/api/users/1/notes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: mockUserId,
+        noteTitle: title,
+        noteContent: content,
+      }),
+    });
+    await fetchNotes();
   }
 
-  function createNote() {
-    const newId = notes.value.length + 1;
-    const newNote = { id: newId, title: `New note ${newId}`, content: "" };
-    notes.value.push(newNote);
-    activeNote.value = newNote;
-  }
+  async function updateNote(updatedNote) {
+    const idx = notes.value.findIndex((n) => n.id === updatedNote.id);
+    if (idx === -1) return;
 
-  function updateNote(updatedNote) {
-    const index = notes.value.findIndex((note) => note.id === updatedNote.id);
-    if (index !== -1) {
-      notes.value[index] = updatedNote;
-      activeNote.value = updatedNote;
+    // Optimistic update - immediate UI feedback
+    notes.value[idx] = { ...notes.value[idx], ...updatedNote };
+
+    try {
+      const res = await fetch(`/api/users/1/notes/${updatedNote.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: mockUserId,
+          noteTitle: updatedNote.title,
+          noteContent: updatedNote.content,
+        }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+
+      const { success, data } = await res.json();
+      if (!success) throw new Error("Update failed");
+
+      const saved = {
+        id: data.noteId,
+        title: data.noteTitle,
+        content: data.noteContent,
+        userId: data.userId,
+        updatedAt: data.updatedAt
+          ? new Date(data.updatedAt).getTime()
+          : Date.now(),
+      };
+
+      // After optimistic update: ensure correct order
+      notes.value.splice(idx, 1);
+      notes.value.unshift(saved);
+      activeNote.value = notes.value[0];
+    } catch (err) {
+      console.error("Failed to save note:", err);
     }
   }
 
-  function deleteNote(id) {
-    notes.value = notes.value.filter((note) => note.id !== id);
-    if (activeNote.value?.id === id) {
-      activeNote.value = null;
+  async function deleteNote(id) {
+    const res = await fetch(`/api/users/1/notes/${id}`, { method: "DELETE" });
+    if (!res.ok) {
+      console.error("Error deleting note:", await res.text());
+      return;
     }
-
-    console.log("Deleted Note ID:", id);
+    await fetchNotes();
   }
 
   function selectNote(id) {
