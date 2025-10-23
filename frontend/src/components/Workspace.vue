@@ -1,9 +1,99 @@
 <script setup>
-import { ref } from "vue";
-import NoteEditor from "./NoteEditor.vue";
-//import QuizEditor from './QuizEditor.vue';
+import { onMounted, ref, watch } from "vue";
+import { useNotesStore } from "@/stores/useNotesStore";
+import { useQuizStore } from "@/stores/useQuizStore";
+import { storeToRefs } from "pinia";
 
+import NoteEditor from "./NoteEditor.vue";
+import QuizEditor from "./QuizEditor.vue";
+import QuizPlayer from "./QuizPlayer.vue";
+
+// Notes
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
+
+// Toggle mellan Note/Quiz
 const isQuizEditor = ref(false);
+
+// Quiz store
+const store = useQuizStore();
+const { current } = storeToRefs(store);
+
+// Lokalt state för editor/player
+const selectedQuiz = ref(null);
+const quizEditorRef = ref(null);
+
+const playerOpen = ref(false);
+const playerTitle = ref("Quiz");
+const playerQuestions = ref([]);
+
+// Ladda quiz vid mount
+onMounted(() => store.load());
+
+// Reagera på att "current" ändras i storen
+watch(
+  () => current.value?.id,
+  async (id) => {
+    if (!id) return;
+    try {
+      const full = await store.getFull(id); // hämta inkl. frågor
+      selectedQuiz.value = full;
+      isQuizEditor.value = true;
+    } catch (e) {
+      console.error(e);
+      alert("Could not load quiz");
+    }
+  }
+);
+
+// Starta spelaren
+function onStart({ title, questions }) {
+  playerTitle.value = title;
+  playerQuestions.value = questions;
+  playerOpen.value = true;
+}
+
+// Efter save
+function onSaved({ id, title }) {
+  store.setCurrentById(id);
+}
+
+// Skapa nytt quiz
+function newQuiz() {
+  isQuizEditor.value = true;
+  store.clearCurrent();
+  selectedQuiz.value = null;
+  quizEditorRef.value?.resetQuiz();
+}
+
+// Archive quiz
+async function handleArchive() {
+  const id = store.current?.id || selectedQuiz.value?.id;
+  if (!id) {
+    if (confirm("Quizet är inte sparat. Vill du spara det först?")) {
+      const res = await store.save({ title: playerTitle.value, questions: playerQuestions.value });
+      if (res?.id) await store.archive(res.id);
+    }
+  } else {
+    await store.archive(id);
+  }
+  playerOpen.value = false;
+}
+
+function handleRestart() {
+}
+
+// Om quizet inte är sparat: fråga
+function handleClose() {
+  const notSaved = !selectedQuiz.value?.id;
+  if (notSaved) {
+    if (confirm("Do you wanna save quiz before you exit?")) {
+      store.save({ title: playerTitle.value, questions: playerQuestions.value })
+        .catch(e => alert(e?.message || "Could not save"));
+    }
+  }
+  playerOpen.value = false;
+}
 </script>
 
 <template>
@@ -12,19 +102,37 @@ const isQuizEditor = ref(false);
       <label class="switch">
         <input type="checkbox" v-model="isQuizEditor" />
         <span class="slider">
-          <p id="slider-note" v-bind:class="{ inactive: isQuizEditor }">Note</p>
-          <p id="slider-quiz" v-bind:class="{ inactive: !isQuizEditor }">
-            Quiz
-          </p>
+          <p id="slider-note" :class="{ inactive: isQuizEditor }">Note</p>
+          <p id="slider-quiz" :class="{ inactive: !isQuizEditor }">Quiz</p>
         </span>
       </label>
     </div>
+
+    <!-- Note -->
     <NoteEditor
       v-if="!isQuizEditor"
-      :note="{ id: 1, title: 'Sample Note', content: 'This is a sample note.' }"
-      @save="(note) => console.log('Save note:', note)"
+      :note="activeNote"
+      @save="note => notesStore.updateNote(note)"
     />
-    <!-- <QuizEditor v-else /> -->
+
+    <!-- Quiz -->
+    <QuizEditor
+      v-else
+      :quiz="selectedQuiz"
+      ref="quizEditorRef"
+      @start="onStart"
+      @saved="onSaved"
+    />
+
+    <!-- Quizplayer -->
+    <QuizPlayer
+      :open="playerOpen"
+      :title="playerTitle"
+      :questions="playerQuestions"
+      @close="handleClose"
+      @archive="handleArchive"
+      @restart="handleRestart"
+    />
   </div>
 </template>
 
@@ -32,14 +140,16 @@ const isQuizEditor = ref(false);
 .workspace-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: rgb(42, 42, 48);
   padding: 1rem;
-  overflow: auto;
+  min-height: 100%;
 }
 
 /*_____________Toggle Editor______________________*/
+
 
 #toggle-editor {
   position: absolute;
