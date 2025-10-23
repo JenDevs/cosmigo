@@ -207,8 +207,9 @@ async function save() {
     <div class="actions">
       <div class="left-actions">
       <button @click="startQuiz">Start quiz</button>
-      <button @click="addQuestion">+ Add question</button>
+      <button class="add" @click="addQuestion">+ Add question</button>
       </div>
+
       <button
         type="button"
         class="save"
@@ -278,6 +279,11 @@ button:disabled {
 }
 button.danger {
   background: #a33;
+}
+
+button.add {
+  background-color: #4caf50;
+  color: white;
 }
 
 .actions {
