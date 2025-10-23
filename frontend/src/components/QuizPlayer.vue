@@ -1,19 +1,21 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount } from "vue";
 
-// props från föräldern
+// event upp till föräldern 
+const emit = defineEmits(["close", "archive", "restart"]);
+
 const props = defineProps({
   open: { type: Boolean, default: false },         
   questions: { type: Array, default: () => [] },  
   title: { type: String, default: "Quiz" },        
 });
 
-// event upp till föräldern 
-const emit = defineEmits(["close"]);
-
 // internt state
 const idx = ref(0);           
 const showAnswer = ref(false); 
+
+// slut-prompt
+const showEndPrompt = ref(false);
 
 // nollställ när spelaren öppnas
 watch(
@@ -22,6 +24,7 @@ watch(
     if (o) {
       idx.value = 0;
       showAnswer.value = false;
+      showEndPrompt.value = false;
     }
   }
 );
@@ -47,13 +50,34 @@ const canNext  = computed(() => idx.value < props.questions.length - 1);
 
 // navigation + flip 
 function prev() {
-  if (canPrev.value) { idx.value--; showAnswer.value = false; }
+  if (canPrev.value) { 
+    idx.value--; showAnswer.value = false; }
 }
 function next() {
-  if (canNext.value) { idx.value++; showAnswer.value = false; }
+  if (canNext.value) { 
+    idx.value++; showAnswer.value = false; 
+  } else {
+    showEndPrompt.value = true;
+  }
 }
 function flip() {
   showAnswer.value = !showAnswer.value;
+}
+
+// slut-prompt knappar
+function doAgain() { 
+  idx.value = 0;
+  showAnswer.value = false;
+  showEndPrompt.value = false;
+  emit("restart");
+}
+function markDone() {   
+  showEndPrompt.value = false;
+  emit("archive");
+}
+function justClose() {
+  showEndPrompt.value = false;
+  emit("close");
 }
 </script>
 
@@ -84,6 +108,19 @@ function flip() {
       </div>
     </div>
   </div>
+
+<!-- sista kortet -->
+  <div v-if="showEndPrompt" class="modal-backdrop">
+  <div class="modal-card">
+    <h4>Är du klar med quizet?</h4>
+    <p>Vill du arkivera det, göra det igen, eller stänga?</p>
+    <div class="modal-actions">
+      <button @click="doAgain">Do it again</button>
+      <button @click="markDone">Finish and send to archive</button>
+      <button @click="justClose">Close</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <style scoped>

@@ -271,6 +271,7 @@ button {
   padding: 6px 10px;
   cursor: pointer;
 }
+
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;

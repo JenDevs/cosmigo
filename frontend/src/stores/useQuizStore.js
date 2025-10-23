@@ -17,37 +17,40 @@ export const useQuizStore = defineStore("quiz", {
   },
 
   actions: {
-async load() {
-  this.loading = true; this.error = "";
-  try {
-    const data = await Quizzes.list();
+    async load() {
+      this.loading = true;
+      this.error = "";
+      try {
+        const data = await Quizzes.list();
 
-    const items = Array.isArray(data)
-      ? data
-      : Array.isArray(data?.rows)
-        ? data.rows
-        : [];
+        const items = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.rows)
+            ? data.rows
+            : [];
 
-    if (!Array.isArray(data)) {
-      console.warn("Quizzes.list() returned non-array:", data);
-    }
+        if (!Array.isArray(data)) {
+          console.warn("Quizzes.list() returned non-array:", data);
+        }
 
-    // filtrera bort skräp (saknar titel)
-    this.list = items.filter(q => q && q.title && String(q.title).trim());
-  } catch (e) {
-    this.error = "Could not get quizzes";
-    console.error(e);
-  } finally {
-    this.loading = false;
-  }
-},
+        // filtrera bort skräp 
+        this.list = items.filter(q => q && q.title && String(q.title).trim());
+      } catch (e) {
+        this.error = "Could not get quizzes";
+        console.error(e);
+      } finally {
+        this.loading = false;
+      }
+    },
 
     setCurrentById(id) {
       const q = this.list.find(x => x.id === id);
       this.current = q ? { id: q.id, title: q.title } : null;
     },
 
-    clearCurrent() { this.current = null; },
+    clearCurrent() {
+      this.current = null;
+    },
 
     /**
      * Hämta fullständigt quiz (inkl frågor/svar) från API
@@ -63,7 +66,6 @@ async load() {
      * @param {{id?:string,title?:string,questions?:Array<{text?:string,answer?:string,position?:number}>}} quiz
      */
     async save(quiz) {
-      // sanering/validering
       const title = (quiz.title || "").trim();
       const questions = (quiz.questions || [])
         .map((q, i) => ({
@@ -71,20 +73,17 @@ async load() {
           answer: (q.answer || "").trim() || null,
           position: Number.isFinite(q.position) ? q.position : i
         }))
-        .filter(q => q.text); // ta bort tomma
+        .filter(q => q.text);
 
       if (!title || questions.length === 0) {
         throw new Error("Title + at least 1 question is required.");
       }
 
       if (!quiz.id) {
-        // skapa nytt
         const res = await Quizzes.create({ title, questions });
-        // optimistiskt: lägg till i listan om backend gav id
         if (res?.id) this.list.unshift({ id: res.id, title });
         return res;
       } else {
-        // uppdatera befintligt
         await Quizzes.update(quiz.id, { title, questions });
         const idx = this.list.findIndex(x => x.id === quiz.id);
         if (idx !== -1) this.list[idx] = { ...this.list[idx], title };
@@ -98,10 +97,27 @@ async load() {
       if (this.current?.id === id) this.current = null;
     },
 
-    // valfri helper för nytt, tomt quiz i editorn
+    // tomt quiz i editorn
     newBlank() {
       this.clearCurrent();
       return { id: undefined, title: "", questions: [{ text: "", answer: "" }] };
-    }
-  }
+    },
+
+    // arkivera quiz
+    async archive(id) {
+      const res = await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
+        method: "POST",
+        credentials: "include",
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data?.success === false) {
+        throw new Error(data?.error || "Archive failed");
+      }
+
+      // ta bort quizet från listan i UI
+      this.list = this.list.filter(q => q.id !== id);
+      if (this.current?.id === id) this.current = null;
+    },
+  }, 
 });

@@ -163,3 +163,30 @@ exports.deleteQuiz = async (req, res) => {
     return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
+// ARCHIVES
+exports.archiveQuiz = async (req, res) => {
+  try {
+    const userId = req.query.userId ?? req.body.userId ?? req.user?.userId;
+    const ok = await quizService.updateStatus(Number(req.params.id), userId, "archived");
+    if (ok === 403) return res.status(403).json({ success:false, error:"Not user" });
+    if (!ok) return res.status(404).json({ success:false, error:"Quiz not found" });
+    res.json({ success:true, status:"archived" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success:false, error:"Internal Server Error" });
+  }
+};
+
+exports.unarchiveQuiz = async (req, res) => {
+  try {
+    const userId = req.query.userId ?? req.body.userId ?? req.user?.userId;
+    const ok = await quizService.updateStatus(Number(req.params.id), userId, "draft");
+    if (ok === 403) return res.status(403).json({ success:false, error:"Not user" });
+    if (!ok) return res.status(404).json({ success:false, error:"Quiz not found" });
+    res.json({ success:true, status:"draft" });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ success:false, error:"Internal Server Error" });
+  }
+};

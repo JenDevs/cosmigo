@@ -15,4 +15,7 @@ router.post("/api/quizzes/:id/questions", quizCtrl.addOneQuestion);
 router.post("/api/quizzes/:id/publish", quizCtrl.publishQuiz);
 router.delete("/api/quizzes/:id", quizCtrl.deleteQuiz);
 
+router.post("/api/quizzes/:id/archive", quizCtrl.archiveQuiz);
+router.post("/api/quizzes/:id/unarchive", quizCtrl.unarchiveQuiz);
+
 module.exports = router;

@@ -65,6 +65,34 @@ function newQuiz() {
   selectedQuiz.value = null;
   quizEditorRef.value?.resetQuiz();
 }
+
+async function handleArchive() {
+  const id = store.current?.id || selectedQuiz.value?.id;
+  if (!id) {
+    if (confirm("Quizet är inte sparat. Vill du spara det först?")) {
+      const res = await store.save({ title: playerTitle.value, questions: playerQuestions.value });
+      if (res?.id) await store.archive(res.id);
+    }
+  } else {
+    await store.archive(id);
+  }
+  playerOpen.value = false;
+}
+
+function handleRestart() {
+}
+
+// Om quizet inte är sparat: fråga
+function handleClose() {
+  const notSaved = !selectedQuiz.value?.id;
+  if (notSaved) {
+    if (confirm("Do you wanna save quiz before you exit?")) {
+      store.save({ title: playerTitle.value, questions: playerQuestions.value })
+        .catch(e => alert(e?.message || "Could not save"));
+    }
+  }
+  playerOpen.value = false;
+}
 </script>
 
 <template>
@@ -95,11 +123,14 @@ function newQuiz() {
       @saved="onSaved"
     />
 
+    <!-- Quizplayer -->
     <QuizPlayer
       :open="playerOpen"
       :title="playerTitle"
       :questions="playerQuestions"
-      @close="playerOpen = false"
+      @close="handleClose"
+      @archive="handleArchive"
+      @restart="handleRestart"
     />
   </div>
 </template>

@@ -84,6 +84,21 @@ function updateQuizTitle(quizId, userId, title) {
   });
 }
 
+// UPDATE STATUS
+function updateStatus(quizId, userId, status) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const own = await ensureOwner(quizId, userId);
+      if (own !== true) return resolve(own);
+      const sql = `UPDATE quizzes SET status=? WHERE id=? AND userId=?`;
+      connectionMySQL.query(sql, [status, quizId, userId], (err, r) => {
+        if (err) reject(err);
+        else resolve(r.affectedRows > 0);
+      });
+    } catch (e) { reject(e); }
+  });
+}
+
 // REPLACE ALL QUESTIONS 
 function replaceQuestions(quizId, userId, questions) {
   return new Promise(async (resolve, reject) => {
@@ -217,6 +232,7 @@ module.exports = {
   getQuizById,
   createQuiz,
   updateQuizTitle,
+  updateStatus,
   replaceQuestions,
   addOneQuestion,
   publishQuiz,
