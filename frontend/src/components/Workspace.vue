@@ -66,6 +66,7 @@ function newQuiz() {
   quizEditorRef.value?.resetQuiz();
 }
 
+// Archive quiz
 async function handleArchive() {
   const id = store.current?.id || selectedQuiz.value?.id;
   if (!id) {
