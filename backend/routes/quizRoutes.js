@@ -1,21 +1,26 @@
 const express = require("express");
-const quizCtrl = require("../controllers/quizController");
-
 const router = express.Router();
+const quizController = require("../controllers/quizController");
 
-router.get("/api/quizzes", quizCtrl.getQuizzes);
-router.get("/api/quizzes/:id", quizCtrl.getQuizById);
+// Lista alla quiz
+router.get("/quizzes", quizController.listQuizzes);
 
-router.post("/api/quizzes", quizCtrl.createQuiz); 
-router.put("/api/quizzes/:id/title", quizCtrl.updateQuizTitle);
+// Hämta ett quiz inkl frågor
+router.get("/quizzes/:id", quizController.getQuiz);
 
-router.put("/api/quizzes/:id/questions", quizCtrl.replaceQuestions); 
-router.post("/api/quizzes/:id/questions", quizCtrl.addOneQuestion);  
+// Skapa nytt quiz
+router.post("/quizzes", quizController.createQuiz);
 
-router.post("/api/quizzes/:id/publish", quizCtrl.publishQuiz);
-router.delete("/api/quizzes/:id", quizCtrl.deleteQuiz);
+// Uppdatera quiz-titel
+router.put("/quizzes/:id/title", quizController.updateQuizTitle);
 
-router.post("/api/quizzes/:id/archive", quizCtrl.archiveQuiz);
-router.post("/api/quizzes/:id/unarchive", quizCtrl.unarchiveQuiz);
+// Ersätt alla frågor
+router.put("/quizzes/:id/questions", quizController.replaceQuestions);
+
+// Radera quiz
+router.delete("/quizzes/:id", quizController.deleteQuiz);
+
+// Arkivera quiz
+router.post("/quizzes/:id/archive", quizController.archiveQuiz);
 
 module.exports = router;

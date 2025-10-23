@@ -227,6 +227,24 @@ function deleteQuiz(quizId, userId) {
   });
 }
 
+// ARCHIVE QUIZ
+function archiveQuiz(quizId, userId) { // 🔹 NEW
+  return new Promise(async (resolve, reject) => {
+    try {
+      const own = await ensureOwner(quizId, userId);
+      if (own !== true) return resolve(own); // 0 = not found, 403 = forbidden
+
+      const sql = `UPDATE quizzes SET status='archived' WHERE id=? AND userId=?`;
+      connectionMySQL.query(sql, [quizId, userId], (err, r) => {
+        if (err) return reject(err);
+        resolve(r.affectedRows > 0);
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
+}
+
 module.exports = {
   getAllQuizzes,
   getQuizById,
@@ -237,4 +255,5 @@ module.exports = {
   addOneQuestion,
   publishQuiz,
   deleteQuiz,
+  archiveQuiz,
 };

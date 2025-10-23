@@ -1,192 +1,94 @@
 const quizService = require("../services/quizService");
-const getUserId = (req) => req.query.userId ?? req.body.userId ?? req.user?.userId;
 
-// --- validering ---
-function needTitle(value) {
-  const t = typeof value === "string" ? value : value?.title;
-  if (typeof t !== "string" || !t.trim()) return "Title is required";
-  if (t.length > 200) return "Title too long (max 200)";
-  return null;
-}
-function needQuestion(q) {
-  if (!q || typeof q.text !== "string" || !q.text.trim())
-    return "Question text needed";
-  if (q.answer != null && typeof q.answer !== "string")
-    return "Answer must be string or omitted";
-  if (q.position != null && !Number.isInteger(q.position))
-    return "Position must be integer";
-  return null;
-}
-function needQuestionsArray(body) {
-  if (!body || !Array.isArray(body.questions)) return "questions[] required";
-  if (body.questions.length === 0) return "At least 1 question needed";
-  for (const q of body.questions) {
-    const err = needQuestion(q);
-    if (err) return err;
-  }
-  return null;
-}
-
-// LIST
-exports.getQuizzes = async (req, res) => {
+// GET: alla quiz
+async function listQuizzes(req, res) {
   try {
-    const userId = getUserId(req);
-    const rows = await quizService.getAllQuizzes(userId);
-    if (!rows || rows.length === 0) {
-      return res.status(404).json({ success: false, error: "No quizzes found" });
-    }
-    res.json({ success: true, data: rows });
-  } catch (error) {
-    console.error("Error fetching quizzes:", error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// GET ONE
-exports.getQuizById = async (req, res) => {
-  try {
-    const userId = getUserId(req);
-    const quiz = await quizService.getQuizById(Number(req.params.id), userId);
-    if (quiz === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (!quiz) return res.status(404).json({ success: false, error: "Quiz not found" });
-    res.json({ success: true, data: quiz });
-  } catch (error) {
-    console.error("Error fetching quiz:", error);
-    res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// CREATE (draft)
-exports.createQuiz = async (req, res) => {
-  const err = needTitle(req.body?.title ?? req.body);
-  if (err) return res.status(400).json({ success: false, error: err });
-
-  try {
-    const userId = getUserId(req);
-    const title = (req.body.title || "").trim();
-    const result = await quizService.createQuiz(userId, title);
-    return res.status(201).json({ success: true, data: result });
-  } catch (error) {
-    console.error("Error creating quiz:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// UPDATE TITLE
-exports.updateQuizTitle = async (req, res) => {
-  const err = needTitle(req.body?.title ?? req.body);
-  if (err) return res.status(400).json({ success: false, error: err });
-
-  try {
-    const userId = getUserId(req);
-    const ok = await quizService.updateQuizTitle(
-      Number(req.params.id),
-      userId,
-      req.body.title.trim()
-    );
-    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error updating quiz title:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// REPLACE QUESTIONS
-exports.replaceQuestions = async (req, res) => {
-  const err = needQuestionsArray(req.body);
-  if (err) return res.status(400).json({ success: false, error: err });
-
-  try {
-    const userId = getUserId(req);
-    const ok = await quizService.replaceQuestions(
-      Number(req.params.id),
-      userId,
-      req.body.questions
-    );
-    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error replacing questions:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// ADD ONE QUESTION
-exports.addOneQuestion = async (req, res) => {
-  const err = needQuestion(req.body);
-  if (err) return res.status(400).json({ success: false, error: err });
-
-  try {
-    const userId = getUserId(req);
-    const result = await quizService.addOneQuestion(
-      Number(req.params.id),
-      userId,
-      req.body
-    );
-    if (result === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (!result) return res.status(404).json({ success: false, error: "Quiz not found" });
-    return res.status(201).json({ success: true, data: result });
-  } catch (error) {
-    console.error("Error adding question:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// PUBLISH
-exports.publishQuiz = async (req, res) => {
-  try {
-    const userId = getUserId(req);
-    const ok = await quizService.publishQuiz(Number(req.params.id), userId);
-    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (ok === 409) return res.status(409).json({ success: false, error: "Needs at least 1 question" });
-    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
-    return res.json({ success: true, status: "published" });
-  } catch (error) {
-    console.error("Error publishing quiz:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// DELETE
-exports.deleteQuiz = async (req, res) => {
-  try {
-    const userId = getUserId(req);
-    const ok = await quizService.deleteQuiz(Number(req.params.id), userId);
-    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
-    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error deleting quiz:", error);
-    return res.status(500).json({ success: false, error: "Internal Server Error" });
-  }
-};
-
-// ARCHIVES
-exports.archiveQuiz = async (req, res) => {
-  try {
-    const userId = req.query.userId ?? req.body.userId ?? req.user?.userId;
-    const ok = await quizService.updateStatus(Number(req.params.id), userId, "archived");
-    if (ok === 403) return res.status(403).json({ success:false, error:"Not user" });
-    if (!ok) return res.status(404).json({ success:false, error:"Quiz not found" });
-    res.json({ success:true, status:"archived" });
+    const rows = await quizService.getAllQuizzes(req.user.id);
+    res.json(rows);
   } catch (e) {
     console.error(e);
-    res.status(500).json({ success:false, error:"Internal Server Error" });
+    res.status(500).json({ success: false, error: "Database error" });
   }
-};
+}
 
-exports.unarchiveQuiz = async (req, res) => {
+// GET: ett quiz + frågor
+async function getQuiz(req, res) {
   try {
-    const userId = req.query.userId ?? req.body.userId ?? req.user?.userId;
-    const ok = await quizService.updateStatus(Number(req.params.id), userId, "draft");
-    if (ok === 403) return res.status(403).json({ success:false, error:"Not user" });
-    if (!ok) return res.status(404).json({ success:false, error:"Quiz not found" });
-    res.json({ success:true, status:"draft" });
+    const q = await quizService.getQuizById(req.params.id, req.user.id);
+    if (q === 0) return res.status(404).json({ success: false, error: "Not found" });
+    if (q === 403) return res.status(403).json({ success: false, error: "Not your quiz" });
+    res.json(q);
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+}
+
+// POST: skapa nytt
+async function createQuiz(req, res) {
+  try {
+    const { title } = req.body;
+    const created = await quizService.createQuiz(req.user.id, title);
+    res.json(created);
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+}
+
+// PUT: uppdatera titel
+async function updateQuizTitle(req, res) {
+  try {
+    const ok = await quizService.updateQuizTitle(req.params.id, req.user.id, req.body.title);
+    if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
+    if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+}
+
+// PUT: ersätt alla frågor
+async function replaceQuestions(req, res) {
+  try {
+    const ok = await quizService.replaceQuestions(req.params.id, req.user.id, req.body.questions);
+    if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
+    if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+}
+
+// DELETE: ta bort quiz
+async function deleteQuiz(req, res) {
+  try {
+    const ok = await quizService.deleteQuiz(req.params.id, req.user.id);
+    if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
+    if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
+    res.json({ success: true });
+  } catch (e) {
+    res.status(500).json({ success: false, error: e.message });
+  }
+}
+
+// POST /api/quizzes/:id/archive
+async function archiveQuiz(req, res) {
+  try {
+    const ok = await quizService.archiveQuiz(req.params.id, req.user.id);
+    if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
+    if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
+    res.json({ success: true });
   } catch (e) {
     console.error(e);
-    res.status(500).json({ success:false, error:"Internal Server Error" });
+    res.status(500).json({ success: false, error: e.message });
   }
+}
+
+module.exports = {
+  listQuizzes,
+  getQuiz,
+  createQuiz,
+  updateQuizTitle,
+  replaceQuestions,
+  deleteQuiz,
+  archiveQuiz, 
 };
