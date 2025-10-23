@@ -74,9 +74,6 @@ function flip() {
       <div class="flashcard" @click="flip" title="Klicka för att vända (Space/F)">
         <p class="question" v-if="!showAnswer">{{ current.text }}</p>
         <p class="answer" v-else>{{ current.answer || "—" }}</p>
-        <small class="hint">
-          klicka för att {{ showAnswer ? "visa frågan" : "visa svaret" }} • ←/→ navigera • Esc stäng
-        </small>
       </div>
 
       <!-- controller  -->
@@ -126,13 +123,13 @@ function flip() {
   cursor: pointer;
 }
 
-/* framstegstext */
+/* hur många frågor/kort */
 .counter {
   opacity: 0.8;
   margin: 6px 0 12px;
 }
 
-/* kortet som flippar fråga/svar */
+/* flashcard */
 .flashcard {
   background: #3a3a40;
   border-radius: 12px;
@@ -146,7 +143,7 @@ function flip() {
 }
 .question,
 .answer {
-  font-size: 1.2rem;
+  font-size: 3rem;
   line-height: 1.5;
 }
 .answer {

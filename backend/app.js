@@ -10,6 +10,12 @@ app.use(express.urlencoded({ extended: true }));
 
 app.get("/api/health", (_, res) => res.json({ ok: true }));
 
+// DEV: fake user 
+app.use((req, res, next) => {
+  if (!req.user) req.user = { id: 1 };
+  next();
+});
+
 // USERS
 const userRoutes = require("./routes/userRoutes");
 app.use("/api/users", userRoutes);

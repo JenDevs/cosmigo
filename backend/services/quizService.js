@@ -1,94 +1,81 @@
 const db = require("../connectionMySQL");
 
 // LIST
-async function getAllQuizzesForUser(userId) {
+async function svcListQuizzes(userId) {
   const [rows] = await db.promise().query(
-    "SELECT id, title, created_at FROM quizzes WHERE user_id=? ORDER BY created_at DESC",
+    "SELECT id, title, status, createdAt FROM quizzes WHERE userId=? ORDER BY createdAt DESC",
     [userId]
   );
   return rows;
 }
 
 // GET ONE
-async function getQuizById(userId, quizId) {
+async function svcGetQuiz(userId, quizId) {
   const [qz] = await db.promise().query(
-    "SELECT id, title FROM quizzes WHERE id=? AND user_id=?",
+    "SELECT id, title, status FROM quizzes WHERE id=? AND userId=?",
     [quizId, userId]
   );
   const quiz = qz[0];
   if (!quiz) return null;
 
   const [qs] = await db.promise().query(
-    "SELECT id, text, answer, position FROM questions WHERE quiz_id=? ORDER BY position",
+    "SELECT id, text, answer, position FROM questions WHERE quizId=? ORDER BY position ASC, id ASC",
     [quizId]
   );
   return { ...quiz, questions: qs };
 }
 
-// CREATE
-async function createQuiz(userId, payload) {
-  const conn = await db.promise().getConnection();
-  try {
-    await conn.beginTransaction();
-
-    const [ins] = await conn.query(
-      "INSERT INTO quizzes (user_id, title) VALUES (?, ?)",
-      [userId, payload.title]
-    );
-    const quizId = ins.insertId;
-
-    const qs = payload.questions || [];
-    for (let i = 0; i < qs.length; i++) {
-      const q = qs[i];
-      await conn.query(
-        "INSERT INTO questions (quiz_id, text, answer, position) VALUES (?, ?, ?, ?)",
-        [quizId, q.text, q.answer ?? null, q.position ?? i]
-      );
-    }
-
-    await conn.commit();
-    return { id: quizId, title: payload.title };
-  } catch (e) {
-    await conn.rollback();
-    throw e;
-  } finally {
-    conn.release();
-  }
+// CREATE DRAFT
+async function svcCreateQuizDraft(userId, title) {
+  const [ins] = await db
+    .promise()
+    .query("INSERT INTO quizzes (userId, title, status) VALUES (?, ?, 'draft')", [
+      userId,
+      title,
+    ]);
+  return { id: ins.insertId, title, status: "draft" };
 }
 
-// UPDATE
-async function updateQuiz(userId, quizId, payload) {
+// UPDATE TITLE
+async function svcUpdateTitle(userId, quizId, title) {
+  const [r] = await db
+    .promise()
+    .query("UPDATE quizzes SET title=? WHERE id=? AND userId=?", [title, quizId, userId]);
+  if (r.affectedRows === 0) {
+    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
+    return exists ? 403 : 0; // 403 = finns men inte din
+  }
+  return true;
+}
+
+// REPLACE ALL QUESTIONS (transaction)
+async function svcReplaceQuestions(userId, quizId, questions) {
   const conn = await db.promise().getConnection();
   try {
     await conn.beginTransaction();
 
     const [[owner]] = await conn.query(
-      "SELECT id FROM quizzes WHERE id=? AND user_id=?",
+      "SELECT id FROM quizzes WHERE id=? AND userId=?",
       [quizId, userId]
     );
     if (!owner) {
       await conn.rollback();
-      return { status: 403 };
+      const [[exists]] = await conn.query("SELECT id FROM quizzes WHERE id=?", [quizId]);
+      return exists ? 403 : 0;
     }
 
-    await conn.query("UPDATE quizzes SET title=? WHERE id=?", [
-      payload.title,
-      quizId,
-    ]);
+    await conn.query("DELETE FROM questions WHERE quizId=?", [quizId]);
 
-    await conn.query("DELETE FROM questions WHERE quiz_id=?", [quizId]);
-
-    const qs = payload.questions || [];
-    for (let i = 0; i < qs.length; i++) {
-      const q = qs[i];
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
       await conn.query(
-        "INSERT INTO questions (quiz_id, text, answer, position) VALUES (?, ?, ?, ?)",
-        [quizId, q.text, q.answer ?? null, q.position ?? i]
+        "INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)",
+        [quizId, q.text.trim(), q.answer ?? null, q.position ?? i]
       );
     }
 
     await conn.commit();
-    return { ok: true };
+    return true;
   } catch (e) {
     await conn.rollback();
     throw e;
@@ -97,18 +84,75 @@ async function updateQuiz(userId, quizId, payload) {
   }
 }
 
+// ADD ONE QUESTION
+async function svcAddOneQuestion(userId, quizId, q) {
+  const [[owner]] = await db
+    .promise()
+    .query("SELECT id FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
+  if (!owner) {
+    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
+    return exists ? 403 : 0;
+  }
+
+  // auto-position: max(position) + 1 om ej skickad
+  let pos = q.position;
+  if (pos == null) {
+    const [[row]] = await db
+      .promise()
+      .query("SELECT COALESCE(MAX(position), -1) AS maxPos FROM questions WHERE quizId=?", [
+        quizId,
+      ]);
+    pos = (row.maxPos ?? -1) + 1;
+  }
+
+  const [ins] = await db
+    .promise()
+    .query("INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)", [
+      quizId,
+      q.text.trim(),
+      q.answer ?? null,
+      pos,
+    ]);
+
+  return { id: ins.insertId, quizId, text: q.text.trim(), answer: q.answer ?? null, position: pos };
+}
+
+// PUBLISH (kräver minst 1 fråga)
+async function svcPublishQuiz(userId, quizId) {
+  const [[owner]] = await db
+    .promise()
+    .query("SELECT id FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
+  if (!owner) {
+    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
+    return exists ? 403 : 0;
+  }
+
+  const [[cnt]] = await db
+    .promise()
+    .query("SELECT COUNT(*) AS c FROM questions WHERE quizId=?", [quizId]);
+  if ((cnt?.c ?? 0) < 1) return 409;
+
+  const [u] = await db
+    .promise()
+    .query("UPDATE quizzes SET status='published' WHERE id=?", [quizId]);
+  return u.affectedRows > 0;
+}
+
 // DELETE
-async function deleteQuiz(userId, quizId) {
+async function svcDeleteQuiz(userId, quizId) {
   const [r] = await db
     .promise()
-    .query("DELETE FROM quizzes WHERE id=? AND user_id=?", [quizId, userId]);
+    .query("DELETE FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
   return r.affectedRows > 0;
 }
 
 module.exports = {
-  getAllQuizzesForUser,
-  getQuizById,
-  createQuiz,
-  updateQuiz,
-  deleteQuiz,
+  svcListQuizzes,
+  svcGetQuiz,
+  svcCreateQuizDraft,
+  svcUpdateTitle,
+  svcReplaceQuestions,
+  svcAddOneQuestion,
+  svcPublishQuiz,
+  svcDeleteQuiz,
 };

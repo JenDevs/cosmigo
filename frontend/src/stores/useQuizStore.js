@@ -59,7 +59,7 @@ async load() {
 
     /**
      * Skapa eller uppdatera ett quiz.
-     * Ingen maxgräns – vi skapar alltid när id saknas.
+     * Skapar alltid när id saknas.
      * @param {{id?:string,title?:string,questions?:Array<{text?:string,answer?:string,position?:number}>}} quiz
      */
     async save(quiz) {
