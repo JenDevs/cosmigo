@@ -1,158 +1,177 @@
-const db = require("../connectionMySQL");
+const connectionMySQL = require("../connectionMySQL");
 
 // LIST
-async function svcListQuizzes(userId) {
-  const [rows] = await db.promise().query(
-    "SELECT id, title, status, createdAt FROM quizzes WHERE userId=? ORDER BY createdAt DESC",
-    [userId]
-  );
-  return rows;
+function getAllQuizzes(userId) {
+  return new Promise((resolve, reject) => {
+    const sql = `
+      SELECT id, title, status, createdAt
+      FROM quizzes
+      WHERE userId=?
+      ORDER BY createdAt DESC`;
+    connectionMySQL.query(sql, [userId], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
 }
 
-// GET ONE
-async function svcGetQuiz(userId, quizId) {
-  const [qz] = await db.promise().query(
-    "SELECT id, title, status FROM quizzes WHERE id=? AND userId=?",
-    [quizId, userId]
-  );
-  const quiz = qz[0];
-  if (!quiz) return null;
+// GET ONE (inkl. frågor)
+function getQuizById(quizId) {
+  return new Promise((resolve, reject) => {
+    const sqlQuiz = `SELECT id, userId, title, status FROM quizzes WHERE id=?`;
+    connectionMySQL.query(sqlQuiz, [quizId], (err, rows) => {
+      if (err) return reject(err);
+      const quiz = rows?.[0];
+      if (!quiz) return resolve(null);
 
-  const [qs] = await db.promise().query(
-    "SELECT id, text, answer, position FROM questions WHERE quizId=? ORDER BY position ASC, id ASC",
-    [quizId]
-  );
-  return { ...quiz, questions: qs };
+      const sqlQs = `
+        SELECT id, text, answer, position
+        FROM questions
+        WHERE quizId=?
+        ORDER BY position ASC, id ASC`;
+      connectionMySQL.query(sqlQs, [quizId], (err2, qs) => {
+        if (err2) reject(err2);
+        else resolve({ ...quiz, questions: qs });
+      });
+    });
+  });
 }
 
-// CREATE DRAFT
-async function svcCreateQuizDraft(userId, title) {
-  const [ins] = await db
-    .promise()
-    .query("INSERT INTO quizzes (userId, title, status) VALUES (?, ?, 'draft')", [
-      userId,
-      title,
-    ]);
-  return { id: ins.insertId, title, status: "draft" };
+// CREATE
+function createQuiz(userId, title) {
+  return new Promise((resolve, reject) => {
+    const sql = `INSERT INTO quizzes (userId, title, status) VALUES (?, ?, 'draft')`;
+    connectionMySQL.query(sql, [userId, title], (err, r) => {
+      if (err) reject(err);
+      else resolve({ id: r.insertId, userId, title, status: "draft" });
+    });
+  });
 }
 
 // UPDATE TITLE
-async function svcUpdateTitle(userId, quizId, title) {
-  const [r] = await db
-    .promise()
-    .query("UPDATE quizzes SET title=? WHERE id=? AND userId=?", [title, quizId, userId]);
-  if (r.affectedRows === 0) {
-    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
-    return exists ? 403 : 0; // 403 = finns men inte din
-  }
-  return true;
+function updateQuizTitle(quizId, title) {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE quizzes SET title=? WHERE id=?`;
+    connectionMySQL.query(sql, [title, quizId], (err, r) => {
+      if (err) reject(err);
+      else resolve(r.affectedRows > 0);
+    });
+  });
 }
 
-// REPLACE ALL QUESTIONS (transaction)
-async function svcReplaceQuestions(userId, quizId, questions) {
-  const conn = await db.promise().getConnection();
-  try {
-    await conn.beginTransaction();
+// REPLACE ALL QUESTIONS
+function replaceQuestions(quizId, questions) {
+  return new Promise((resolve, reject) => {
+    connectionMySQL.beginTransaction((err) => {
+      if (err) return reject(err);
 
-    const [[owner]] = await conn.query(
-      "SELECT id FROM quizzes WHERE id=? AND userId=?",
-      [quizId, userId]
-    );
-    if (!owner) {
-      await conn.rollback();
-      const [[exists]] = await conn.query("SELECT id FROM quizzes WHERE id=?", [quizId]);
-      return exists ? 403 : 0;
-    }
+      const delSql = `DELETE FROM questions WHERE quizId=?`;
+      connectionMySQL.query(delSql, [quizId], (errDel) => {
+        if (errDel) {
+          return connectionMySQL.rollback(() => reject(errDel));
+        }
 
-    await conn.query("DELETE FROM questions WHERE quizId=?", [quizId]);
+        if (!questions || questions.length === 0) {
+          return connectionMySQL.commit((errC) =>
+            errC ? connectionMySQL.rollback(() => reject(errC)) : resolve(true)
+          );
+        }
 
-    for (let i = 0; i < questions.length; i++) {
-      const q = questions[i];
-      await conn.query(
-        "INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)",
-        [quizId, q.text.trim(), q.answer ?? null, q.position ?? i]
-      );
-    }
+        const insSql =
+          `INSERT INTO questions (quizId, text, answer, position) VALUES ?`;
+        const values = questions.map((q, i) => [
+          quizId,
+          (q.text || "").trim(),
+          q.answer ?? null,
+          Number.isInteger(q.position) ? q.position : i,
+        ]);
 
-    await conn.commit();
-    return true;
-  } catch (e) {
-    await conn.rollback();
-    throw e;
-  } finally {
-    conn.release();
-  }
+        connectionMySQL.query(insSql, [values], (errIns) => {
+          if (errIns) {
+            return connectionMySQL.rollback(() => reject(errIns));
+          }
+          connectionMySQL.commit((errC) =>
+            errC ? connectionMySQL.rollback(() => reject(errC)) : resolve(true)
+          );
+        });
+      });
+    });
+  });
 }
 
 // ADD ONE QUESTION
-async function svcAddOneQuestion(userId, quizId, q) {
-  const [[owner]] = await db
-    .promise()
-    .query("SELECT id FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
-  if (!owner) {
-    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
-    return exists ? 403 : 0;
-  }
+function addOneQuestion(quizId, q) {
+  return new Promise((resolve, reject) => {
+    const posSql = `SELECT COALESCE(MAX(position), -1) AS maxPos FROM questions WHERE quizId=?`;
+    const text = (q.text || "").trim();
+    if (!text) return reject(new Error("Question text needed"));
 
-  // auto-position: max(position) + 1 om ej skickad
-  let pos = q.position;
-  if (pos == null) {
-    const [[row]] = await db
-      .promise()
-      .query("SELECT COALESCE(MAX(position), -1) AS maxPos FROM questions WHERE quizId=?", [
-        quizId,
-      ]);
-    pos = (row.maxPos ?? -1) + 1;
-  }
+    const doInsert = (position) => {
+      const insSql = `INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)`;
+      connectionMySQL.query(
+        insSql,
+        [quizId, text, q.answer ?? null, position],
+        (err, r) => {
+          if (err) reject(err);
+          else resolve({
+            id: r.insertId,
+            quizId,
+            text,
+            answer: q.answer ?? null,
+            position,
+          });
+        }
+      );
+    };
 
-  const [ins] = await db
-    .promise()
-    .query("INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)", [
-      quizId,
-      q.text.trim(),
-      q.answer ?? null,
-      pos,
-    ]);
-
-  return { id: ins.insertId, quizId, text: q.text.trim(), answer: q.answer ?? null, position: pos };
+    if (q.position == null) {
+      connectionMySQL.query(posSql, [quizId], (err, rows) => {
+        if (err) return reject(err);
+        const nextPos = ((rows?.[0]?.maxPos ?? -1) + 1) | 0;
+        doInsert(nextPos);
+      });
+    } else {
+      doInsert(q.position | 0);
+    }
+  });
 }
 
 // PUBLISH (kräver minst 1 fråga)
-async function svcPublishQuiz(userId, quizId) {
-  const [[owner]] = await db
-    .promise()
-    .query("SELECT id FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
-  if (!owner) {
-    const [[exists]] = await db.promise().query("SELECT id FROM quizzes WHERE id=?", [quizId]);
-    return exists ? 403 : 0;
-  }
+function publishQuiz(quizId) {
+  return new Promise((resolve, reject) => {
+    const cntSql = `SELECT COUNT(*) AS c FROM questions WHERE quizId=?`;
+    connectionMySQL.query(cntSql, [quizId], (err, rows) => {
+      if (err) return reject(err);
+      const c = rows?.[0]?.c ?? 0;
+      if (c < 1) return resolve(409); 
 
-  const [[cnt]] = await db
-    .promise()
-    .query("SELECT COUNT(*) AS c FROM questions WHERE quizId=?", [quizId]);
-  if ((cnt?.c ?? 0) < 1) return 409;
-
-  const [u] = await db
-    .promise()
-    .query("UPDATE quizzes SET status='published' WHERE id=?", [quizId]);
-  return u.affectedRows > 0;
+      const upd = `UPDATE quizzes SET status='published' WHERE id=?`;
+      connectionMySQL.query(upd, [quizId], (err2, r) => {
+        if (err2) reject(err2);
+        else resolve(r.affectedRows > 0);
+      });
+    });
+  });
 }
 
 // DELETE
-async function svcDeleteQuiz(userId, quizId) {
-  const [r] = await db
-    .promise()
-    .query("DELETE FROM quizzes WHERE id=? AND userId=?", [quizId, userId]);
-  return r.affectedRows > 0;
+function deleteQuiz(quizId) {
+  return new Promise((resolve, reject) => {
+    const sql = `DELETE FROM quizzes WHERE id=?`;
+    connectionMySQL.query(sql, [quizId], (err, r) => {
+      if (err) reject(err);
+      else resolve(r.affectedRows > 0);
+    });
+  });
 }
 
 module.exports = {
-  svcListQuizzes,
-  svcGetQuiz,
-  svcCreateQuizDraft,
-  svcUpdateTitle,
-  svcReplaceQuestions,
-  svcAddOneQuestion,
-  svcPublishQuiz,
-  svcDeleteQuiz,
+  getAllQuizzes,
+  getQuizById,
+  createQuiz,
+  updateQuizTitle,
+  replaceQuestions,
+  addOneQuestion,
+  publishQuiz,
+  deleteQuiz,
 };

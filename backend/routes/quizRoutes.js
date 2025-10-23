@@ -1,35 +1,18 @@
 const express = require("express");
-const {
-  listQuizzes,
-  getQuiz,
-  createQuizDraft,
-  updateTitle,
-  replaceQuestions,
-  addOneQuestion,
-  publishQuiz,
-  deleteQuizCtrl,
-} = require("../controllers/quizController");
+const quizCtrl = require("../controllers/quizController");
 
-const r = express.Router();
+const router = express.Router();
 
-// LIST + GET
-r.get("/", listQuizzes);              // GET    /api/quizzes
-r.get("/:id", getQuiz);               // GET    /api/quizzes/:id
+router.get("/api/quizzes", quizCtrl.getQuizzes);
+router.get("/api/quizzes/:id", quizCtrl.getQuizById);
 
-// CREATE (steg A: bara titel -> draft)
-r.post("/", createQuizDraft);         // POST   /api/quizzes    { title }
+router.post("/api/quizzes", quizCtrl.createQuiz); 
+router.put("/api/quizzes/:id/title", quizCtrl.updateQuizTitle);
 
-// UPDATE TITLE
-r.put("/:id/title", updateTitle);     // PUT    /api/quizzes/:id/title  { title }
+router.put("/api/quizzes/:id/questions", quizCtrl.replaceQuestions); 
+router.post("/api/quizzes/:id/questions", quizCtrl.addOneQuestion);  
 
-// QUESTIONS (steg B)
-r.put("/:id/questions", replaceQuestions); // PUT  /api/quizzes/:id/questions  { questions: [...] }
-r.post("/:id/questions", addOneQuestion);  // POST /api/quizzes/:id/questions  { text, answer?, position? }
+router.post("/api/quizzes/:id/publish", quizCtrl.publishQuiz);
+router.delete("/api/quizzes/:id", quizCtrl.deleteQuiz);
 
-// PUBLISH (steg C – kräver minst 1 fråga)
-r.post("/:id/publish", publishQuiz);  // POST   /api/quizzes/:id/publish
-
-// DELETE
-r.delete("/:id", deleteQuizCtrl);     // DELETE /api/quizzes/:id
-
-module.exports = r;
+module.exports = router;

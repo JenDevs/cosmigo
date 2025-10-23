@@ -1,25 +1,20 @@
-const {
-  svcListQuizzes,
-  svcGetQuiz,
-  svcCreateQuizDraft,
-  svcUpdateTitle,
-  svcReplaceQuestions,
-  svcAddOneQuestion,
-  svcPublishQuiz,
-  svcDeleteQuiz,
-} = require("../services/quizService");
+const quizService = require("../services/quizService");
+const getUserId = (req) => req.query.userId ?? req.body.userId ?? req.user?.userId;
 
-// --- validering ---
-function needTitle(body) {
-  const t = body?.title;
-  if (typeof t !== "string" || !t.trim()) return "Title needed";
+// --- enkel validering  ---
+function needTitle(value) {
+  const t = typeof value === "string" ? value : value?.title;
+  if (typeof t !== "string" || !t.trim()) return "Title is required";
   if (t.length > 200) return "Title too long (max 200)";
   return null;
 }
 function needQuestion(q) {
-  if (!q || typeof q.text !== "string" || !q.text.trim()) return "Question text needed";
-  if (q.answer != null && typeof q.answer !== "string") return "Answer must be string or omitted";
-  if (q.position != null && !Number.isInteger(q.position)) return "Position must be integer";
+  if (!q || typeof q.text !== "string" || !q.text.trim())
+    return "Question text needed";
+  if (q.answer != null && typeof q.answer !== "string")
+    return "Answer must be string or omitted";
+  if (q.position != null && !Number.isInteger(q.position))
+    return "Position must be integer";
   return null;
 }
 function needQuestionsArray(body) {
@@ -31,115 +26,116 @@ function needQuestionsArray(body) {
   }
   return null;
 }
-const getUserId = (req) => req.user?.id || req.user?.userId;
 
-// --- controllers ---
-async function listQuizzes(req, res) {
+// LIST
+exports.getQuizzes = async (req, res) => {
   try {
-    const rows = await svcListQuizzes(getUserId(req));
-    res.json(rows); // innehåller createdAt/status från service
-  } catch (e) {
-    console.error("LIST ERROR:", e);
-    res.status(500).json({ error: "Could not get list" });
+    const userId = getUserId(req);
+    const rows = await quizService.getAllQuizzes(userId);
+    if (!rows || rows.length === 0) {
+      return res.status(404).json({ success: false, error: "No quizzes found" });
+    }
+    res.json({ success: true, data: rows });
+  } catch (error) {
+    console.error("Error fetching quizzes:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-async function getQuiz(req, res) {
+// GET ONE
+exports.getQuizById = async (req, res) => {
   try {
-    const quiz = await svcGetQuiz(getUserId(req), Number(req.params.id));
-    if (!quiz) return res.status(404).json({ error: "Not found" });
-    res.json(quiz);
-  } catch (e) {
-    console.error("GET ERROR:", e);
-    res.status(500).json({ error: "Could not get quiz" });
+    const quiz = await quizService.getQuizById(Number(req.params.id));
+    if (!quiz) return res.status(404).json({ success: false, error: "Quiz not found" });
+    res.json({ success: true, data: quiz });
+  } catch (error) {
+    console.error("Error fetching quiz:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-async function createQuizDraft(req, res) {
-  const err = needTitle(req.body);
-  if (err) return res.status(400).json({ error: err });
+// CREATE
+exports.createQuiz = async (req, res) => {
+  const err = needTitle(req.body?.title ?? req.body);
+  if (err) return res.status(400).json({ success: false, error: err });
+
   try {
-    const result = await svcCreateQuizDraft(getUserId(req), req.body.title.trim());
-    res.status(201).json(result); // { id, title, status:'draft' }
-  } catch (e) {
-    console.error("CREATE ERROR:", e);
-    res.status(500).json({ error: "Could not create quiz" });
+    const userId = getUserId(req);
+    const title = (req.body.title || "").trim();
+    const result = await quizService.createQuiz(userId, title);
+    return res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error creating quiz:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-async function updateTitle(req, res) {
-  const err = needTitle(req.body);
-  if (err) return res.status(400).json({ error: err });
+// UPDATE TITLE
+exports.updateQuizTitle = async (req, res) => {
+  const err = needTitle(req.body?.title ?? req.body);
+  if (err) return res.status(400).json({ success: false, error: err });
+
   try {
-    const ok = await svcUpdateTitle(getUserId(req), Number(req.params.id), req.body.title.trim());
-    if (ok === 403) return res.status(403).json({ error: "Not user" });
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("UPDATE TITLE ERROR:", e);
-    res.status(500).json({ error: "Could not update title" });
+    const ok = await quizService.updateQuizTitle(Number(req.params.id), req.body.title.trim());
+    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error updating quiz title:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-async function replaceQuestions(req, res) {
+// REPLACE QUESTIONS
+exports.replaceQuestions = async (req, res) => {
   const err = needQuestionsArray(req.body);
-  if (err) return res.status(400).json({ error: err });
-  try {
-    const ok = await svcReplaceQuestions(getUserId(req), Number(req.params.id), req.body.questions);
-    if (ok === 403) return res.status(403).json({ error: "Not user" });
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("REPLACE QUESTIONS ERROR:", e);
-    res.status(500).json({ error: "Could not save questions" });
-  }
-}
+  if (err) return res.status(400).json({ success: false, error: err });
 
-async function addOneQuestion(req, res) {
+  try {
+    const ok = await quizService.replaceQuestions(Number(req.params.id), req.body.questions);
+    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error replacing questions:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+// ADD ONE QUESTION
+exports.addOneQuestion = async (req, res) => {
   const err = needQuestion(req.body);
-  if (err) return res.status(400).json({ error: err });
-  try {
-    const result = await svcAddOneQuestion(getUserId(req), Number(req.params.id), req.body);
-    if (result === 403) return res.status(403).json({ error: "Not user" });
-    if (!result) return res.status(404).json({ error: "Not found" });
-    res.status(201).json(result);
-  } catch (e) {
-    console.error("ADD QUESTION ERROR:", e);
-    res.status(500).json({ error: "Could not add question" });
-  }
-}
+  if (err) return res.status(400).json({ success: false, error: err });
 
-async function publishQuiz(req, res) {
   try {
-    const ok = await svcPublishQuiz(getUserId(req), Number(req.params.id));
-    if (ok === 403) return res.status(403).json({ error: "Not user" });
-    if (ok === 409) return res.status(409).json({ error: "Needs at least 1 question" });
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true, status: "published" });
-  } catch (e) {
-    console.error("PUBLISH ERROR:", e);
-    res.status(500).json({ error: "Could not publish" });
+    const result = await quizService.addOneQuestion(Number(req.params.id), req.body);
+    if (!result) return res.status(404).json({ success: false, error: "Quiz not found" });
+    return res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    console.error("Error adding question:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-async function deleteQuizCtrl(req, res) {
+// PUBLISH
+exports.publishQuiz = async (req, res) => {
   try {
-    const ok = await svcDeleteQuiz(getUserId(req), Number(req.params.id));
-    if (!ok) return res.status(404).json({ error: "Not found" });
-    res.json({ ok: true });
-  } catch (e) {
-    console.error("DELETE ERROR:", e);
-    res.status(500).json({ error: "Could not delete" });
+    const ok = await quizService.publishQuiz(Number(req.params.id));
+    if (ok === 409) return res.status(409).json({ success: false, error: "Needs at least 1 question" });
+    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
+    return res.json({ success: true, status: "published" });
+  } catch (error) {
+    console.error("Error publishing quiz:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
   }
-}
+};
 
-module.exports = {
-  listQuizzes,
-  getQuiz,
-  createQuizDraft,
-  updateTitle,
-  replaceQuestions,
-  addOneQuestion,
-  publishQuiz,
-  deleteQuizCtrl,
+// DELETE
+exports.deleteQuiz = async (req, res) => {
+  try {
+    const ok = await quizService.deleteQuiz(Number(req.params.id));
+    if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error deleting quiz:", error);
+    return res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
 };
