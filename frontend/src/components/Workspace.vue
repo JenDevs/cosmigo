@@ -1,45 +1,42 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { useNotesStore } from "../stores/useNotesStore";
+import { useNotesStore } from "@/stores/useNotesStore";
+import { useQuizStore } from "@/stores/useQuizStore";
 import { storeToRefs } from "pinia";
+
 import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
-import { useQuizStore } from "@/stores/useQuizStore";
-//import QuizEditor from './QuizEditor.vue';
 
+// Notes
 const notesStore = useNotesStore();
 const { activeNote } = storeToRefs(notesStore);
 
-const props = defineProps({
-  activeNote: {
-    type: Object,
-    default: null,
-  },
-});
-
-// växla mellan Note/Quiz
+// Toggle mellan Note/Quiz
 const isQuizEditor = ref(false);
 
-//Pinia-store för quiz
+// Quiz store
 const store = useQuizStore();
 const { current } = storeToRefs(store);
 
-// quiz player state
+// Lokalt state för editor/player
+const selectedQuiz = ref(null);
+const quizEditorRef = ref(null);
+
 const playerOpen = ref(false);
 const playerTitle = ref("Quiz");
 const playerQuestions = ref([]);
 
-// ladda quiz när sidan öppnas
+// Ladda quiz vid mount
 onMounted(() => store.load());
 
-// reagera när quiz väljs i listan eller store
+// Reagera på att "current" ändras i storen
 watch(
-  () => useQuizStore.current?.id,
+  () => current.value?.id,
   async (id) => {
     if (!id) return;
     try {
-      const full = await Quizzes.get(id);
+      const full = await store.getFull(id); // hämta inkl. frågor
       selectedQuiz.value = full;
       isQuizEditor.value = true;
     } catch (e) {
@@ -49,22 +46,22 @@ watch(
   }
 );
 
-// starta quiz spelaren
+// Starta spelaren
 function onStart({ title, questions }) {
   playerTitle.value = title;
   playerQuestions.value = questions;
   playerOpen.value = true;
 }
 
-// efter att quiz sparats i editorn
+// Efter save
 function onSaved({ id, title }) {
   store.setCurrentById(id);
 }
 
-// skapa nytt quiz
+// Skapa nytt quiz
 function newQuiz() {
   isQuizEditor.value = true;
-  useQuizStore.current = null;
+  store.clearCurrent();
   selectedQuiz.value = null;
   quizEditorRef.value?.resetQuiz();
 }
@@ -76,29 +73,28 @@ function newQuiz() {
       <label class="switch">
         <input type="checkbox" v-model="isQuizEditor" />
         <span class="slider">
-          <p id="slider-note" v-bind:class="{ inactive: isQuizEditor }">Note</p>
-          <p id="slider-quiz" v-bind:class="{ inactive: !isQuizEditor }">
-            Quiz
-          </p>
+          <p id="slider-note" :class="{ inactive: isQuizEditor }">Note</p>
+          <p id="slider-quiz" :class="{ inactive: !isQuizEditor }">Quiz</p>
         </span>
       </label>
     </div>
 
+    <!-- Note -->
     <NoteEditor
       v-if="!isQuizEditor"
       :note="activeNote"
-      @save="(note) => notesStore.updateNote(note)"
+      @save="note => notesStore.updateNote(note)"
     />
 
-    <!-- Quizeditor -->
-    <QuizEditor v-else 
-    :quiz="selectedQuiz" 
-    ref="quizEditorRef"
-    @start="onStart"
-    @saved="onSaved" 
+    <!-- Quiz -->
+    <QuizEditor
+      v-else
+      :quiz="selectedQuiz"
+      ref="quizEditorRef"
+      @start="onStart"
+      @saved="onSaved"
     />
 
-    <!-- Quizspelare -->
     <QuizPlayer
       :open="playerOpen"
       :title="playerTitle"
