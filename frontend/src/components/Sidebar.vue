@@ -58,16 +58,30 @@ const { selectNote, createNote, deleteNote } = notesStore;
   <aside class="sidebar">
     <ProfileCard />
   <TodoList/>
-    <!-- <NoteList :notes="notes" @delete="deleteNote" /> -->
+  
+<!-- QUIZZES -->
+<section class="quizzes-container">
+  <header class="quizzes-header">
+    <h3 class="quizzes-title">My Quizzes</h3>
+  </header>
 
-    <div class="quizzes-panel">
-      <QuizList
-        v-if="store.list.length > 0"
-        :quizzes="store.list"
-        @select="selectQuiz"
-        @delete="deleteQuiz"
-      />
-    </div>
+  <div class="quizzes-body">
+    <p v-if="loading" class="q-muted">Loading…</p>
+    <p v-else-if="error" class="q-error">{{ error }}</p>
+    <p v-else-if="store.list.length === 0" class="q-muted">
+      You have no saved quizzes yet.
+    </p>
+
+    <QuizList
+      v-else
+      :quizzes="store.list"
+      @select="selectQuiz"
+      @delete="deleteQuiz"
+    />
+  </div>
+</section>
+
+  <!-- <NoteList :notes="notes" @delete="deleteNote" /> -->
     <div class="note-list-container">
       <button class="new-note-btn" @click="createNote">New Note</button>
       <NoteList
@@ -113,5 +127,50 @@ const { selectNote, createNote, deleteNote } = notesStore;
   padding: 12px;
   border-radius: 8px;
   color: white;
+}
+
+/* ---- QUIZZES panel ---- */
+.quizzes-container {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+  color: white;
+}
+
+.quizzes-header {
+  background-color: rgba(148, 148, 148, 0.317);
+  border-radius: 6px;
+  padding: 6px 10px;      
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: calc(100% - 2px);
+  box-sizing: border-box;
+}
+
+.quizzes-title {
+  margin: 0;
+  font-size: 1.05rem;  
+  font-weight: 600;
+  color: white;
+  text-align: left;
+}
+
+.quiz-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.quiz-item {
+  margin: 6px 0;
+}
+
+.q-error { 
+  color: #ffb3b3; 
+  font-size: 0.95rem; 
+  margin: 6px 2px; 
 }
 </style>
