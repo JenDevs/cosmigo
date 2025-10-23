@@ -1,24 +1,16 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import ProfileCard from "./ProfileCard.vue";
-//import TodoList from "./TodoList.vue";
+import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
 import QuizList from "./QuizList.vue";
 import { useQuizStore } from "@/stores/useQuizStore";
-
-const notes = ref([
-  { id: 1, title: "Note 1", content: "Content for Note 1" },
-  { id: 2, title: "Note 2", content: "Content for Note 2" },
-  { id: 3, title: "Note 3", content: "Content for Note 3" },
-]);
-
-const deleteNote = (id) => {
-  notes.value = notes.value.filter((note) => note.id !== id);
-};
+import { useNotesStore } from "../stores/useNotesStore";
+import { storeToRefs } from "pinia";
 
 // QUIZZES
 
-//Pinia store
+//Pinia s
 const store = useQuizStore();
 
 // Ladda listan från backend via store
@@ -56,13 +48,17 @@ async function deleteQuiz(id) {
 
 // ladda quiz
 onMounted(loadQuizzes);
+
+const notesStore = useNotesStore();
+const { notes } = storeToRefs(notesStore);
+const { selectNote, createNote, deleteNote } = notesStore;
 </script>
 
 <template>
   <aside class="sidebar">
     <ProfileCard />
-    <!-- <TodoList /> -->
-    <NoteList :notes="notes" @delete="deleteNote" />
+  <TodoList/>
+    <!-- <NoteList :notes="notes" @delete="deleteNote" /> -->
 
     <div class="quizzes-panel">
       <QuizList
@@ -70,6 +66,15 @@ onMounted(loadQuizzes);
         :quizzes="store.list"
         @select="selectQuiz"
         @delete="deleteQuiz"
+      />
+    </div>
+    <div class="note-list-container">
+      <button class="new-note-btn" @click="createNote">New Note</button>
+      <NoteList
+        :notes="notes"
+        @select="selectNote"
+        @new-note="createNote"
+        @delete="deleteNote"
       />
     </div>
   </aside>
@@ -81,7 +86,7 @@ onMounted(loadQuizzes);
   flex-direction: column;
   justify-content: space-between;
   width: 300px;
-  height: 100vh;
+  height: 100%;
   background-color: rgb(63, 63, 70);
   padding: 12px;
   display: flex;
@@ -90,5 +95,23 @@ onMounted(loadQuizzes);
 
 .note-list {
   margin-top: auto;
+}
+
+.new-note-btn {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.note-list-container {
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
 }
 </style>

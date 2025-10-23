@@ -1,10 +1,22 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { useNotesStore } from "../stores/useNotesStore";
+import { storeToRefs } from "pinia";
 import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
 import { useQuizStore } from "@/stores/useQuizStore";
-import { storeToRefs } from "pinia";
+//import QuizEditor from './QuizEditor.vue';
+
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
+
+const props = defineProps({
+  activeNote: {
+    type: Object,
+    default: null,
+  },
+});
 
 // växla mellan Note/Quiz
 const isQuizEditor = ref(false);
@@ -74,8 +86,8 @@ function newQuiz() {
 
     <NoteEditor
       v-if="!isQuizEditor"
-      :note="{ id: 1, title: 'Sample Note', content: 'This is a sample note.' }"
-      @save="(note) => console.log('Save note:', note)"
+      :note="activeNote"
+      @save="(note) => notesStore.updateNote(note)"
     />
 
     <!-- Quizeditor -->
@@ -100,14 +112,16 @@ function newQuiz() {
 .workspace-view {
   flex: 1;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: rgb(42, 42, 48);
   padding: 1rem;
-  overflow: auto;
+  min-height: 100%;
 }
 
 /*_____________Toggle Editor______________________*/
+
 
 #toggle-editor {
   position: absolute;

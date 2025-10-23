@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "pinia": "^3.0.3"
+    "pinia": "^3.0.3",
+    "primevue": "^4.4.1"
   }
 }

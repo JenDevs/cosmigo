@@ -1,44 +1,54 @@
 <script setup>
 import { ref, watch } from "vue";
+import { useNotesStore } from "../stores/useNotesStore";
+import { computed } from "vue";
+
+const notesStore = useNotesStore();
+const activeNote = computed(() => notesStore.activeNote);
 
 const props = defineProps({
   note: {
     type: Object,
-    required: true,
+    default: null,
   },
 });
 
-const emit = defineEmits(["save"]);
-
-const title = ref(props.note.title);
-const content = ref(props.note.content);
+const title = ref();
+const content = ref();
+const savedAt = ref(null);
 
 watch(
   () => props.note,
   (newNote) => {
-    title.value = newNote.title;
-    content.value = newNote.content;
-  }
+    if (newNote) {
+      title.value = newNote.title;
+      content.value = newNote.content;
+      savedAt.value = new Date();
+    } else {
+      title.value = "";
+      content.value = "";
+      savedAt.value = null;
+    }
+  },
+  { immediate: true }
 );
-
-const saveNote = () => {
-  emit("save", {
-    id: props.note.id,
-    title: title.value,
-    content: content.value,
-  });
-};
 </script>
 
 <template>
-  <div class="note-editor">
-    <input v-model="title" placeholder="Title" class="title-input" />
-    <textarea
-      v-model="content"
-      placeholder="Write your note here..."
-      class="content-area"
+  <div v-if="activeNote" class="note-editor">
+    <input
+      class="title-input"
+      type="text"
+      v-model="activeNote.title"
+      placeholder="Untitled"
     />
-    <button @click="saveNote">💾 Save</button>
+    <textarea class="content-area" v-model="activeNote.content" />
+    <button @click="$emit('save', activeNote)">Save</button>
+    <p>Last saved at: {{ savedAt }}</p>
+  </div>
+
+  <div v-else class="no-note">
+    <p>Select or create a note to begin.</p>
   </div>
 </template>
 
