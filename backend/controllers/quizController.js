@@ -1,7 +1,7 @@
 const quizService = require("../services/quizService");
 const getUserId = (req) => req.query.userId ?? req.body.userId ?? req.user?.userId;
 
-// --- enkel validering  ---
+// --- validering ---
 function needTitle(value) {
   const t = typeof value === "string" ? value : value?.title;
   if (typeof t !== "string" || !t.trim()) return "Title is required";
@@ -45,7 +45,9 @@ exports.getQuizzes = async (req, res) => {
 // GET ONE
 exports.getQuizById = async (req, res) => {
   try {
-    const quiz = await quizService.getQuizById(Number(req.params.id));
+    const userId = getUserId(req);
+    const quiz = await quizService.getQuizById(Number(req.params.id), userId);
+    if (quiz === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (!quiz) return res.status(404).json({ success: false, error: "Quiz not found" });
     res.json({ success: true, data: quiz });
   } catch (error) {
@@ -54,7 +56,7 @@ exports.getQuizById = async (req, res) => {
   }
 };
 
-// CREATE
+// CREATE (draft)
 exports.createQuiz = async (req, res) => {
   const err = needTitle(req.body?.title ?? req.body);
   if (err) return res.status(400).json({ success: false, error: err });
@@ -76,7 +78,13 @@ exports.updateQuizTitle = async (req, res) => {
   if (err) return res.status(400).json({ success: false, error: err });
 
   try {
-    const ok = await quizService.updateQuizTitle(Number(req.params.id), req.body.title.trim());
+    const userId = getUserId(req);
+    const ok = await quizService.updateQuizTitle(
+      Number(req.params.id),
+      userId,
+      req.body.title.trim()
+    );
+    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
     return res.status(200).json({ success: true });
   } catch (error) {
@@ -91,7 +99,13 @@ exports.replaceQuestions = async (req, res) => {
   if (err) return res.status(400).json({ success: false, error: err });
 
   try {
-    const ok = await quizService.replaceQuestions(Number(req.params.id), req.body.questions);
+    const userId = getUserId(req);
+    const ok = await quizService.replaceQuestions(
+      Number(req.params.id),
+      userId,
+      req.body.questions
+    );
+    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
     return res.status(200).json({ success: true });
   } catch (error) {
@@ -106,7 +120,13 @@ exports.addOneQuestion = async (req, res) => {
   if (err) return res.status(400).json({ success: false, error: err });
 
   try {
-    const result = await quizService.addOneQuestion(Number(req.params.id), req.body);
+    const userId = getUserId(req);
+    const result = await quizService.addOneQuestion(
+      Number(req.params.id),
+      userId,
+      req.body
+    );
+    if (result === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (!result) return res.status(404).json({ success: false, error: "Quiz not found" });
     return res.status(201).json({ success: true, data: result });
   } catch (error) {
@@ -118,7 +138,9 @@ exports.addOneQuestion = async (req, res) => {
 // PUBLISH
 exports.publishQuiz = async (req, res) => {
   try {
-    const ok = await quizService.publishQuiz(Number(req.params.id));
+    const userId = getUserId(req);
+    const ok = await quizService.publishQuiz(Number(req.params.id), userId);
+    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (ok === 409) return res.status(409).json({ success: false, error: "Needs at least 1 question" });
     if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
     return res.json({ success: true, status: "published" });
@@ -131,7 +153,9 @@ exports.publishQuiz = async (req, res) => {
 // DELETE
 exports.deleteQuiz = async (req, res) => {
   try {
-    const ok = await quizService.deleteQuiz(Number(req.params.id));
+    const userId = getUserId(req);
+    const ok = await quizService.deleteQuiz(Number(req.params.id), userId);
+    if (ok === 403) return res.status(403).json({ success: false, error: "Not user" });
     if (!ok) return res.status(404).json({ success: false, error: "Quiz not found" });
     return res.status(200).json({ success: true });
   } catch (error) {
