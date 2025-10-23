@@ -9,11 +9,7 @@ import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
 
 // QUIZZES
-
-//Pinia s
 const store = useQuizStore();
-
-// Ladda listan från backend via store
 const loading = ref(false);
 const error = ref("");
 

@@ -53,8 +53,8 @@ function handleSelect() {
   background-color: rgba(0, 0, 0, 0.4);
 }
 
-/* delete-knappen */
 .delete-quiz-btn {
+  float: right;
   font-size: 1rem;
   background-color: #e74c3c;
   color: white;
@@ -62,8 +62,5 @@ function handleSelect() {
   border-radius: 4px;
   padding: 4px 8px;
   cursor: pointer;
-}
-.delete:hover {
-  background: #c0392b;
 }
 </style>

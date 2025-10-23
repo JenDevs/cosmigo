@@ -3,9 +3,8 @@ import { Quizzes } from "@/api/quizzes";
 
 export const useQuizStore = defineStore("quiz", {
   state: () => ({
-    /** @type {Array<{id:string,title:string}>} */
     list: [],
-    /** @type {null | {id:string,title:string}} */
+    archived: [],
     current: null,
     loading: false,
     error: "",
@@ -18,28 +17,24 @@ export const useQuizStore = defineStore("quiz", {
 
   actions: {
     async load() {
-      this.loading = true;
-      this.error = "";
+      this.loading = true; this.error = "";
       try {
         const data = await Quizzes.list();
-
-        const items = Array.isArray(data)
-          ? data
-          : Array.isArray(data?.rows)
-            ? data.rows
-            : [];
-
-        if (!Array.isArray(data)) {
-          console.warn("Quizzes.list() returned non-array:", data);
-        }
-
-        // filtrera bort skräp 
-        this.list = items.filter(q => q && q.title && String(q.title).trim());
+        const items = Array.isArray(data) ? data : Array.isArray(data?.rows) ? data.rows : [];
+        this.list = items.filter(q => q && q.title && String(q.title).trim() && q.status !== "archived"); // filtrera bort archived om du vill
       } catch (e) {
         this.error = "Could not get quizzes";
         console.error(e);
-      } finally {
-        this.loading = false;
+      } finally { this.loading = false; }
+    },
+
+    async loadArchived() {
+      try {
+        const data = await Quizzes.listArchived();
+        const items = Array.isArray(data) ? data : Array.isArray(data?.rows) ? data.rows : [];
+        this.archived = items.filter(q => q && q.title && String(q.title).trim());
+      } catch (e) {
+        console.error(e);
       }
     },
 
@@ -52,19 +47,6 @@ export const useQuizStore = defineStore("quiz", {
       this.current = null;
     },
 
-    /**
-     * Hämta fullständigt quiz (inkl frågor/svar) från API
-     * @param {string} id
-     */
-    async getFull(id) {
-      return Quizzes.get(id);
-    },
-
-    /**
-     * Skapa eller uppdatera ett quiz.
-     * Skapar alltid när id saknas.
-     * @param {{id?:string,title?:string,questions?:Array<{text?:string,answer?:string,position?:number}>}} quiz
-     */
     async save(quiz) {
       const title = (quiz.title || "").trim();
       const questions = (quiz.questions || [])
@@ -97,7 +79,6 @@ export const useQuizStore = defineStore("quiz", {
       if (this.current?.id === id) this.current = null;
     },
 
-    // tomt quiz i editorn
     newBlank() {
       this.clearCurrent();
       return { id: undefined, title: "", questions: [{ text: "", answer: "" }] };
@@ -105,19 +86,23 @@ export const useQuizStore = defineStore("quiz", {
 
     // arkivera quiz
     async archive(id) {
-      const res = await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
+      await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
         method: "POST",
         credentials: "include",
+      }).then(r => r.json()).then(d => {
+        if (d?.success === false) throw new Error(d.error || "Archive failed");
       });
 
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || data?.success === false) {
-        throw new Error(data?.error || "Archive failed");
+      // flytta objektet från list -> archived
+      const i = this.list.findIndex(q => q.id === id);
+      if (i !== -1) {
+        const [q] = this.list.splice(i, 1);
+        this.archived.unshift({ ...q, status: "archived" });
+      } else {
+        // om vi inte hittar den i listan, hämta om archived
+        await this.loadArchived();
       }
-
-      // ta bort quizet från listan i UI
-      this.list = this.list.filter(q => q.id !== id);
       if (this.current?.id === id) this.current = null;
     },
-  }, 
+  }
 });

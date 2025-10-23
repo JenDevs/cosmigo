@@ -214,7 +214,7 @@ async function save() {
       :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
       @click="save"
     >
-      💾 Save
+      Save
     </button>
   </div>
 

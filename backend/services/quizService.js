@@ -17,15 +17,23 @@ function ensureOwner(quizId, userId) {
   });
 }
 
-// LIST
-function getAllQuizzes(userId) {
+// LIST (valfri status)
+function getAllQuizzes(userId, { status = null } = {}) {
   return new Promise((resolve, reject) => {
-    const sql = `
+     let sql = `
       SELECT id, title, status, createdAt
       FROM quizzes
-      WHERE userId=?
-      ORDER BY createdAt DESC`;
-    connectionMySQL.query(sql, [userId], (err, rows) => {
+      WHERE userId=?`;
+    const params = [userId];
+
+    if (status) {
+      sql += ` AND status=?`;
+      params.push(status);
+    }
+
+    sql += ` ORDER BY createdAt DESC`;
+
+    connectionMySQL.query(sql, params, (err, rows) => {
       if (err) reject(err);
       else resolve(rows);
     });

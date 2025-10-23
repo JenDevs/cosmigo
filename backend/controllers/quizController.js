@@ -3,7 +3,8 @@ const quizService = require("../services/quizService");
 // GET: alla quiz
 async function listQuizzes(req, res) {
   try {
-    const rows = await quizService.getAllQuizzes(req.user.id);
+    const status = typeof req.query.status === "string" ? req.query.status : null;
+    const rows = await quizService.getAllQuizzes(req.user.id, { status });
     res.json(rows);
   } catch (e) {
     console.error(e);
