@@ -149,7 +149,7 @@ async function save() {
       class="title-input"
     />
 
-    <!-- Visa titel-fel -->
+    <!-- Glömt titel -->
     <p v-if="triedSubmit && titleMissing" class="err">
       Did you forgot something? Perhaps a title?
     </p>
@@ -185,13 +185,13 @@ async function save() {
         class="a-input"
       />
 
-      <!-- Frågespecifikt fel -->
+      <!-- Glömt titel -->
       <p v-if="triedSubmit && !q.text.trim()" class="err">
         Did you forgot something? Maybe a question?
       </p>
     </div>
 
-    <!-- Gemensamt fel om båda saknas -->
+    <!-- Om båda saknas -->
     <p
       v-if="
         triedSubmit &&
@@ -205,22 +205,23 @@ async function save() {
 
     <!-- Bottenknappar -->
     <div class="actions">
-      <div class="left-actions">
-      <button @click="startQuiz">Start quiz</button>
-      <button class="add" @click="addQuestion">+ Add question</button>
-      </div>
-
-      <button
-        type="button"
-        class="save"
-        :disabled="!isValid"
-        :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
-        @click="save"
-      >
-        💾 Save
-      </button>
-    </div>
+    <div class="left-actions">
+    <button class="add" @click="addQuestion">Add Question</button>
+    <button
+      type="button"
+      class="save"
+      :disabled="!isValid"
+      :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
+      @click="save"
+    >
+      💾 Save
+    </button>
   </div>
+
+  <!-- flyttad hit -->
+  <button class="start" @click="startQuiz">Start Quiz</button>
+</div>
+</div>
 </template>
 
 <style scoped>
@@ -292,8 +293,24 @@ button.add {
   align-items: center;
   gap: 10px;
 }
+
+.left-actions {
+  display: flex;
+  gap: 8px; 
+}
+
 .save {
   background: #007bff;
+  color: white;
+}
+
+.start {
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
 }
 
 .err {
