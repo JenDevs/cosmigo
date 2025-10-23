@@ -2,25 +2,13 @@ const express = require("express");
 const router = express.Router();
 const quizController = require("../controllers/quizController");
 
-// Lista alla quiz
-router.get("/quizzes", quizController.listQuizzes);
-
-// Hämta ett quiz inkl frågor
-router.get("/quizzes/:id", quizController.getQuiz);
-
-// Skapa nytt quiz
-router.post("/quizzes", quizController.createQuiz);
-
-// Uppdatera quiz-titel
-router.put("/quizzes/:id/title", quizController.updateQuizTitle);
-
-// Ersätt alla frågor
-router.put("/quizzes/:id/questions", quizController.replaceQuestions);
-
-// Radera quiz
-router.delete("/quizzes/:id", quizController.deleteQuiz);
-
-// Arkivera quiz
-router.post("/quizzes/:id/archive", quizController.archiveQuiz);
+router.get("/",         quizController.listQuizzes);          // GET    /api/quizzes
+router.get("/:id",      quizController.getQuiz);              // GET    /api/quizzes/:id
+router.post("/",        quizController.createQuiz);           // POST   /api/quizzes
+router.put("/:id",      quizController.updateQuiz);           // PUT    /api/quizzes/:id
+router.put("/:id/title",    quizController.updateQuizTitle);  // PUT    /api/quizzes/:id/title
+router.put("/:id/questions",quizController.replaceQuestions); // PUT    /api/quizzes/:id/questions
+router.delete("/:id",   quizController.deleteQuiz);           // DELETE /api/quizzes/:id
+router.post("/:id/archive",quizController.archiveQuiz);       // POST   /api/quizzes/:id/archive
 
 module.exports = router;
