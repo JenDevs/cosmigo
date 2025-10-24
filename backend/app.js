@@ -11,6 +11,10 @@ app.use(express.urlencoded({ extended: true }));
 const userRoutes = require("./routes/userRoutes");
 app.use(userRoutes);
 
+const pomodoroRoutes = require("./routes/pomodoroRoutes");
+app.use("/api/pomodoro", pomodoroRoutes)
+
 // app.use(express.static('public'));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
