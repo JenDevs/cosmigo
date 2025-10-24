@@ -2,6 +2,7 @@
 import { defineStore } from "pinia";
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 
+
 export const useTimerStore = defineStore("timer", () => {
   const state = ref("Idle");
   const sessionCount = ref(0);

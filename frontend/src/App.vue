@@ -36,7 +36,6 @@ const showTimer = ref(false);
   </button>
 
   
-
 </template>
 
 <style>

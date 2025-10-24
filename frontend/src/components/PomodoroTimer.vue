@@ -75,3 +75,4 @@ const timer = useTimerStore()
   50% { opacity: 0; }
 }
 </style>
+

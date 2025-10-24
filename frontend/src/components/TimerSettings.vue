@@ -95,3 +95,4 @@ function applySettings() {
   background: #B8A79C;
 }
 </style>
+

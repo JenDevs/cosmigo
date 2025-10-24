@@ -2,7 +2,6 @@ const connectionMySQL = require("./../connectionMySQL");
 
 
 
-
 function getAllPomodoros() {
   return new Promise((resolve, reject) => {
     let sql = "SELECT * FROM pomodoro";

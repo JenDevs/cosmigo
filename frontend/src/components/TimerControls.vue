@@ -57,3 +57,4 @@ const emit = defineEmits(['start', 'pause', 'stop', 'reset', 'open-settings'])
   transition: color 0.2s ease;
 }
 </style>
+
