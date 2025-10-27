@@ -4,13 +4,6 @@ import { watch } from "vue";
 import { useNotesStore } from "../stores/useNotesStore";
 import { computed } from "vue";
 
-const props = defineProps({
-  note: {
-    type: Object,
-    default: null,
-  },
-});
-
 const notesStore = useNotesStore();
 const activeNote = computed(() => notesStore.activeNote);
 
