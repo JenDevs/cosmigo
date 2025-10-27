@@ -1,4 +1,6 @@
 <script setup>
+import { reactive } from 'vue'
+
 const props = defineProps({
   userWorkTime: Number,
   userShortBreak: Number,
@@ -8,15 +10,26 @@ const props = defineProps({
 
 const emit = defineEmits(['apply', 'close'])
 
-const tempValues = {
+const tempValues = reactive ( {
   work: props.userWorkTime,
   short: props.userShortBreak,
   long: props.userLongBreak,
   every: props.longBreakEvery
-}
+})
 
 function applySettings() {
-  emit('apply', tempValues)
+  const isValid =
+    tempValues.work >= 1 && tempValues.work <= 120 &&
+    tempValues.short >= 1 && tempValues.short <= 120 &&
+    tempValues.long >= 1 && tempValues.long <= 120 &&
+    tempValues.every >= 1 && tempValues.every <= 10
+
+  if(!isValid) {
+    alert('Please enter valid values(work/breaks: 1-120 min, session: 1-10)')
+  }
+  
+  emit('apply', tempValues
+  )
 }
 </script>
 

@@ -1,7 +1,6 @@
 const pomodoroService = require("./../services/pomodoroService");
 
 exports.getAllPomodoros = async (req, res) => {
-  console.log('getAll ok');
   try {
     const pomodoros = await pomodoroService.getAllPomodoros();
     res.json({ pomodoros });
@@ -10,11 +9,10 @@ exports.getAllPomodoros = async (req, res) => {
       error: error.message,
     });
   }
-}; 
+};
 
 exports.getPomodoroById = async (req, res) => {
   const { id } = req.params;
-  console.log("param" + id);
 
   try {
     const pomodoroById = await pomodoroService.getPomodoroById(id);
@@ -28,7 +26,6 @@ exports.getPomodoroById = async (req, res) => {
 
 exports.getPomodorosByUserId = async (req, res) => {
   const { pomodoroUserId } = req.params;
-  console.log("param" + pomodoroUserId);
 
   try {
     const pomodorosByUser = await pomodoroService.getPomodorosByUserId(
@@ -153,4 +150,3 @@ exports.deletePomodoro = async (req, res) => {
     });
   }
 };
-

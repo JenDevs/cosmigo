@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed, nextTick } from "vue";
+import { ref, computed } from "vue";
 
 export const useTimerStore = defineStore("timer", () => {
   const state = ref("Idle");
@@ -44,7 +44,6 @@ export const useTimerStore = defineStore("timer", () => {
     LONG_BREAK: "Long break",
   };
 
-  // ny funktion
   function initTimer() {
     loadFromLocalStorage();
     fetchPomodoro();
@@ -71,10 +70,6 @@ export const useTimerStore = defineStore("timer", () => {
     }
 
     if (remainingTime.value === 0 && state.value === TIMER_STATES.IDLE) {
-      selectedWorkTime.value = userWorkTime.value * 60;
-      shortBreak.value = userShortBreak.value * 60;
-      longBreak.value = userLongBreak.value * 60;
-      longBreakEvery.value = 4;
       remainingTime.value = selectedWorkTime.value;
       state.value = TIMER_STATES.WORK;
     }
@@ -212,10 +207,6 @@ export const useTimerStore = defineStore("timer", () => {
     sessionCount.value = saved.sessions ?? 0;
     remainingTime.value = saved.time ?? selectedWorkTime.value;
     criticalState();
-
-    nextTick(() => {
-      userWorkTime.value = userWorkTime.value;
-    });
   }
 
   async function createPomodoro() {
@@ -230,13 +221,18 @@ export const useTimerStore = defineStore("timer", () => {
       .slice(0, 19)
       .replace("T", " ");
 
+    const durationInSeconds = Math.max(
+      0,
+      Math.round((currentSessionEnd - currentSessionStart) / 1000)
+    );
+
     try {
       const res = await fetch("http://localhost:3000/api/pomodoro/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           sessionType: state.value,
-          duration: selectedWorkTime.value,
+          duration: durationInSeconds,
           completed: 1,
           startTime,
           endTime,

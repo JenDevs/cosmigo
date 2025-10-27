@@ -15,7 +15,7 @@ const showTimer = ref(false);
     <WorkspaceView />
   </div>
 
-  <div v-if="showTimer" class="timer-wrapper">
+  <div v-show="showTimer" class="timer-wrapper">
     <PomodoroTimer />
   </div>
   
