@@ -35,6 +35,13 @@ async function updateTodo(todoId, todo) {
   return result;
 }
 
+async function completeTodo(todoId, todo) {
+  const sql = 'UPDATE Todo SET todoIsCompleted = ? WHERE todoId = ?'
+  const params = [todo.todoIsCompleted ? 1 : 0, todoId]
+  const [result] = await connectionMySQL.query(sql, params)
+  return result
+}
+
 function getTodosByUser(userId) {
   return connectionMySQL
     .query('SELECT * FROM Todo WHERE userId = ? ORDER BY todoCreatedAt DESC', [userId])
@@ -58,5 +65,6 @@ module.exports = {
   getTodoById,
   updateTodo,
   getTodosByUser,
-  getAllTodos
+  getAllTodos,
+  completeTodo
 }

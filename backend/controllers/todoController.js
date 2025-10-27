@@ -1,36 +1,36 @@
 const todoService = require('../services/todoService');
 
 exports.createTodo = async (req, res) => {
-    console.log('Received request to create todo with data:', req.body);
-  const { userId, todoTitle, todoDescription, todoIsCompleted } = req.body;
-  console.log('Parsed fields - userId:', userId, 'todoTitle:', todoTitle, 
-    'todoDescription:', todoDescription, 'todoIsCompleted:', todoIsCompleted);
+  const { userId, todoTitle, todoDescription, todoIsCompleted } = req.body
+  if (!userId || !todoTitle || !todoDescription) {
+    return res.status(400).json({ success: false, error: 'Missing required fields: userId, todoTitle, todoDescription' })
+  }
+  try {
+    const result = await todoService.createTodo(userId, todoTitle, todoDescription, todoIsCompleted)
+    return res.status(201).json({ success: true, todoId: result.insertId })
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message })
+  }
+}
 
-    if (!userId || !todoTitle || !todoDescription) {
-        console.error('Missing required fields in request body');
-        return res.status(400).json({
-            success: false,
-            error: 'Missing required fields: userId, todoTitle, todoDescription'
-        });
+
+exports.completeTodo = async (req, res) => {
+  const todoId = Number(req.params.todoId)
+  const { todoIsCompleted } = req.body
+  if (!Number.isFinite(todoId) || typeof todoIsCompleted === 'undefined') {
+    return res.status(400).json({ success: false, error: 'Invalid todoId or todoIsCompleted' })
+  }
+  try {
+    const result = await todoService.completeTodo(todoId, { todoIsCompleted: !!todoIsCompleted })
+    if (!result || result.affectedRows === 0) {
+      return res.status(404).json({ success: false, error: 'Todo not found' })
     }
-    try {
-        await todoService.createTodo(
-            userId,
-            todoTitle,
-            todoDescription,
-            todoIsCompleted
-        );
-        return res.status(201).json({
-            success: true,
-            message: 'Todo item created successfully',
-        });
-    } catch (error) {
-        return res.status(500).json({
-            success: false,
-            error: error.message,
-        });
-    }
-};
+    return res.status(200).json({ success: true, data: { todoId, todoIsCompleted: !!todoIsCompleted } })
+  } catch (error) {
+    return res.status(500).json({ success: false, error: error.message })
+  }
+}
+
 
 exports.getTodosByUser = async (req, res) => {
     const userId = req.params.userId;
@@ -86,6 +86,8 @@ exports.updateTodo = async (req, res) => {
     }
 };
 exports.deleteTodo = async (req, res) => {
+    //console.log('Current tasks contents:', JSON.parse(JSON.stringify(tasks.value)));
+console.log('Received request to delete todo with params:', req.params);
   const { todoId } = req.params;
 
   if (!todoId) {
@@ -146,7 +148,3 @@ exports.getAllTodos = async (req, res) => {
         });
     }
 };
-
-/*var serverUrl = todoService.listen(3000, () => {
-    console.log(`Todo service running at http://localhost:3000`);
-});*/

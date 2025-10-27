@@ -6,7 +6,8 @@ router.post('/todos', todoController.createTodo);
 router.get('/todos/user/:userId', todoController.getTodosByUser);
 router.put('/todos/:todoId', todoController.updateTodo);
 router.delete('/todos/:todoId', todoController.deleteTodo);
-//router.get('/api/todos/:todoId', todoController.getTodoById);
 router.get('/todos/:userId', todoController.getAllTodos); // For debugging purposes?
+router.put('/todos/complete/:todoId', todoController.completeTodo);
+
 
 module.exports = router;
