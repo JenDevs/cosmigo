@@ -7,12 +7,12 @@
       <input type="text" id="inputBox" placeholder="Add new task" v-model="newTask" @keyup.enter="addTask" />
       <button @click="addTask">Add</button>
     </div>
-    <ul id="listContainer">
-      <li v-for="(t, i) in tasks" :key="i" :class="{ checked: t.done }" @click="toggle(i)">
-        <span>{{ t.text }}</span>
-        <button @click.stop="removeTask(i)">Delete</button>
-      </li>
-    </ul>
+<ul id="listContainer">
+  <li v-for="(t, i) in tasks" :key="t.id" :class="{ checked: t.done }">
+    <span @click="completeTask(i)" class="todo-text">{{ t.text }}</span>
+    <button @click.stop="removeTask(i)">Delete</button>
+  </li>
+</ul>
   </div>
 </template>
 
@@ -122,38 +122,73 @@ onMounted(() => {
   }
 })
 
-async function addTask() {
-  const text = newTask.value.trim()
-  if (!text) return
-  const item = { id: crypto.randomUUID(), text, done: false }
-  tasks.value.push(item)
-  newTask.value = ''
-  const payload = {
-    userId: 2,
-    todoTitle: text,
-    todoDescription: text,
-    todoIsCompleted: false
-  }
-  try {
-    const res = await fetch('http://localhost:3000/api/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-    if (!res.ok) console.error('Failed to create todo', await res.text())
-  } catch (err) {
-    console.error(err)
-  }
-}
-
 function toggle(i) {
   const t = tasks.value[i]
   if (!t) return
   t.done = !t.done
 }
 
-function removeTask(i) {
-  tasks.value.splice(i, 1)
+async function addTask() {
+  const text = newTask.value.trim()
+  if (!text) return
+  const localId = Date.now()
+  const item = { id: localId, todoId: null, text, done: false }
+  tasks.value.push(item)
+  newTask.value = ''
+  const payload = { userId: 2, todoTitle: text, todoDescription: text, todoIsCompleted: false }
+  try {
+    const res = await fetch('/api/todos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    if (!res.ok) {
+      console.error('Failed to create todo', await res.text())
+      return
+    }
+    const data = await res.json()
+    const idx = tasks.value.findIndex(x => x.id === localId)
+    if (idx !== -1) tasks.value[idx].todoId = data.todoId
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function removeTask(i) {
+  const t = tasks.value[i]
+  if (!t) return
+  if (!t.todoId) {
+    tasks.value.splice(i, 1)
+    return
+  }
+  try {
+    const res = await fetch(`/api/todos/${t.todoId}`, { method: 'DELETE' })
+    if (!res.ok) {
+      console.error('Failed to delete todo', await res.text())
+      return
+    }
+    tasks.value.splice(i, 1)
+  } catch (err) {
+    console.error('Error deleting todo:', err)
+  }
+}
+
+async function completeTask(i) {
+  const t = tasks.value[i]
+  if (!t) return
+  t.done = !t.done
+  try {
+    const res = await fetch(`/api/todos/complete/${t.todoId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todoIsCompleted: t.done })
+    })
+    if (!res.ok) {
+      console.error('Failed to update todo completion', await res.text())
+    }
+  } catch (err) {
+    console.error('Error updating todo completion:', err)
+  }
 }
 
 watch(tasks, () => {

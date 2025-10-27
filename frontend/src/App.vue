@@ -1,5 +1,3 @@
-
-
 <script setup>
 import Sidebar from "./components/Sidebar.vue";
 import WorkspaceView from "./components/Workspace.vue";
