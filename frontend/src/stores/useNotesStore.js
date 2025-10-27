@@ -55,7 +55,10 @@ export const useNotesStore = defineStore("notes", () => {
     const idx = notes.value.findIndex((n) => n.id === updatedNote.id);
     if (idx === -1) return;
 
-    // Optimistic update - immediate UI feedback
+    // Store original for rollback
+    const original = { ...notes.value[idx] };
+
+    // Optimistic update
     notes.value[idx] = { ...notes.value[idx], ...updatedNote };
 
     try {
@@ -89,6 +92,11 @@ export const useNotesStore = defineStore("notes", () => {
       activeNote.value = notes.value[0];
     } catch (err) {
       console.error("Failed to save note:", err);
+      // Rollback optimistic update
+      notes.value[idx] = original;
+      if (activeNote.value?.id === updatedNote.id) {
+        activeNote.value = original;
+      }
     }
   }
 
