@@ -3,11 +3,10 @@ import TimerDisplay from './TimerDisplay.vue'
 import TimerControls from './TimerControls.vue'
 import TimerSettings from './TimerSettings.vue'
 import { useTimerStore } from '../stores/useTimerStore.js'
-import { onBeforeUnmount, onMounted } from 'vue' // Det här är också nytt
+import { onBeforeUnmount, onMounted } from 'vue' 
 
 const timer = useTimerStore()
 
-// onMounted och onBeforeMount är nytt
 onMounted (() => {
   timer.initTimer();
 });

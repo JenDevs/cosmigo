@@ -1,6 +1,5 @@
-// src/stores/useTimerStore.js
 import { defineStore } from "pinia";
-import { ref, computed, /*onMounted, onBeforeUnmount,*/ nextTick } from "vue";
+import { ref, computed, nextTick } from "vue";
 
 export const useTimerStore = defineStore("timer", () => {
   const state = ref("Idle");
@@ -51,15 +50,6 @@ export const useTimerStore = defineStore("timer", () => {
     fetchPomodoro();
   }
 
-  /* onMounted(() => {
-    loadFromLocalStorage();
-    fetchPomodoro();
-  });
-
-  onBeforeUnmount(() => {
-    saveToLocalStorage();
-  }); */
-
   function userSettings(values) {
     userWorkTime.value = values.work;
     userShortBreak.value = values.short;
@@ -77,11 +67,9 @@ export const useTimerStore = defineStore("timer", () => {
     if (isRunning.value) return;
     if (state.value === TIMER_STATES.IDLE) {
       state.value = TIMER_STATES.WORK;
-      // flyttade currenSession hit från if nedan
       currentSessionStart = new Date();
     }
 
-    // if (!currentSessionStart) currentSessionStart = new Date();
     if (remainingTime.value === 0 && state.value === TIMER_STATES.IDLE) {
       selectedWorkTime.value = userWorkTime.value * 60;
       shortBreak.value = userShortBreak.value * 60;
@@ -126,6 +114,11 @@ export const useTimerStore = defineStore("timer", () => {
     state.value = TIMER_STATES.IDLE;
     sessionCount.value = 0;
     localStorage.removeItem("savedPomodoroData");
+    resetUserSettings();
+    saveToLocalStorage();
+  }
+
+  function resetUserSettings() {
     userWorkTime.value = 25;
     userShortBreak.value = 5;
     userLongBreak.value = 60;
@@ -134,7 +127,6 @@ export const useTimerStore = defineStore("timer", () => {
     shortBreak.value = userShortBreak.value * 60;
     longBreak.value = userLongBreak.value * 60;
     remainingTime.value = selectedWorkTime.value;
-    saveToLocalStorage();
   }
 
   function tick() {
@@ -227,7 +219,6 @@ export const useTimerStore = defineStore("timer", () => {
   }
 
   async function createPomodoro() {
-    if (state.value !== TIMER_STATES.WORK) return;
     if (!currentSessionStart || !currentSessionEnd) return;
 
     const startTime = currentSessionStart
