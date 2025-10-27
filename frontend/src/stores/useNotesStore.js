@@ -99,6 +99,7 @@ export const useNotesStore = defineStore("notes", () => {
       return;
     }
     await fetchNotes();
+    activeNote.value = null;
   }
 
   function selectNote(id) {

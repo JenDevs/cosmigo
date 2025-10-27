@@ -78,9 +78,9 @@ onBeforeUnmount(() => {
     <p class="last-saved">Last saved at: {{ savedAtText }}</p>
   </div>
 
-  <!-- <div v-else class="no-note">
+  <div v-else class="no-note">
     <p>Select or create a note to begin.</p>
-  </div> -->
+  </div>
 </template>
 
 <style scoped>
