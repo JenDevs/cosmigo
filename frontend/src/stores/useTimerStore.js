@@ -1,7 +1,6 @@
 // src/stores/useTimerStore.js
 import { defineStore } from "pinia";
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
-
+import { ref, computed, /*onMounted, onBeforeUnmount,*/ nextTick } from "vue";
 
 export const useTimerStore = defineStore("timer", () => {
   const state = ref("Idle");
@@ -46,14 +45,20 @@ export const useTimerStore = defineStore("timer", () => {
     LONG_BREAK: "Long break",
   };
 
-  onMounted(() => {
+  // ny funktion
+  function initTimer() {
+    loadFromLocalStorage();
+    fetchPomodoro();
+  }
+
+  /* onMounted(() => {
     loadFromLocalStorage();
     fetchPomodoro();
   });
 
   onBeforeUnmount(() => {
     saveToLocalStorage();
-  });
+  }); */
 
   function userSettings(values) {
     userWorkTime.value = values.work;
@@ -72,8 +77,11 @@ export const useTimerStore = defineStore("timer", () => {
     if (isRunning.value) return;
     if (state.value === TIMER_STATES.IDLE) {
       state.value = TIMER_STATES.WORK;
+      // flyttade currenSession hit från if nedan
+      currentSessionStart = new Date();
     }
-    if (!currentSessionStart) currentSessionStart = new Date();
+
+    // if (!currentSessionStart) currentSessionStart = new Date();
     if (remainingTime.value === 0 && state.value === TIMER_STATES.IDLE) {
       selectedWorkTime.value = userWorkTime.value * 60;
       shortBreak.value = userShortBreak.value * 60;
@@ -82,6 +90,7 @@ export const useTimerStore = defineStore("timer", () => {
       remainingTime.value = selectedWorkTime.value;
       state.value = TIMER_STATES.WORK;
     }
+
     isRunning.value = true;
     clearInterval(timerInterval);
     timerInterval = setInterval(tick, 1000);
@@ -98,12 +107,14 @@ export const useTimerStore = defineStore("timer", () => {
     clearInterval(timerInterval);
     timerInterval = null;
     isRunning.value = false;
+
     if (state.value === TIMER_STATES.WORK)
       remainingTime.value = selectedWorkTime.value;
     else if (state.value === TIMER_STATES.SHORT_BREAK)
       remainingTime.value = shortBreak.value;
     else if (state.value === TIMER_STATES.LONG_BREAK)
       remainingTime.value = longBreak.value;
+
     criticalState();
   }
 
@@ -140,6 +151,7 @@ export const useTimerStore = defineStore("timer", () => {
       handleTimerFinish();
       return;
     }
+
     criticalState();
   }
 
@@ -153,11 +165,13 @@ export const useTimerStore = defineStore("timer", () => {
     timerInterval = null;
     isCritical.value = false;
     currentSessionEnd = new Date();
+
     if (state.value === TIMER_STATES.WORK) {
       sessionCount.value++;
       createPomodoro().catch((err) =>
         console.warn("Could not save pomodoro", err)
       );
+
       if (sessionCount.value % longBreakEvery.value === 0) {
         state.value = TIMER_STATES.LONG_BREAK;
         remainingTime.value = longBreak.value;
@@ -170,6 +184,7 @@ export const useTimerStore = defineStore("timer", () => {
       remainingTime.value = selectedWorkTime.value;
       currentSessionStart = new Date();
     }
+
     isRunning.value = true;
     timerInterval = setInterval(tick, 1000);
     criticalState();
@@ -185,11 +200,13 @@ export const useTimerStore = defineStore("timer", () => {
       userLongBreak: userLongBreak.value,
       longBreakEvery: longBreakEvery.value,
     };
+
     localStorage.setItem("savedPomodoroData", JSON.stringify(saveData));
   }
 
   function loadFromLocalStorage() {
     const data = localStorage.getItem("savedPomodoroData");
+
     if (!data) return;
     const saved = JSON.parse(data);
     userWorkTime.value = saved.userWorkTime ?? 25;
@@ -203,6 +220,7 @@ export const useTimerStore = defineStore("timer", () => {
     sessionCount.value = saved.sessions ?? 0;
     remainingTime.value = saved.time ?? selectedWorkTime.value;
     criticalState();
+
     nextTick(() => {
       userWorkTime.value = userWorkTime.value;
     });
@@ -211,6 +229,7 @@ export const useTimerStore = defineStore("timer", () => {
   async function createPomodoro() {
     if (state.value !== TIMER_STATES.WORK) return;
     if (!currentSessionStart || !currentSessionEnd) return;
+
     const startTime = currentSessionStart
       .toISOString()
       .slice(0, 19)
@@ -219,6 +238,7 @@ export const useTimerStore = defineStore("timer", () => {
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
+
     try {
       const res = await fetch("http://localhost:3000/api/pomodoro/", {
         method: "POST",
@@ -272,5 +292,7 @@ export const useTimerStore = defineStore("timer", () => {
     userSettings,
     createPomodoro,
     fetchPomodoro,
+    initTimer,
+    saveToLocalStorage,
   };
 });
