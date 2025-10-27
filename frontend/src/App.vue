@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue';
-import PomodoroTimer from './components/PomodoroTimer.vue'
 import Sidebar from "./components/Sidebar.vue";
 import Workspace from "./components/Workspace.vue";
 

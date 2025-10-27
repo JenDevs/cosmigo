@@ -1,11 +1,7 @@
 <script setup>
 import { ref, onMounted, inject } from "vue";
-import ProfileCard from "./ProfileCard.vue";
-import TodoList from "./TodoList.vue";
-import NoteList from "./NoteList.vue";
 import QuizList from "./QuizList.vue";
 import { useQuizStore } from "@/stores/useQuizStore";
-import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
 
 // QUIZZES
@@ -44,10 +40,6 @@ async function deleteQuiz(id) {
 
 // ladda quiz
 onMounted(loadQuizzes);
-
-const notesStore = useNotesStore();
-const { notes } = storeToRefs(notesStore);
-const { selectNote, createNote, deleteNote } = notesStore;
 </script>
 
 <template>

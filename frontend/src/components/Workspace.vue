@@ -1,16 +1,10 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
-import { useNotesStore } from "@/stores/useNotesStore";
 import { useQuizStore } from "@/stores/useQuizStore";
 import { storeToRefs } from "pinia";
 
-import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
-
-// Notes
-const notesStore = useNotesStore();
-const { activeNote } = storeToRefs(notesStore);
 
 // Toggle mellan Note/Quiz
 const isQuizEditor = ref(false);
