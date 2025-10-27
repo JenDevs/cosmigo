@@ -1,7 +1,15 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onBeforeUnmount } from "vue";
+import { watch } from "vue";
 import { useNotesStore } from "../stores/useNotesStore";
 import { computed } from "vue";
+
+const props = defineProps({
+  note: {
+    type: Object,
+    default: null,
+  },
+});
 
 const notesStore = useNotesStore();
 const activeNote = computed(() => notesStore.activeNote);
@@ -18,14 +26,6 @@ const savedAtText = computed(() => {
   return d.toLocaleString();
 });
 
-const props = defineProps({
-  note: {
-    type: Object,
-    default: null,
-  },
-});
-//_______________________________________________________________________
-import { onBeforeUnmount } from "vue";
 let saveTimer = null;
 let stopContentWatch = null;
 
