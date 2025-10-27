@@ -9,7 +9,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(["delete", "new-note", "select"]);
+const emit = defineEmits(["delete", "select"]);
 </script>
 
 <template>

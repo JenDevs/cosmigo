@@ -24,26 +24,46 @@ const props = defineProps({
     default: null,
   },
 });
+//_______________________________________________________________________
+import { onBeforeUnmount } from "vue";
+let saveTimer = null;
+let stopContentWatch = null;
 
-let timeout;
+const stopCurrentNoteWatch = () => {
+  if (stopContentWatch) {
+    stopContentWatch();
+    stopContentWatch = null;
+  }
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+};
+
 watch(
   () => notesStore.activeNote,
-  (newNote, oldNote) => {
+  (newNote) => {
+    stopCurrentNoteWatch();
     if (!newNote) return;
-    // Watch content/title edits)
-    watch(
-      () => ({ title: newNote.title, content: newNote.content }),
-      (updated) => {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => {
+    // watch title/content of the current note
+    stopContentWatch = watch(
+      () => [newNote.title, newNote.content],
+      () => {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          // pass copy to avoid mutating during save
           notesStore.updateNote({ ...newNote });
-        }, 1000); // autosave 1s after user stops typing
+        }, 1000);
       },
-      { deep: true }
+      { deep: false }
     );
   },
   { immediate: true }
 );
+
+onBeforeUnmount(() => {
+  stopCurrentNoteWatch();
+});
 </script>
 
 <template>

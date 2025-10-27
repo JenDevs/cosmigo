@@ -22,12 +22,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
       >
         New Note
       </button>
-      <NoteList
-        :notes="notes"
-        @select="selectNote"
-        @new-note="createNote"
-        @delete="deleteNote"
-      />
+      <NoteList :notes="notes" @select="selectNote" @delete="deleteNote" />
     </div>
   </aside>
 </template>

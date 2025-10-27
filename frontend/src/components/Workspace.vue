@@ -8,13 +8,6 @@ import NoteEditor from "./NoteEditor.vue";
 const notesStore = useNotesStore();
 const { activeNote } = storeToRefs(notesStore);
 
-const props = defineProps({
-  activeNote: {
-    type: Object,
-    default: null,
-  },
-});
-
 const isQuizEditor = ref(false);
 </script>
 

@@ -10,10 +10,10 @@ function getAllNotes(userId) {
   });
 }
 
-function getNoteById(noteId) {
+function getNoteById(userId, noteId) {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM Note WHERE noteId = ?";
-    connectionMySQL.query(sql, [noteId], (err, rows) => {
+    const sql = "SELECT * FROM Note WHERE userId = ? AND noteId = ?";
+    connectionMySQL.query(sql, [userId, noteId], (err, rows) => {
       if (err) return reject(err);
       resolve(rows[0]);
     });
@@ -62,7 +62,7 @@ function updateNote(noteId, userId, noteTitle, noteContent) {
         [Number(noteId), Number(userId)],
         (e2, rows) => {
           if (e2) return reject(e2);
-          resolve(rows[0]); 
+          resolve(rows[0]);
         }
       );
     });

@@ -8,20 +8,31 @@ export const useNotesStore = defineStore("notes", () => {
   const mockUserId = 1;
 
   async function fetchNotes() {
-    console.log("Fetching notes...");
-    const res = await fetch(`/api/users/1/notes`);
-    const raw = await res.json();
-
-    notes.value = raw.map((n) => ({
-      id: n.noteId,
-      title: n.noteTitle,
-      content: n.noteContent,
-      userId: n.userId,
-      updatedAt: n.updatedAt ? new Date(n.updatedAt).getTime() : 0,
-    }));
-    notes.value.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-    console.log("Fetched Notes:", notes.value);
-    activeNote.value = notes.value[0] || null;
+    try {
+      const res = await fetch(`/api/users/1/notes`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          notes.value = [];
+          activeNote.value = null;
+          return;
+        }
+        throw new Error(await res.text());
+      }
+      const raw = await res.json();
+      notes.value = raw.map((n) => ({
+        id: n.noteId,
+        title: n.noteTitle,
+        content: n.noteContent,
+        userId: n.userId,
+        updatedAt: n.updatedAt ? new Date(n.updatedAt).getTime() : 0,
+      }));
+      notes.value.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+      console.log("Fetched Notes:", notes.value);
+    } catch (e) {
+      console.error("Failed to fetch notes:", e);
+      notes.value = [];
+      activeNote.value = null;
+    }
   }
   onMounted(fetchNotes);
 
