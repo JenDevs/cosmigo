@@ -1,5 +1,5 @@
 <script setup>
-import { defineProps, defineEmits, onMounted } from "vue";
+import { defineProps, defineEmits } from "vue";
 import NoteItem from "./NoteItem.vue";
 
 const props = defineProps({
@@ -14,10 +14,10 @@ const emit = defineEmits(["delete", "new-note", "select"]);
 
 <template>
   <div class="note-list">
-    <ul>
+    <ul role="list" aria-label="List of notes">
       <NoteItem
         v-for="note in notes"
-        v-bind:key="note.id"
+        :key="note.id"
         :note="note"
         @select="emit('select', $event)"
         @delete="emit('delete', $event)"
@@ -28,7 +28,12 @@ const emit = defineEmits(["delete", "new-note", "select"]);
 
 <style scoped>
 .note-list ul {
-  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 120px);
+  gap: 6px 6px;
+  justify-content: center;
+  justify-items: center;
+  list-style: none;
   padding: 0;
   margin: 0;
 }

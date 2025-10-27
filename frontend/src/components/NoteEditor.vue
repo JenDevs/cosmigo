@@ -55,7 +55,7 @@ watch(
       placeholder="Untitled"
     />
     <textarea class="content-area" v-model="activeNote.content" />
-    <p>Last saved at: {{ savedAtText }}</p>
+    <p class="last-saved">Last saved at: {{ savedAtText }}</p>
   </div>
 
   <!-- <div v-else class="no-note">
@@ -96,17 +96,9 @@ watch(
   font-family: inherit;
 }
 
-button {
-  align-self: flex-start;
-  background-color: #007bff;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #005dc0;
+.last-saved {
+  font-size: 0.85rem;
+  color: #ccc;
+  text-align: right;
 }
 </style>

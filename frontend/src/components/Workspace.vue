@@ -42,6 +42,7 @@ const isQuizEditor = ref(false);
 
 <style scoped>
 .workspace-view {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   flex: 1;
   display: flex;
   justify-content: center;

@@ -1,7 +1,6 @@
 <script setup>
 import { ref, inject } from "vue";
 import ProfileCard from "./ProfileCard.vue";
-//import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
 import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
@@ -13,11 +12,16 @@ const { selectNote, createNote, deleteNote } = notesStore;
 </script>
 
 <template>
-  <aside class="sidebar">
+  <aside class="sidebar" role="complementary" aria-label="Notes sidebar">
     <ProfileCard />
-    <!-- <TodoList /> -->
     <div class="note-list-container">
-      <button class="new-note-btn" @click="createNote">New Note</button>
+      <button
+        class="new-note-btn"
+        @click="createNote"
+        aria-label="Create new note"
+      >
+        New Note
+      </button>
       <NoteList
         :notes="notes"
         @select="selectNote"
@@ -30,6 +34,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
 
 <style scoped>
 .sidebar {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -54,6 +59,12 @@ const { selectNote, createNote, deleteNote } = notesStore;
   margin-bottom: 10px;
   border-radius: 5px;
   cursor: pointer;
+}
+
+.new-note-btn:active {
+  background-color: #43a346;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
 }
 
 .note-list-container {
