@@ -1,8 +1,11 @@
 <script setup>
-import { ref, inject } from "vue";
+import { ref, inject, onMounted } from "vue";
 import ProfileCard from "./ProfileCard.vue";
 import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
+import QuizList from "./QuizList.vue";
+
+import { useQuizStore } from "@/stores/useQuizStore";
 import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
 
@@ -10,10 +13,6 @@ const notesStore = useNotesStore();
 const { notes } = storeToRefs(notesStore);
 
 const { selectNote, createNote, deleteNote } = notesStore;
-import { ref, onMounted, inject } from "vue";
-import QuizList from "./QuizList.vue";
-import { useQuizStore } from "@/stores/useQuizStore";
-import { storeToRefs } from "pinia";
 
 // QUIZZES
 const store = useQuizStore();
