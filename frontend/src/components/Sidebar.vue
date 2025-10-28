@@ -1,6 +1,7 @@
 <script setup>
 import { ref, inject } from "vue";
 import ProfileCard from "./ProfileCard.vue";
+import TodoList from "./TodoList.vue";
 import NoteList from "./NoteList.vue";
 import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
@@ -14,6 +15,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
 <template>
   <aside class="sidebar" role="complementary" aria-label="Notes sidebar">
     <ProfileCard />
+        <TodoList />
     <div class="note-list-container">
       <button
         class="new-note-btn"

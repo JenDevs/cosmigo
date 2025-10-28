@@ -18,6 +18,7 @@ exports.getPomodoroById = async (req, res) => {
     const pomodoroById = await pomodoroService.getPomodoroById(id);
     res.json({ pomodoroById });
   } catch (error) {
+    console.error("Error in getPomodoroById controller:", error);
     return res.status(500).json({
       error: error.message,
     });
