@@ -38,6 +38,26 @@ export const useQuizStore = defineStore("quiz", {
       }
     },
 
+    async getFull(id) {
+  if (!id) throw new Error("Missing id");
+
+  const data = await Quizzes.get(id);
+
+  const questions = Array.isArray(data?.questions)
+    ? data.questions.map((q, i) => ({
+        id: q.id,
+        text: String(q.text || "").trim(),
+        answer: String(q.answer || "").trim() || null,
+        position: Number.isFinite(q.position) ? q.position : i,
+      }))
+    : [];
+
+  return {
+    id: data.id,
+    title: String(data.title || "").trim(),
+    questions,
+  };
+},
     setCurrentById(id) {
       const q = this.list.find(x => x.id === id);
       this.current = q ? { id: q.id, title: q.title } : null;
