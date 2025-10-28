@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import workspace from "../components/Workspace.vue";
+import TodoList from "@/components/TodoList.vue";
 
 const routes = [
   {
@@ -13,9 +14,10 @@ const routes = [
     component: workspace,
   },
   {
-    path: "/home",
-    redirect: "/workspace", 
+    path: "/",
+    redirect: "/notes",
   },
+  {path: "/todos", component: TodoList }
 ];
 
 const router = createRouter({

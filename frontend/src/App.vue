@@ -1,5 +1,8 @@
+
+
 <script setup>
 import { ref } from 'vue';
+import PomodoroTimer from './components/PomodoroTimer.vue'
 import Sidebar from "./components/Sidebar.vue";
 import Workspace from "./components/Workspace.vue";
 
@@ -14,7 +17,7 @@ const showTimer = ref(false);
     <Workspace />
   </div>
 
-  <div v-if="showTimer" class="timer-wrapper">
+  <div v-show="showTimer" class="timer-wrapper">
     <PomodoroTimer />
   </div>
   
@@ -35,7 +38,6 @@ const showTimer = ref(false);
   </button>
 
   
-
 </template>
 
 <style>
@@ -51,7 +53,6 @@ body {
 .layout {
   display: flex;
   width: 100vw;
-  height: 100%;
   overflow: visible;
 }
 

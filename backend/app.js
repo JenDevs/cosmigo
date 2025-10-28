@@ -30,23 +30,19 @@ app.use((req, res, next) => {
 const userRoutes = require("./routes/userRoutes");
 app.use(userRoutes);
 
-// TODOS
-const todoRoutes = require("./routes/todoRoutes");
-app.use("/api", todoRoutes); // routes bör börja med /todos i filen
-
-// NOTES
 const noteRoutes = require("./routes/noteRoutes");
-app.use(noteRoutes); // noteRoutes har redan /api/notes i filen
+app.use(noteRoutes);
 
-// POMODORO
+
+const todoRoutes = require("./routes/todoRoutes");
+app.use('/api', todoRoutes)
+
+
+
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
-app.use("/api/pomodoro", pomodoroRoutes);
+app.use("/api/pomodoro", pomodoroRoutes)
 
-// QUIZZES
-const quizRoutes = require("./routes/quizRoutes");
-app.use("/api/quizzes", quizRoutes);
+// app.use(express.static('public'));
 
-// === START SERVER ===
-app.listen(port, () =>
-  console.log(`Server running on http://localhost:${port}`)
-);
+app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
