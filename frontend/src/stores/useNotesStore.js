@@ -19,7 +19,7 @@ export const useNotesStore = defineStore("notes", () => {
         throw new Error(await res.text());
       }
       const raw = await res.json();
-      notes.value = raw.map((n) => ({
+      notes.value = raw.map((n) => ({ //raw iffy
         id: n.noteId,
         title: n.noteTitle,
         content: n.noteContent,
