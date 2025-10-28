@@ -13,6 +13,10 @@ app.use(userRoutes);
 const noteRoutes = require("./routes/noteRoutes");
 app.use(noteRoutes);
 
+const pomodoroRoutes = require("./routes/pomodoroRoutes");
+app.use("/api/pomodoro", pomodoroRoutes)
+
 // app.use(express.static('public'));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+
