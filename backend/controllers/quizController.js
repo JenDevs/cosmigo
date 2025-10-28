@@ -100,7 +100,12 @@ async function updateQuizTitle(req, res) {
 // PUT: ersätt alla frågor
 async function replaceQuestions(req, res) {
   try {
-    const ok = await quizService.replaceQuestions(req.params.id, req.user.id, req.body.questions);
+    const { questions } = req.body || {};
+    if (!Array.isArray(questions)) {
+      return res.status(400).json({ success: false, error: "questions must be an array" });
+    }
+
+    const ok = await quizService.replaceQuestions(req.params.id, req.user.id, questions);
     if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
     if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
     res.json({ success: true });
