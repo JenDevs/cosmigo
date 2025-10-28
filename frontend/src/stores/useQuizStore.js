@@ -106,23 +106,26 @@ export const useQuizStore = defineStore("quiz", {
 
     // arkivera quiz
     async archive(id) {
-      await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
-        method: "POST",
-        credentials: "include",
-      }).then(r => r.json()).then(d => {
-        if (d?.success === false) throw new Error(d.error || "Archive failed");
-      });
+  const res = await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Accept": "application/json" },
+  });
+  if (!res.ok) throw new Error(`Archive failed (${res.status})`);
 
-      // flytta objektet från list -> archived
-      const i = this.list.findIndex(q => q.id === id);
-      if (i !== -1) {
-        const [q] = this.list.splice(i, 1);
-        this.archived.unshift({ ...q, status: "archived" });
-      } else {
-        // om vi inte hittar den i listan, hämta om archived
-        await this.loadArchived();
-      }
-      if (this.current?.id === id) this.current = null;
-    },
+  let d = {};
+  try { d = await res.json(); } catch { /* Non-JSON is fine */ }
+  if (d?.success === false) throw new Error(d.error || "Archive failed");
+
+  // move from active list -> archived list
+  const i = this.list.findIndex(q => q.id === id);
+  if (i !== -1) {
+    const [q] = this.list.splice(i, 1);
+    this.archived.unshift({ ...q, status: "archived" });
+  } else {
+    await this.loadArchived();
+  }
+  if (this.current?.id === id) this.current = null;
+}
   }
 });
