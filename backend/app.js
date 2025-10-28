@@ -28,7 +28,7 @@ app.use((req, res, next) => {
 
 // USERS
 const userRoutes = require("./routes/userRoutes");
-app.use("/api/users", userRoutes);
+app.use(userRoutes);
 
 // TODOS
 const todoRoutes = require("./routes/todoRoutes");

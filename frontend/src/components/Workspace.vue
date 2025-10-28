@@ -1,12 +1,12 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import { useNotesStore } from "@/stores/useNotesStore";
-import { useQuizStore } from "@/stores/useQuizStore";
+import { useNotesStore } from "../stores/useNotesStore";
 import { storeToRefs } from "pinia";
-
+import { ref } from "vue";
 import NoteEditor from "./NoteEditor.vue";
-import QuizEditor from "./QuizEditor.vue";
-import QuizPlayer from "./QuizPlayer.vue";
+//import QuizEditor from './QuizEditor.vue';
+
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
 
 // Toggle mellan Note/Quiz
 const isQuizEditor = ref(false);
@@ -135,7 +135,7 @@ async function handleClose() {
     <NoteEditor
       v-if="!isQuizEditor"
       :note="activeNote"
-      @save="note => notesStore.updateNote(note)"
+      @save="(note) => notesStore.updateNote(note)"
     />
 
     <!-- Quiz -->
@@ -161,6 +161,7 @@ async function handleClose() {
 
 <style scoped>
 .workspace-view {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   flex: 1;
   display: flex;
   flex-direction: column;
