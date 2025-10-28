@@ -92,16 +92,16 @@ const validationMessage = computed(() => {
 // starta quiz
 function startQuiz() {
   triedSubmit.value = true;
-  const cleaned = quiz.value.questions.filter((q) => q.text && q.text.trim());
-  if (!quiz.value.title?.trim() || cleaned.length === 0) {
+  const payload = getCurrentQuizData();
+  if (!payload.title || payload.questions.length === 0) {
     alert(validationMessage.value);
     return;
   }
   emit("start", {
-    title: quiz.value.title.trim(),
-    questions: cleaned.map((q) => ({
-      text: q.text.trim(),
-      answer: (q.answer || "").trim(),
+    title: payload.title,
+    questions: payload.questions.map(q => ({
+      text: q.text,
+      answer: q.answer ?? "",
     })),
   });
 }

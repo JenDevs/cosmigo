@@ -98,9 +98,6 @@ async function handleArchive() {
   }
 }
 
-function handleRestart() {
-}
-
 // Stäng spelaren – fråga om spara om det inte finns id
 async function handleClose() {
   const id = store.current?.id || selectedQuiz.value?.id;
@@ -112,7 +109,8 @@ async function handleClose() {
       try {
         await store.save(draft);
       } catch (e) {
-        alert(e?.message || "Could not save");
+       alert(e?.message || "Could not save");
+       return; // abort closing on failure
       }
     }
   }

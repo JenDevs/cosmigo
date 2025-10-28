@@ -99,7 +99,7 @@ function justClose() {
         <button class="close" @click="emit('close')" title="Close (Esc)">✖</button>
       </div>
 
-      <div class="counter">{{ idx + 1 }} / {{ questions.length }}</div>
+      <div class="counter">{{ hasQuestions ? idx + 1 : 0 }} / {{ questions.length }}</div>
       <div class="flashcard" @click="flip" title="Click to flip card (Space/F)">
         <p class="question" v-if="!showAnswer">{{ current.text }}</p>
         <p class="answer" v-else>{{ current.answer || "—" }}</p>
