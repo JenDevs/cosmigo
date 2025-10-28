@@ -80,11 +80,19 @@ async function updateQuiz(req, res) {
 // PUT: uppdatera titel
 async function updateQuizTitle(req, res) {
   try {
-    const ok = await quizService.updateQuizTitle(req.params.id, req.user.id, req.body.title);
+    const title = (req.body.title || "").trim();
+    if (!title) {
+      return res.status(400).json({ success: false, error: "Missing title" });
+    }
+
+    const ok = await quizService.updateQuizTitle(req.params.id, req.user.id, title);
+
     if (ok === 0) return res.status(404).json({ success: false, error: "Not found" });
     if (ok === 403) return res.status(403).json({ success: false, error: "Forbidden" });
+
     res.json({ success: true });
   } catch (e) {
+    console.error(e);
     res.status(500).json({ success: false, error: e.message });
   }
 }
