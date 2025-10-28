@@ -12,7 +12,7 @@ const showTimer = ref(false);
 
   <div class="layout">
     <Sidebar />
-    <WorkspaceView />
+    <Workspace />
   </div>
 
   <div v-show="showTimer" class="timer-wrapper">
