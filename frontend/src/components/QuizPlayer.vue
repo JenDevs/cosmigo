@@ -27,9 +27,19 @@ watch(() => props.open, (o) => {
 // tangentbordsgenvägar
 function onKey(e) {
   if (!props.open) return;
+
+  // Om slutrutan visas: låt bara Esc stänga och blockera övriga tangenter
+  if (showEndPrompt.value) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      emit("close");
+    }
+    return;
+  }
+
   if (e.key === "Escape") emit("close");
-  if (e.key === "ArrowRight") next();
-  if (e.key === "ArrowLeft") prev();
+  if (e.key === "ArrowRight") { e.preventDefault(); next(); }
+  if (e.key === "ArrowLeft")  { e.preventDefault(); prev(); }
   if (e.key.toLowerCase() === "f" || e.key === " ") {
     e.preventDefault();
     flip();
