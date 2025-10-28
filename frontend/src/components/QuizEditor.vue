@@ -5,15 +5,15 @@ import { useQuizStore } from "@/stores/useQuizStore";
 // event upp till föräldern
 const emit = defineEmits(["start", "saved"]);
 
-// props (valt quiz att redigera)
+// valt quiz att redigera
 const props = defineProps({
   quiz: { type: Object, default: null },
 });
 
-// hämta Pinia-store
+// Pinia-store
 const store = useQuizStore();
 
-// skapa fråga med unikt ID
+// skapa fråga med unikt ID för v-for
 let _uid = 0;
 const mkQ = (q = {}) => ({
   _uid: _uid++,
@@ -24,17 +24,17 @@ const mkQ = (q = {}) => ({
 // lokalt state
 const quiz = ref({ id: undefined, title: "", questions: [mkQ()] });
 
-// flagga: visa fel först efter Save/Start
+// visa valideringsfel först efter Save/Start
 const triedSubmit = ref(false);
 
-// återställ quiz
+// återställ editor
 function resetQuiz() {
   quiz.value = { id: undefined, title: "", questions: [mkQ()] };
   triedSubmit.value = false;
 }
-defineExpose({ resetQuiz });
+defineExpose({ resetQuiz, getCurrentQuizData });
 
-// uppdatera quiz när props ändras
+// synka in nytt props.quiz
 watch(
   () => props.quiz,
   (q) => {
@@ -49,12 +49,12 @@ watch(
   { immediate: true }
 );
 
-// redigeringsfunktioner
+// redigering
 function addQuestion() {
   quiz.value.questions.push(mkQ());
 }
 function removeQuestion(i) {
-  if (!confirm("Are you sure you want to delete this question? Really? REALLY!? Okey =)")) return;
+  if (!confirm("Are you sure you want to delete this question?")) return;
   quiz.value.questions.splice(i, 1);
   if (quiz.value.questions.length === 0) quiz.value.questions.push(mkQ());
 }
@@ -67,7 +67,7 @@ function move(i, dir) {
   ];
 }
 
-// valideringsstatus
+// validering
 const titleMissing = computed(() => !quiz.value.title?.trim());
 const missingQuestions = computed(() =>
   quiz.value.questions.filter((q) => !q.text?.trim())
@@ -77,15 +77,14 @@ const hasValidQuestion = computed(() =>
 );
 const isValid = computed(() => !titleMissing.value && hasValidQuestion.value);
 
-// Generera meddelande beroende på feltyp
+// generera valideringsmeddelande
 const validationMessage = computed(() => {
-  if (!triedSubmit.value) return ""; // visa inget innan försök
+  if (!triedSubmit.value) return "";
   if (titleMissing.value && missingQuestions.value.length > 0)
-    return "Heeeeey Sweetieheart, you need BOTH a title and ATLEAST one question.";
-  if (titleMissing.value)
-    return "Did you forgot something? Perhaps the title?";
+    return "Please enter a title and at least one question.";
+  if (titleMissing.value) return "You forgot the quiz title.";
   if (missingQuestions.value.length > 0)
-    return "Did you forgot something? Maybe a question?";
+    return "You forgot at least one question.";
   return "";
 });
 
@@ -93,12 +92,10 @@ const validationMessage = computed(() => {
 function startQuiz() {
   triedSubmit.value = true;
   const cleaned = quiz.value.questions.filter((q) => q.text && q.text.trim());
-
   if (!quiz.value.title?.trim() || cleaned.length === 0) {
     alert(validationMessage.value);
     return;
   }
-
   emit("start", {
     title: quiz.value.title.trim(),
     questions: cleaned.map((q) => ({
@@ -108,7 +105,22 @@ function startQuiz() {
   });
 }
 
-// spara quiz
+// exponerad helper: hämta aktuellt editor-draft
+function getCurrentQuizData() {
+  return {
+    id: quiz.value.id,
+    title: (quiz.value.title || "").trim(),
+    questions: (quiz.value.questions || [])
+      .map((q, i) => ({
+        text: (q.text || "").trim(),
+        answer: (q.answer || "").trim() || null,
+        position: Number.isFinite(q.position) ? q.position : i,
+      }))
+      .filter((q) => q.text),
+  };
+}
+
+// spara quiz (skapa/uppdatera via store)
 async function save() {
   triedSubmit.value = true;
   if (!isValid.value) {
@@ -116,112 +128,72 @@ async function save() {
     return;
   }
 
-  const payload = {
-    id: quiz.value.id,
-    title: quiz.value.title.trim(),
-    questions: quiz.value.questions.map((q, i) => ({
-      text: q.text.trim(),
-      answer: q.answer || null,
-      position: i,
-    })),
-  };
+  const payload = getCurrentQuizData();
 
   try {
-    // byt till Pinia-store
     const res = await store.save(payload);
     if (!quiz.value.id && res?.id) quiz.value.id = res.id;
     emit("saved", { id: quiz.value.id, title: quiz.value.title });
-    alert("Yay! You saved your quiz! You are such a smart cookie!");
+    alert("Saved! ✅");
   } catch (e) {
     console.error(e);
-    alert("Fiddlesticks! Someone (not me) stole your quiz, please try again!");
+    alert("Save failed. Please try again.");
   }
 }
 </script>
 
 <template>
-  <!-- Huvudcontainer -->
   <div class="quiz-editor">
     <!-- Titel -->
-    <input
-      v-model="quiz.title"
-      placeholder="Quiz title"
-      class="title-input"
-    />
+    <input v-model="quiz.title" placeholder="Quiz title" class="title-input" />
 
-    <!-- Glömt titel -->
+    <!-- Titel-fel -->
     <p v-if="triedSubmit && titleMissing" class="err">
-      Did you forgot something? Perhaps a title?
+      You forgot the quiz title.
     </p>
 
     <!-- Frågor -->
     <div v-for="(q, i) in quiz.questions" :key="q._uid" class="question-card">
-      <!-- Rad: # och knappar -->
       <div class="row">
         <strong>#{{ i + 1 }}</strong>
         <div class="row-actions">
           <button @click="move(i, -1)" :disabled="i === 0">▲</button>
-          <button
-            @click="move(i, 1)"
-            :disabled="i === quiz.questions.length - 1"
-          >
-            ▼
-          </button>
+          <button @click="move(i, 1)" :disabled="i === quiz.questions.length - 1">▼</button>
           <button class="danger" @click="removeQuestion(i)">✖</button>
         </div>
       </div>
 
-      <!-- Frågetext -->
-      <input
-        v-model="q.text"
-        placeholder="Please write your question here..."
-        class="q-input"
-      />
+      <input v-model="q.text" placeholder="Write your question..." class="q-input" />
+      <input v-model="q.answer" placeholder="(Optional) Answer" class="a-input" />
 
-      <!-- Svar (valfritt) -->
-      <input
-        v-model="q.answer"
-        placeholder="(Optional) Answer"
-        class="a-input"
-      />
-
-      <!-- Glömt titel -->
       <p v-if="triedSubmit && !q.text.trim()" class="err">
-        Did you forgot something? Maybe a question?
+        You forgot a question.
       </p>
     </div>
 
-    <!-- Om båda saknas -->
-    <p
-      v-if="
-        triedSubmit &&
-        titleMissing &&
-        missingQuestions.length > 0
-      "
-      class="err"
-    >
-      Heeeeey Sweetieheart, you need BOTH a title and ATLEAST one question.
+    <!-- Gemensamt fel -->
+    <p v-if="triedSubmit && titleMissing && missingQuestions.length > 0" class="err">
+      Please enter a title and at least one question.
     </p>
 
     <!-- Bottenknappar -->
     <div class="actions">
-    <div class="left-actions">
-    <button class="add" @click="addQuestion">Add Question</button>
-    <button
-      type="button"
-      class="save"
-      :disabled="!isValid"
-      :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
-      @click="save"
-    >
-      Save
-    </button>
-  </div>
+      <div class="left-actions">
+        <button class="add" @click="addQuestion">Add Question</button>
+        <button
+          type="button"
+          class="save"
+          :disabled="!isValid"
+          :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
+          @click="save"
+        >
+          Save
+        </button>
+      </div>
 
-  <!-- flyttad hit -->
-  <button class="start" @click="startQuiz">Start Quiz</button>
-</div>
-</div>
+      <button class="start" @click="startQuiz">Start Quiz</button>
+    </div>
+  </div>
 </template>
 
 <style scoped>
@@ -236,6 +208,11 @@ async function save() {
   margin: 120px 0 0 0;
   color: #fff;
 }
+
+/* lite mindre text i fälten (inte knappar) */
+.title-input { font-size: 1.05rem; }
+.q-input     { font-size: 1rem; }
+.a-input     { font-size: 0.95rem; }
 
 .title-input,
 .q-input,
@@ -265,6 +242,7 @@ async function save() {
   gap: 6px;
 }
 
+/* knappar (standard) */
 button {
   background: #555;
   color: #fff;
@@ -273,45 +251,32 @@ button {
   padding: 6px 10px;
   cursor: pointer;
 }
-
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-button.danger {
-  background: #a33;
-}
+button.danger { background: #a33; }
 
-button.add {
-  background-color: #4caf50;
-  color: white;
-}
-
+/* add/save/start layout & färger */
 .actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
+.left-actions { 
+  display: flex; 
+  gap: 8px; }
 
-.left-actions {
-  display: flex;
-  gap: 8px; 
-}
-
-.save {
-  background: #007bff;
-  color: white;
-}
-
-.start {
-  background: #555;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
-  cursor: pointer;
-}
+button.add  { 
+  background-color: #4caf50; 
+  color: white; }
+button.save { 
+  background: #007bff; 
+  color: white; }
+button.start { 
+  background: #555; 
+  color: #fff; }
 
 .err {
   color: #ffb3b3;
