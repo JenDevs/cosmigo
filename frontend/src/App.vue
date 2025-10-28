@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import PomodoroTimer from './components/PomodoroTimer.vue'
 import Sidebar from "./components/Sidebar.vue";
-import WorkspaceView from "./components/Workspace.vue";
+import Workspace from "./components/Workspace.vue";
 
 const showTimer = ref(false);
 
