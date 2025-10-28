@@ -19,3 +19,17 @@ createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
 updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 FOREIGN KEY (userId) REFERENCES User(userId)
 );
+CREATE TABLE IF NOT EXISTS pomodoro (
+    pomodoroId INT AUTO_INCREMENT PRIMARY KEY,
+    sessionType VARCHAR(50) NOT NULL,
+    duration INT NOT NULL,
+    completed TINYINT(1) DEFAULT 0,
+    startTime DATETIME,
+    endTime DATETIME,
+    pomodoroUserId INT,
+    CONSTRAINT fk_pomodoro_user
+    FOREIGN KEY (pomodoroUserId)
+    REFERENCES User(userId)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+);
