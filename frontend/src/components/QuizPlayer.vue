@@ -13,7 +13,7 @@ const idx = ref(0);
 const showAnswer = ref(false);
 const showEndPrompt = ref(false);
 const hasQuestions = computed(() => (props.questions?.length || 0) > 0);
-const isLast = computed(() => harQuestions.value && idx.value >= props.questions.length - 1);
+const isLast = computed(() => hasQuestions.value && idx.value >= props.questions.length - 1);
 
 // nollställ varje gång spelaren öppnas
 watch(() => props.open, (o) => {
@@ -41,7 +41,7 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 // härledda
 const current = computed(() => props.questions[idx.value] || { text: "", answer: "" });
 const canPrev  = computed(() => idx.value > 0);
-const canNext  = computed(() => hasQeuestions.value && idx.value < props.questions.length - 1);
+const canNext  = computed(() => hasQuestions.value && idx.value < props.questions.length - 1);
 
 // navigation 
 function prev() {
