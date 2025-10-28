@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useQuizStore } from "@/stores/useQuizStore";
+import NoteEditor from "./NoteEditor.vue";
 
 // event upp till föräldern
 const emit = defineEmits(["start", "saved"]);
