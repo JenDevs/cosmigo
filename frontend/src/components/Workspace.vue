@@ -1,13 +1,19 @@
 <script setup>
 import { onMounted, ref, watch } from "vue";
+import { useNotesStore } from "@/stores/useNotesStore";
 import { useQuizStore } from "@/stores/useQuizStore";
 import { storeToRefs } from "pinia";
 
+import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
 
 // Toggle mellan Note/Quiz
 const isQuizEditor = ref(false);
+
+// Notes-store 
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
 
 // Quiz store
 const store = useQuizStore();
@@ -30,7 +36,7 @@ watch(
   async (id) => {
     if (!id) return;
     try {
-      const full = await store.getFull(id); // hämta inkl. frågor
+      const full = await store.getFull(id); 
       selectedQuiz.value = full;
       isQuizEditor.value = true;
     } catch (e) {
@@ -48,7 +54,7 @@ function onStart({ title, questions }) {
 }
 
 // Efter save
-function onSaved({ id, title }) {
+function onSaved({ id }) {
   store.setCurrentById(id);
 }
 
@@ -60,32 +66,57 @@ function newQuiz() {
   quizEditorRef.value?.resetQuiz();
 }
 
-// Archive quiz
+// Arkivera quiz 
 async function handleArchive() {
   const id = store.current?.id || selectedQuiz.value?.id;
-  if (!id) {
-    if (confirm("Quizet är inte sparat. Vill du spara det först?")) {
-      const res = await store.save({ title: playerTitle.value, questions: playerQuestions.value });
-      if (res?.id) await store.archive(res.id);
+
+  const draft = quizEditorRef.value?.getCurrentQuizData?.();
+  const hasEditorData = !!(draft && draft.title && draft.questions?.length);
+
+  try {
+    if (!id) {
+      // Osparat quiz → fråga och spara editor-datat
+      if (confirm("Quiz is not save. Would you liek to save now?")) {
+        const payload = hasEditorData
+          ? draft
+          : { title: playerTitle.value, questions: playerQuestions.value }; 
+        const res = await store.save(payload);
+        if (res?.id) await store.archive(res.id);
+      }
+    } else {
+      // Sparat quiz → spara ev. ändringar innan arkivering
+      if (hasEditorData) {
+        await store.save({ ...draft, id }); 
+      }
+      await store.archive(id);
     }
-  } else {
-    await store.archive(id);
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || "Kunde inte arkivera quizet.");
+  } finally {
+    playerOpen.value = false;
   }
-  playerOpen.value = false;
 }
 
 function handleRestart() {
 }
 
-// Om quizet inte är sparat: fråga
-function handleClose() {
-  const notSaved = !selectedQuiz.value?.id;
-  if (notSaved) {
-    if (confirm("Do you wanna save quiz before you exit?")) {
-      store.save({ title: playerTitle.value, questions: playerQuestions.value })
-        .catch(e => alert(e?.message || "Could not save"));
+// Stäng spelaren – fråga om spara om det inte finns id
+async function handleClose() {
+  const id = store.current?.id || selectedQuiz.value?.id;
+  const draft = quizEditorRef.value?.getCurrentQuizData?.();
+  const hasEditorData = !!(draft && draft.title && draft.questions?.length);
+
+  if (!id && hasEditorData) {
+    if (confirm("Do you want to save before exit?")) {
+      try {
+        await store.save(draft);
+      } catch (e) {
+        alert(e?.message || "Could not save");
+      }
     }
   }
+
   playerOpen.value = false;
 }
 </script>
@@ -142,9 +173,7 @@ function handleClose() {
   min-height: 100%;
 }
 
-/*_____________Toggle Editor______________________*/
-
-
+/* Toggle */
 #toggle-editor {
   position: absolute;
   top: 60px;
@@ -153,73 +182,53 @@ function handleClose() {
   height: 36px;
   justify-content: space-between;
 }
-
-.switch {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-content: center;
-  width: 100%;
-  height: 100%;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-
-.slider {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-  position: relative;
-  cursor: pointer;
-  background-color: rgb(24, 24, 29);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.slider::before {
-  position: absolute;
-  content: "";
-  height: 100%;
-  width: 50%;
-  background-color: rgb(211, 211, 211);
-  border-radius: 8px;
-  transition: transform 0.4s;
-  transform: translateX(0);
-  z-index: 0;
-}
-
-input:checked + .slider {
-  background-color: rgb(24, 24, 29);
-}
-
-input:checked + .slider:before {
-  transform: translateX(100%);
-}
-
-.slider p {
-  color: rgba(0, 0, 0, 1);
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
-  font-weight: bold;
-  text-transform: uppercase;
-  transition: color 0.3s ease;
-  z-index: 1;
-}
-.slider p.inactive {
-  color: rgba(255, 255, 255, 0.3);
-}
-#slider-note {
-  margin-left: 15%;
-}
-#slider-quiz {
-  margin-right: 15%;
-  margin-left: auto;
-}
+.switch { 
+  position: relative; 
+  display: flex; 
+  justify-content: center; 
+  width: 100%; 
+  height: 100%; }
+.switch input { 
+  opacity: 0; 
+  width: 0; 
+  height: 0; 
+  position: absolute; }
+.slider { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  width: 100%; 
+  height: 100%; 
+  position: relative; 
+  cursor: pointer; 
+  background-color: rgb(24, 24, 29); 
+  border-radius: 8px; 
+  overflow: hidden; }
+.slider::before { 
+  position: absolute; 
+  content: ""; 
+  height: 100%; 
+  width: 50%; 
+  background-color: rgb(211, 211, 211); 
+  border-radius: 8px; 
+  transition: transform 0.4s; 
+  transform: translateX(0); 
+  z-index: 0; }
+input:checked + .slider { 
+  background-color: rgb(24, 24, 29); }
+input:checked + .slider:before { 
+  transform: translateX(100%); }
+.slider p { 
+  color: rgba(0, 0, 0, 1); 
+  font-weight: bold; 
+  text-transform: uppercase; 
+  transition: color 0.3s ease; 
+  z-index: 1; }
+.slider p.inactive { 
+  color: rgba(255, 255, 255, 0.3); }
+#slider-note { 
+  margin-left: 15%; }
+#slider-quiz { 
+  margin-right: 15%; 
+  margin-left: auto; }
 </style>
