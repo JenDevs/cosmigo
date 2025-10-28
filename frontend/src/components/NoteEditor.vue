@@ -1,44 +1,78 @@
 <script setup>
-import { ref, watch } from "vue";
+import { onBeforeUnmount } from "vue";
+import { watch } from "vue";
+import { useNotesStore } from "../stores/useNotesStore";
+import { computed } from "vue";
 
-const props = defineProps({
-  note: {
-    type: Object,
-    required: true,
-  },
+const notesStore = useNotesStore();
+const activeNote = computed(() => notesStore.activeNote);
+
+const savedAt = computed(() =>
+  activeNote.value ? activeNote.value.updatedAt : null
+);
+const savedAtText = computed(() => {
+  if (!savedAt.value) return "—";
+  const d =
+    typeof savedAt.value === "number"
+      ? new Date(savedAt.value)
+      : new Date(String(savedAt.value));
+  return d.toLocaleString();
 });
 
-const emit = defineEmits(["save"]);
+let saveTimer = null;
+let stopContentWatch = null;
 
-const title = ref(props.note.title);
-const content = ref(props.note.content);
+const stopCurrentNoteWatch = () => {
+  if (stopContentWatch) {
+    stopContentWatch();
+    stopContentWatch = null;
+  }
+  if (saveTimer) {
+    clearTimeout(saveTimer);
+    saveTimer = null;
+  }
+};
 
 watch(
-  () => props.note,
+  () => notesStore.activeNote,
   (newNote) => {
-    title.value = newNote.title;
-    content.value = newNote.content;
-  }
+    stopCurrentNoteWatch();
+    if (!newNote) return;
+    // watch title/content of the current note
+    stopContentWatch = watch(
+      () => [newNote.title, newNote.content],
+      () => {
+        if (saveTimer) clearTimeout(saveTimer);
+        saveTimer = setTimeout(() => {
+          // pass copy to avoid mutating during save
+          notesStore.updateNote({ ...newNote });
+        }, 1000);
+      },
+      { deep: false }
+    );
+  },
+  { immediate: true }
 );
 
-const saveNote = () => {
-  emit("save", {
-    id: props.note.id,
-    title: title.value,
-    content: content.value,
-  });
-};
+onBeforeUnmount(() => {
+  stopCurrentNoteWatch();
+});
 </script>
 
 <template>
-  <div class="note-editor">
-    <input v-model="title" placeholder="Title" class="title-input" />
-    <textarea
-      v-model="content"
-      placeholder="Write your note here..."
-      class="content-area"
+  <div v-if="activeNote" class="note-editor">
+    <input
+      class="title-input"
+      type="text"
+      v-model="activeNote.title"
+      placeholder="Untitled"
     />
-    <button @click="saveNote">💾 Save</button>
+    <textarea class="content-area" v-model="activeNote.content" />
+    <p class="last-saved">Last saved at: {{ savedAtText }}</p>
+  </div>
+
+  <div v-else class="no-note">
+    <p>Select or create a note to begin.</p>
   </div>
 </template>
 
@@ -75,17 +109,9 @@ const saveNote = () => {
   font-family: inherit;
 }
 
-button {
-  align-self: flex-start;
-  background-color: #007bff;
-  color: white;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #005dc0;
+.last-saved {
+  font-size: 0.85rem;
+  color: #ccc;
+  text-align: right;
 }
 </style>
