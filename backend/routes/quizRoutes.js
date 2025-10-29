@@ -2,13 +2,24 @@ const express = require("express");
 const router = express.Router();
 const quizController = require("../controllers/quizController");
 
-router.get("/",         quizController.listQuizzes);          // GET    /api/quizzes
-router.get("/:id",      quizController.getQuiz);              // GET    /api/quizzes/:id
-router.post("/",        quizController.createQuiz);           // POST   /api/quizzes
-router.put("/:id",      quizController.updateQuiz);           // PUT    /api/quizzes/:id
-router.put("/:id/title",    quizController.updateQuizTitle);  // PUT    /api/quizzes/:id/title
-router.put("/:id/questions",quizController.replaceQuestions); // PUT    /api/quizzes/:id/questions
-router.delete("/:id",   quizController.deleteQuiz);           // DELETE /api/quizzes/:id
-router.post("/:id/archive",quizController.archiveQuiz);       // POST   /api/quizzes/:id/archive
+const validateIds = (req, res, next) => {
+  const { userId, id } = req.params;
+  if (userId && !Number.isInteger(Number(userId))) {
+    return res.status(400).json({ error: "Invalid userId" });
+  }
+  if (id && !Number.isInteger(Number(id))) {
+    return res.status(400).json({ error: "Invalid quiz id" });
+  }
+  next();
+};
+
+router.get   ("/users/:userId/quizzes",           validateIds, quizController.listQuizzes);
+router.get   ("/users/:userId/quizzes/:id",       validateIds, quizController.getQuiz);
+router.post  ("/users/:userId/quizzes",           validateIds, quizController.createQuiz);
+router.put   ("/users/:userId/quizzes/:id",       validateIds, quizController.updateQuiz);
+router.put   ("/users/:userId/quizzes/:id/title", validateIds, quizController.updateQuizTitle);
+router.put   ("/users/:userId/quizzes/:id/questions", validateIds, quizController.replaceQuestions);
+router.delete("/users/:userId/quizzes/:id",       validateIds, quizController.deleteQuiz);
+router.post  ("/users/:userId/quizzes/:id/archive", validateIds, quizController.archiveQuiz);
 
 module.exports = router;

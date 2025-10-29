@@ -16,6 +16,7 @@ const { activeNote } = storeToRefs(notesStore);
 // Quiz
 const store = useQuizStore();
 const { current } = storeToRefs(store);
+const userId = 1;
 
 // UI-state
 const isQuizEditor = ref(false);
@@ -27,7 +28,7 @@ const playerTitle = ref("Quiz");
 const playerQuestions = ref([]);
 
 // Ladda quiz-listan
-onMounted(() => store.load());
+onMounted(() => store.load(userId));
 
 // När valt quiz ändras i storen → hämta full version
 watch(
@@ -35,7 +36,7 @@ watch(
   async (id) => {
     if (!id) return;
     try {
-      const full = await store.getFull(id);
+      const full = await store.getFull(userId, id);
       selectedQuiz.value = full;
       isQuizEditor.value = true;
     } catch (e) {
@@ -79,17 +80,17 @@ async function handleArchive() {
         const payload = hasEditorData
           ? draft
           : { title: playerTitle.value, questions: playerQuestions.value };
-        const res = await store.save(payload);
+        const res = await store.save(userId, payload);
         if (res?.id) {
-          await store.archive(res.id);
+          await store.archive(userId, res.id);
           archived = true;
         }
       }
     } else {
       if (hasEditorData) {
-        await store.save({ ...draft, id });
+        await store.save(userId, { ...draft, id });
       }
-      await store.archive(id);
+      await store.archive(userId, id);
       archived = true;
     }
   } catch (e) {
@@ -109,10 +110,10 @@ async function handleClose() {
   if (!id && hasEditorData) {
     if (confirm("Do you want to save before exit?")) {
       try {
-        await store.save(draft);
+        await store.save(userId, draft);
       } catch (e) {
         alert(e?.message || "Could not save");
-        return; // avbryt stängning om det failar
+        return; 
       }
     }
   }
@@ -120,7 +121,7 @@ async function handleClose() {
   playerOpen.value = false;
 }
 
-// (valfritt) restart-handler så @restart inte pekar på ingenting
+// restart-handler så @restart inte pekar på ingenting
 function handleRestart() {
   console.log("Quiz restarted");
 }

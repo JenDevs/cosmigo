@@ -17,7 +17,7 @@ function ensureOwner(quizId, userId) {
   });
 }
 
-// LIST (valfri status)
+// LIST 
 function getAllQuizzes(userId, { status = null } = {}) {
   return new Promise((resolve, reject) => {
      let sql = `
@@ -47,8 +47,8 @@ function getQuizById(quizId, userId) {
     connectionMySQL.query(sqlQuiz, [quizId], (err, rows) => {
       if (err) return reject(err);
       const quiz = rows?.[0];
-      if (!quiz) return resolve(0);            // finns ej
-      if (quiz.userId !== userId) return resolve(403); // inte din
+      if (!quiz) return resolve(0);            
+      if (quiz.userId !== userId) return resolve(403); 
 
       const sqlQs = `
         SELECT id, text, answer, position
@@ -236,11 +236,11 @@ function deleteQuiz(quizId, userId) {
 }
 
 // ARCHIVE QUIZ
-function archiveQuiz(quizId, userId) { // 🔹 NEW
+function archiveQuiz(quizId, userId) { 
   return new Promise(async (resolve, reject) => {
     try {
       const own = await ensureOwner(quizId, userId);
-      if (own !== true) return resolve(own); // 0 = not found, 403 = forbidden
+      if (own !== true) return resolve(own); 
 
       const sql = `UPDATE quizzes SET status='archived' WHERE id=? AND userId=?`;
       connectionMySQL.query(sql, [quizId, userId], (err, r) => {

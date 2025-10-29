@@ -1,5 +1,32 @@
 import { defineStore } from "pinia";
-import { Quizzes } from "@/api/quizzes";
+import axios from "axios";
+
+// /api/users/:userId/quizzes
+const Quizzes = {
+  list(userId, opts = {}) {
+    return axios
+      .get(`/api/users/${userId}/quizzes`, { params: { ...(opts.status ? { status: opts.status } : {}) } })
+      .then(r => r.data);
+  },
+  listArchived(userId) {
+    return Quizzes.list(userId, { status: "archived" });
+  },
+  get(userId, id) {
+    return axios.get(`/api/users/${userId}/quizzes/${id}`).then(r => r.data);
+  },
+  create(userId, payload) {
+    return axios.post(`/api/users/${userId}/quizzes`, payload).then(r => r.data);
+  },
+  update(userId, id, payload) {
+    return axios.put(`/api/users/${userId}/quizzes/${id}`, payload).then(r => r.data);
+  },
+  remove(userId, id) {
+    return axios.delete(`/api/users/${userId}/quizzes/${id}`).then(r => r.data);
+  },
+  archive(userId, id) {
+    return axios.post(`/api/users/${userId}/quizzes/${id}/archive`, {}).then(r => r.data);
+  },
+};
 
 export const useQuizStore = defineStore("quiz", {
   state: () => ({
@@ -11,69 +38,77 @@ export const useQuizStore = defineStore("quiz", {
   }),
 
   getters: {
-    hasError: (s) => !!s.error,
-    isEmpty: (s) => s.list.length === 0,
+    hasError: s => !!s.error,
+    isEmpty: s => s.list.length === 0,
   },
 
   actions: {
-    async load() {
+    // Hämta alla (ej arkiverade) quiz
+    async load(userId) {
       this.loading = true; this.error = "";
       try {
-        const data = await Quizzes.list();
+        const data = await Quizzes.list(userId);
         const items = Array.isArray(data) ? data : Array.isArray(data?.rows) ? data.rows : [];
-        this.list = items.filter(q => q && q.title && String(q.title).trim() && q.status !== "archived"); // filtrera bort archived om du vill
+        this.list = items
+          .filter(q => q && q.title && String(q.title).trim())
+          .filter(q => q.status !== "archived");
       } catch (e) {
-        this.error = "Could not get quizzes";
         console.error(e);
-      } finally { this.loading = false; }
+        this.error = "Could not get quizzes";
+        this.list = [];
+      } finally {
+        this.loading = false;
+      }
     },
 
-    async loadArchived() {
+    // Hämta arkiverade
+    async loadArchived(userId) {
       try {
-        const data = await Quizzes.listArchived();
+        const data = await Quizzes.listArchived(userId);
         const items = Array.isArray(data) ? data : Array.isArray(data?.rows) ? data.rows : [];
         this.archived = items.filter(q => q && q.title && String(q.title).trim());
       } catch (e) {
         console.error(e);
+        this.archived = [];
       }
     },
 
-    async getFull(id) {
-  if (!id) throw new Error("Missing id");
+    // Hämta ett quiz inkl. frågor
+    async getFull(userId, id) {
+      if (!id) throw new Error("Missing id");
+      const data = await Quizzes.get(userId, id);
 
-  const data = await Quizzes.get(id);
+      const questions = Array.isArray(data?.questions)
+        ? data.questions.map((q, i) => ({
+            id: q.id,
+            text: String(q.text || "").trim(),
+            answer: String(q.answer || "").trim() || null,
+            position: Number.isFinite(q.position) ? q.position : i,
+          }))
+        : [];
 
-  const questions = Array.isArray(data?.questions)
-    ? data.questions.map((q, i) => ({
-        id: q.id,
-        text: String(q.text || "").trim(),
-        answer: String(q.answer || "").trim() || null,
-        position: Number.isFinite(q.position) ? q.position : i,
-      }))
-    : [];
+      return {
+        id: data.id,
+        title: String(data.title || "").trim(),
+        questions,
+      };
+    },
 
-  return {
-    id: data.id,
-    title: String(data.title || "").trim(),
-    questions,
-  };
-},
     setCurrentById(id) {
       const q = this.list.find(x => x.id === id);
       this.current = q ? { id: q.id, title: q.title } : null;
     },
 
-    clearCurrent() {
-      this.current = null;
-    },
+    clearCurrent() { this.current = null; },
 
-    async save(quiz) {
+    // Skapa/uppdatera quiz
+    async save(userId, quiz) {
       const title = (quiz.title || "").trim();
       const questions = (quiz.questions || [])
         .map((q, i) => ({
           text: (q.text || "").trim(),
           answer: (q.answer || "").trim() || null,
-          position: Number.isFinite(q.position) ? q.position : i
+          position: Number.isFinite(q.position) ? q.position : i,
         }))
         .filter(q => q.text);
 
@@ -82,50 +117,43 @@ export const useQuizStore = defineStore("quiz", {
       }
 
       if (!quiz.id) {
-        const res = await Quizzes.create({ title, questions });
-        if (res?.id) this.list.unshift({ id: res.id, title });
+        const res = await Quizzes.create(userId, { title, questions });
+        if (res?.id) this.list.unshift({ id: res.id, title, status: "draft" });
         return res;
       } else {
-        await Quizzes.update(quiz.id, { title, questions });
+        await Quizzes.update(userId, quiz.id, { title, questions });
         const idx = this.list.findIndex(x => x.id === quiz.id);
         if (idx !== -1) this.list[idx] = { ...this.list[idx], title };
         return { id: quiz.id };
       }
     },
 
-    async remove(id) {
-      await Quizzes.remove(id);
+    // Ta bort
+    async remove(userId, id) {
+      await Quizzes.remove(userId, id);
       this.list = this.list.filter(q => q.id !== id);
       if (this.current?.id === id) this.current = null;
     },
 
+    // Nytt tomt
     newBlank() {
       this.clearCurrent();
       return { id: undefined, title: "", questions: [{ text: "", answer: "" }] };
     },
 
-    // arkivera quiz
-    async archive(id) {
-  const res = await fetch(`/api/quizzes/${encodeURIComponent(id)}/archive`, {
-    method: "POST",
-    credentials: "include",
-    headers: { "Accept": "application/json" },
-  });
-  if (!res.ok) throw new Error(`Archive failed (${res.status})`);
+    // Arkivera
+    async archive(userId, id) {
+      await Quizzes.archive(userId, id);
 
-  let d = {};
-  try { d = await res.json(); } catch { /* Non-JSON is fine */ }
-  if (d?.success === false) throw new Error(d.error || "Archive failed");
-
-  // move from active list -> archived list
-  const i = this.list.findIndex(q => q.id === id);
-  if (i !== -1) {
-    const [q] = this.list.splice(i, 1);
-    this.archived.unshift({ ...q, status: "archived" });
-  } else {
-    await this.loadArchived();
-  }
-  if (this.current?.id === id) this.current = null;
-}
-  }
+      // flytta från aktiva -> arkiverade
+      const i = this.list.findIndex(q => q.id === id);
+      if (i !== -1) {
+        const [q] = this.list.splice(i, 1);
+        this.archived.unshift({ ...q, status: "archived" });
+      } else {
+        await this.loadArchived(userId);
+      }
+      if (this.current?.id === id) this.current = null;
+    },
+  },
 });

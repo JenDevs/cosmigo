@@ -130,14 +130,15 @@ async function save() {
   }
 
   const payload = getCurrentQuizData();
+  const userId = 1; 
 
   try {
-    const res = await store.save(payload);
+    const res = await store.save(userId, payload);
     if (!quiz.value.id && res?.id) quiz.value.id = res.id;
     emit("saved", { id: quiz.value.id, title: quiz.value.title });
-    alert("Saved! ✅");
+    alert("Saved!");
   } catch (e) {
-    console.error(e);
+    console.error("Save failed:", e);
     alert("Save failed. Please try again.");
   }
 }

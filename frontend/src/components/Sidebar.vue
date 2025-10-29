@@ -18,12 +18,15 @@ const { selectNote, createNote, deleteNote } = notesStore;
 const store = useQuizStore();
 const loading = ref(false);
 const error = ref("");
+const userId = 1;
+const { list } = storeToRefs(store); 
 
 async function loadQuizzes() {
+  const userId = 1;
   loading.value = true;
   error.value = "";
   try {
-    await store.load();
+    await store.load(userId);
   } catch (e) {
     error.value = "Could not get quizzes";
     console.error(e);
@@ -41,7 +44,7 @@ function selectQuiz(id) {
 async function deleteQuiz(id) {
   if (!confirm("Do you want to delete this quiz?")) return;
   try {
-    await store.remove(id);
+    await store.remove(userId, id);
   } catch (e) {
     alert("Could not delete quiz.");
     console.error(e);
