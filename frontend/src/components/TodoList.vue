@@ -197,10 +197,24 @@ async function removeTask(i) {
 
 async function completeTask(i) {
   const t = tasks.value[i];
-  if (!t || !t.todoId) return;
+  if (!t) return;
 
   const prev = t.done;
   t.done = !t.done;
+
+  // If user unticks task, stops animation immediatly
+  if (!t.done && typeof cosmigo?.cancelTemp === "function") {
+    cosmigo.cancelTemp();
+  }
+
+  if (!t.todoId) {
+    if (t.done && typeof cosmigo?.onCompletion === "function") {
+      cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+        restart: false,
+      });
+    }
+    return;
+  }
 
   try {
     const res = await fetch(`/api/todos/${t.todoId}`, {
@@ -218,13 +232,12 @@ async function completeTask(i) {
       t.done = prev;
       return;
     }
-    // When task is completed cosmigo spins
+    // When user ticks task, cosmigo spins
     if (t.done && typeof cosmigo?.onCompletion === "function") {
-      try {
-        cosmigo.onCompletion("cosmigo_completion_rolling", 850);
-      } catch (e) {
-        console.error("onCompletion failed:", e);
-      }
+      // ignore while active, or use restart:true to refresh one timer
+      cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+        restart: false,
+      });
     }
   } catch (err) {
     console.error("Error updating todo completion:", err);

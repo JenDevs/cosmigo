@@ -5,7 +5,25 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
   const mockUserId = 1;
   const unlocked = ref([]);
   const equippedKey = ref(null);
+
+  // Temp animation state
   let tempTimer = null;
+  const tempActive = ref(false);
+  const baseKey = ref(null);
+  let lastTempAt = 0;
+  const DEFAULT_COOLDOWN = 800;
+
+  function endTemp() {
+    if (tempTimer) {
+      clearTimeout(tempTimer);
+      tempTimer = null;
+    }
+    if (tempActive.value) {
+      equippedKey.value = baseKey.value;
+      tempActive.value = false;
+      baseKey.value = null;
+    }
+  }
 
   async function fetchProfile() {
     try {
@@ -62,18 +80,36 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     return unlocked.value.includes(key);
   }
 
-  // Temporarily update cosmigo profile image to gif when completing task
-  function onCompletion(tempKey, duration = 3000) {
-    const original = equippedKey.value;
+  function onCompletion(
+    tempKey,
+    duration = 850,
+    { cooldownMs = DEFAULT_COOLDOWN, restart = false } = {}
+  ) {
+    const now = Date.now();
 
-    if (tempTimer) clearTimeout(tempTimer);
+    // Cooldown to avoid spam
+    if (!tempActive.value && now - lastTempAt < cooldownMs) return;
 
+    if (tempActive.value) {
+      // Already showing: either ignore, or restart the ONE timer
+      if (restart) {
+        if (tempTimer) clearTimeout(tempTimer);
+        tempTimer = setTimeout(endTemp, duration);
+      }
+      return; // don't create new timers
+    }
+
+    baseKey.value = equippedKey.value;
     equippedKey.value = tempKey;
+    tempActive.value = true;
+    lastTempAt = now;
 
-    tempTimer = setTimeout(() => {
-      equippedKey.value = original;
-      tempTimer = null;
-    }, duration);
+    tempTimer = setTimeout(endTemp, duration);
+  }
+
+  // Cancel gif animation on task untick
+  function cancelTemp() {
+    endTemp();
   }
 
   return {
@@ -84,5 +120,6 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     equip,
     hasKey,
     onCompletion,
+    cancelTemp,
   };
 });
