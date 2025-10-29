@@ -47,8 +47,8 @@ const avatarSrc = computed(
 #avatar:hover {
   cursor: pointer;
   transform: scale(1.05);
-  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.6));
-  transition: all 0.1s ease;
+  filter: drop-shadow(0 0 2px rgba(70, 196, 255, 0.6));
+  transition: all 0.1s linear;
 }
 #cosmigo-component {
   display: flex;
