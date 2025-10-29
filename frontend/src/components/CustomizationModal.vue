@@ -18,11 +18,11 @@ async function onEquip() {
   await cosmigo.equip(selectedKey.value); // updates DB (equipped_key) + store
   emit("close");
 }
+
 function closeModal() {
   emit("close");
 }
 
-// keyboard accessibility for tiles
 function onKeyDown(e, key) {
   if (e.key === "Enter" || e.key === " ") {
     e.preventDefault();
@@ -45,7 +45,6 @@ function onKeyDown(e, key) {
       </header>
 
       <div class="grid" v-if="unlockedItems.length">
-        <!-- tiles -->
         <button
           v-for="item in unlockedItems"
           :key="item.key"

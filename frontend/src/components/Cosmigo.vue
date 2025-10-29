@@ -1,7 +1,9 @@
 <script setup>
 import CustomizationModal from "./CustomizationModal.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useCosmigoStore } from "@/stores/useCosmigoStore";
+import { COSMIGO_REWARDS } from "@/constants/cosmigoRewards";
+
 const cosmigo = useCosmigoStore();
 
 onMounted(() => {
@@ -16,8 +18,13 @@ function openModal() {
 function closeModal() {
   isModalOpen.value = false;
 }
-</script>
 
+const avatarSrc = computed(
+  () =>
+    COSMIGO_REWARDS[cosmigo.equippedKey]?.src ||
+    new URL("../assets/images/cosmigo_happiness.png", import.meta.url).href
+);
+</script>
 <template>
   <div id="cosmigo-component">
     <img
@@ -26,13 +33,7 @@ function closeModal() {
       alt="Customization"
       @click="openModal"
     />
-    <!-- Todo: Switch img to current key -->
-    <img
-      id="avatar"
-      src="../assets/images/cosmigo_happiness.png"
-      alt="Avatar"
-    />
-
+    <img id="avatar" :src="avatarSrc" alt="Avatar" />
     <CustomizationModal v-if="isModalOpen" @close="closeModal" />
   </div>
 </template>

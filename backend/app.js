@@ -22,6 +22,7 @@ app.use("/api", todoRoutes);
 
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 app.use("/api/pomodoro", pomodoroRoutes);
+
 const cosmigoRoutes = require("./routes/cosmigoRoutes");
 app.use(cosmigoRoutes);
 

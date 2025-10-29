@@ -5,6 +5,7 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
   const mockUserId = 1;
   const unlocked = ref([]);
   const equippedKey = ref(null);
+  let tempTimer = null;
 
   async function fetchProfile() {
     try {
@@ -61,6 +62,20 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     return unlocked.value.includes(key);
   }
 
+  // Temporarily update cosmigo profile image to gif when completing task
+  function onCompletion(tempKey, duration = 3000) {
+    const original = equippedKey.value;
+
+    if (tempTimer) clearTimeout(tempTimer);
+
+    equippedKey.value = tempKey;
+
+    tempTimer = setTimeout(() => {
+      equippedKey.value = original;
+      tempTimer = null;
+    }, duration);
+  }
+
   return {
     unlocked,
     equippedKey,
@@ -68,5 +83,6 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     unlock,
     equip,
     hasKey,
+    onCompletion,
   };
 });
