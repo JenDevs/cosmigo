@@ -41,7 +41,7 @@ function onKeyDown(e, key) {
   >
     <div class="modal-content">
       <header class="modal-header">
-        <h2 id="customize-title">Choose your look</h2>
+        <h2 id="customize-title">Choose your look...</h2>
       </header>
 
       <div class="grid" v-if="unlockedItems.length">
@@ -95,65 +95,125 @@ function onKeyDown(e, key) {
   min-width: 320px;
   max-width: 720px;
   width: 90%;
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 14px;
+  padding: 0 1.5rem 1.5rem 1.5rem;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-
 .modal-header {
-  color: black;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif, "Lucida Sans",
+    Arial, sans-serif;
+  word-spacing: 5px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+  background-color: rgb(18, 185, 124);
+  border-radius: 12px 12px 0 0;
+  margin: 0 -1.5rem 24px;
+  color: rgb(255, 255, 255);
+  cursor: default;
+  user-select: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 24px;
 }
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  align-items: center;
   gap: 12px;
   margin: 12px 0;
+  user-select: none;
 }
 .tile {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  height: 100%;
   border: 2px solid transparent;
-  border-radius: 10px;
-  padding: 8px;
-  background: #f8f8f8;
+  border-radius: 20px;
+  padding: 12px;
+  margin: auto;
+  background: rgba(255, 255, 255, 0);
   cursor: pointer;
 }
+.tile:hover {
+  transform: translateY(-3px);
+  transition: 120ms ease;
+}
+.tile.selected:hover {
+  transform: none;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.4);
+}
 .tile.selected {
-  border-color: #4f46e5;
-  background: #eef;
+  border-color: rgb(18, 185, 124);
+  scale: 1.2;
+  background: rgba(212, 231, 224, 1);
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.4);
+  transition: all 85ms;
+}
+.tile:hover img {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+}
+.tile.selected img,
+.tile:focus-visible img {
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.4));
 }
 .tile img {
   width: 80px;
   height: 80px;
+  padding: 0;
+  margin: 0;
   object-fit: contain;
+  transition: filter 120ms ease;
+}
+.label {
+  color: rgb(65, 65, 65);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: 600;
+  margin-top: 6px;
 }
 .actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 8px;
+  padding-top: 24px;
 }
 .primary {
-  background: #4f46e5;
+  background: rgb(7, 173, 112);
   color: #fff;
   border: 0;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 0px rgb(4, 117, 76);
+}
+.primary:hover {
+  background-color: rgb(3, 194, 124);
+}
+.primary:active {
+  transform: translateY(2px);
+  transition: 100ms;
+  background-color: rgb(3, 194, 124);
+  box-shadow: 0 2px 0px rgb(4, 117, 76);
 }
 .secondary {
-  background: #b94a4a;
+  background: #d13838;
   border: 0;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
+  user-select: none;
+  box-shadow: 0 4px 0px #801e1e;
+}
+.secondary:hover {
+  background-color: #e04646;
+}
+.secondary:active {
+  transform: translateY(2px);
+  transition: 100ms;
+  background-color: #e04646;
+  box-shadow: 0 2px 0px #801e1e;
 }
 .no-rewards {
   color: #666;
