@@ -131,3 +131,30 @@ exports.updateUser = async (req, res) => {
     });
   }
 };
+
+exports.addXp = async (req, res) => {
+  const { id } = req.params;
+  const userId = Number(id);
+
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res.status(400).json({ success: false, error: "Invalid user ID" });
+  }
+
+  const { xpGained } = req.body;
+  const parsedXp = Number(xpGained);
+
+  if (!Number.isFinite(parsedXp) || parsedXp <= 0) {
+    return res.status(400).json({ success: false, error: "Invalid XP value" });
+  }
+
+  try {
+    const result = await userService.addXp(userId, parsedXp);
+    res.json({
+      success: true,
+      userExperience: result.newXp,
+      userLevel: result.newLevel,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
