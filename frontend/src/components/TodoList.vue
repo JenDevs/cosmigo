@@ -79,7 +79,7 @@ ul li {
   position: relative;
 }
 ul li::before {
-  content: '•';
+  content: "•";
   color: white;
   display: inline-block;
   width: 1em;
@@ -92,7 +92,7 @@ ul li.checked {
   text-decoration: line-through;
 }
 ul li.checked::before {
-  content: '✓';
+  content: "✓";
   color: rgb(0, 179, 45);
 }
 ul li span {
@@ -110,10 +110,11 @@ ul li span:hover {
 }
 </style>
 
-
 <!-- Script -->
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useCosmigoStore } from "@/stores/useCosmigoStore";
+const cosmigo = useCosmigoStore();
 
 const newTask = ref('')
 const tasks = ref([])
@@ -159,14 +160,14 @@ async function addTask() {
   newTask.value = ''
   const payload = { userId: 1, todoTitle: text, todoDescription: text, todoIsCompleted: false }
   try {
-    const res = await fetch('/api/todos', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
+    const res = await fetch("/api/todos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
     if (!res.ok) {
-      console.error('Failed to create todo', await res.text())
-      return
+      console.error("Failed to create todo", await res.text());
+      return;
     }
     const data = await res.json()
     tasks.value.push({
@@ -176,46 +177,71 @@ async function addTask() {
       todoId: data.todoId ?? null
     })
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
 }
 
 async function removeTask(i) {
-  const t = tasks.value[i]
+  const t = tasks.value[i];
   try {
-    const res = await fetch(`/api/todos/${t.todoId}`, { method: 'DELETE' })
+    const res = await fetch(`/api/todos/${t.todoId}`, { method: "DELETE" });
     if (!res.ok && res.status !== 404) {
-      console.error('Failed to delete todo', await res.text())
-      return
+      console.error("Failed to delete todo", await res.text());
+      return;
     }
-    tasks.value.splice(i, 1)
+    tasks.value.splice(i, 1);
   } catch (err) {
-    console.error('Error deleting todo:', err)
+    console.error("Error deleting todo:", err);
   }
 }
 
 async function completeTask(i) {
-  const t = tasks.value[i]
-  if (!t || !t.todoId) return
-  const prev = t.done
-  t.done = !t.done
+  const t = tasks.value[i];
+  if (!t) return;
+
+  const prev = t.done;
+  t.done = !t.done;
+
+  // If user unticks task, stops animation immediatly
+  if (!t.done && typeof cosmigo?.cancelTemp === "function") {
+    cosmigo.cancelTemp();
+  }
+
+  if (!t.todoId) {
+    if (t.done && typeof cosmigo?.onCompletion === "function") {
+      cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+        restart: false,
+      });
+    }
+    return;
+  }
+
   try {
     const res = await fetch(`/api/todos/${t.todoId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         todoTitle: t.text,
         todoDescription: t.text,
-        todoIsCompleted: t.done
-      })
-    })
+        todoIsCompleted: t.done,
+      }),
+    });
+
     if (!res.ok) {
-      console.error('Failed to update todo completion', await res.text())
-      t.done = prev
+      console.error("Failed to update todo completion", await res.text());
+      t.done = prev;
+      return;
+    }
+    // When user ticks task, cosmigo spins
+    if (t.done && typeof cosmigo?.onCompletion === "function") {
+      // ignore while active, or use restart:true to refresh one timer
+      cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+        restart: false,
+      });
     }
   } catch (err) {
-    console.error('Error updating todo completion:', err)
-    t.done = prev
+    console.error("Error updating todo completion:", err);
+    t.done = prev;
   }
 }
 

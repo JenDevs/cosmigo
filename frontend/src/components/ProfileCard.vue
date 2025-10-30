@@ -1,14 +1,17 @@
 <script setup>
 import ProgressBar from "primevue/progressbar";
+import Cosmigo from "./Cosmigo.vue";
 </script>
 
 <template>
   <div id="profile-card">
+    <Cosmigo />
+    <!-- Old hardcoded avatar
     <img
       id="avatar"
       src="../assets/images/cosmigo_happiness.png"
       alt="Avatar"
-    />
+    /> -->
     <p id="username">@Username</p>
 
     <ProgressBar :value="50" class="xp-bar" />

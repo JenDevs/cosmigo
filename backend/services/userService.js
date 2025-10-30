@@ -1,9 +1,5 @@
 const connectionMySQL = require("./../connectionMySQL");
 
-// function getAllUsers() {
-// return db.query("SELECT * FROM User").then(([results]) => results);
-// }
-
 function getAllUsers() {
   return new Promise((resolve, reject) => {
     let sql = "SELECT * FROM User";
@@ -14,11 +10,18 @@ function getAllUsers() {
   });
 }
 
-/* function getUserById(db, userId) {
-  return db
-    .query("SELECT * FROM User WHERE userId = ?", [userId])
-    .then(([results]) => results[0]);
-} */
+function getUserById(userId) {
+  return new Promise((resolve, reject) => {
+    connectionMySQL.query(
+      "SELECT * FROM User WHERE userId = ?",
+      [userId],
+      (err, results) => {
+        if (err) reject(err);
+        else resolve(results[0]);
+      }
+    );
+  });
+}
 
 function createUser(userName, userEmail, userLevel, userExperience) {
   return new Promise((resolve, reject) => {
@@ -33,23 +36,9 @@ function createUser(userName, userEmail, userLevel, userExperience) {
   });
 }
 
-/* function createUser(db, userData) {
-  return db
-    .query(
-      "INSERT INTO User (userName, userEmail, userLevel, userExperience) VALUES (?, ?, ?, ?)",
-      [
-        userData.userName,
-        userData.userEmail,
-        userData.userLevel || 1,
-        userData.userExperience || 0,
-      ]
-    )
-    .then(([result]) => ({ userId: result.insertId, ...userData }));
-} */
-
-/* function updateUser(db, userId, userData) {
-  return db
-    .query(
+function updateUser(userId, userData) {
+  return new Promise((resolve, reject) => {
+    connectionMySQL.query(
       "UPDATE User SET userName = ?, userEmail = ?, userLevel = ?, userExperience =? WHERE userId = ?",
       [
         userData.userName,
@@ -57,10 +46,14 @@ function createUser(userName, userEmail, userLevel, userExperience) {
         userData.userLevel,
         userData.userExperience,
         userId,
-      ]
-    )
-    .then(() => ({ userId, ...userData }));
-} */
+      ],
+      (err) => {
+        if (err) reject(err);
+        else resolve({ userId, ...userData });
+      }
+    );
+  });
+}
 
 /* function deleteUser(db, userId) {
   return db
@@ -70,8 +63,8 @@ function createUser(userName, userEmail, userLevel, userExperience) {
 
 module.exports = {
   getAllUsers,
-  // getUserById,
+  getUserById,
   createUser,
-  // updateUser,
+  updateUser,
   // deleteUser,
 };

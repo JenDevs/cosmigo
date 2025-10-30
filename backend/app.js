@@ -18,10 +18,13 @@ const quizRoutes = require("./routes/quizRoutes");
 app.use("/api", quizRoutes);
 
 const todoRoutes = require("./routes/todoRoutes");
-app.use('/api', todoRoutes)
+app.use("/api", todoRoutes);
 
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
-app.use("/api/pomodoro", pomodoroRoutes)
+app.use("/api/pomodoro", pomodoroRoutes);
+
+const cosmigoRoutes = require("./routes/cosmigoRoutes");
+app.use(cosmigoRoutes);
 
 // felhanterare
 app.use((req, res, next) => {
@@ -30,4 +33,3 @@ app.use((req, res, next) => {
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
-
