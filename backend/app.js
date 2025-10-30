@@ -14,16 +14,20 @@ app.use(userRoutes);
 const noteRoutes = require("./routes/noteRoutes");
 app.use(noteRoutes);
 
+const quizRoutes = require("./routes/quizRoutes");
+app.use("/api", quizRoutes);
 
 const todoRoutes = require("./routes/todoRoutes");
 app.use('/api', todoRoutes)
 
-
-
 const pomodoroRoutes = require("./routes/pomodoroRoutes");
 app.use("/api/pomodoro", pomodoroRoutes)
 
-// app.use(express.static('public'));
+// felhanterare
+app.use((req, res, next) => {
+  console.log(` ${req.method} ${req.url}`);
+  next();
+});
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 

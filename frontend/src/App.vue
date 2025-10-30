@@ -46,12 +46,12 @@ body {
   background-color: rgb(99, 99, 99);
   margin: 0;
   padding: 0;
-  max-height: 100vh;
+  min-height: 100%;
+  display: block;
 }
 
 .layout {
   display: flex;
-  height: 100vh;
   width: 100vw;
   overflow: visible;
 }
