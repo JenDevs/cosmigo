@@ -9,7 +9,7 @@ export const useUserStore = defineStore("user", () => {
 
   const XP_REWARD = {
     todo: 50,
-    pomodoro: 300,
+    pomodoro: 20,
     pomodoroStreak: 100,
     quiz: 200,
   };

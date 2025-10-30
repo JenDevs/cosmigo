@@ -24,9 +24,9 @@ onMounted (() => {
       src="../assets/images/cosmigo_happiness.png"
       alt="Avatar"
     /> -->
-    <p id="username">@Username</p>
-
      <p id="username">@{{ username }}</p>
+
+     <ProgressBar :value="progress" class="xp-bar" />
 
     <div class="stats-row">
       <small id="level">Level: {{ level }}</small>
