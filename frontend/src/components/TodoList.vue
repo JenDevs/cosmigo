@@ -2,7 +2,7 @@
 
 <template>
   <div class="todoList">
-    <h2>Todo List <img src="../assets/images/notepad.png" width="100%" height="100%" /></h2>
+    <h2>My To-Dos <img src="../assets/images/notepad.png" width="100%" height="100%" /></h2>
     <div class="row">
       <input type="text" id="inputBox" placeholder="Write a new task here" v-model="newTask" @keyup.enter="addTask" />
       <button @click="addTask">Add</button>
@@ -28,12 +28,21 @@
   color: white;
   margin-top: 16px;
 }
-.todoList h2{
+.todoList h2 {
   background-color: rgb(92, 0, 0);
-  padding: 16px;
+  padding: 8px 16px;
   border-radius: 8px;
   color: white;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 1.5rem;
+}
+.todoList h2 img {
+  height: 2em;
+  width: auto;
 }
 .todoList .row {
   display: flex;
