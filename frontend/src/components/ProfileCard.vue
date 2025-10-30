@@ -1,6 +1,18 @@
 <script setup>
 import ProgressBar from "primevue/progressbar";
 import Cosmigo from "./Cosmigo.vue";
+import { useUserStore } from "@/stores/useUserStore";
+import { storeToRefs } from "pinia";
+import { onMounted } from "vue";
+
+const userStore = useUserStore();
+const { username, level, xp, xpToNextLevel, progress } = storeToRefs(userStore);
+const { LEVELS, fetchUser } = userStore;
+
+onMounted (() => {
+  fetchUser();
+});
+
 </script>
 
 <template>
@@ -14,11 +26,11 @@ import Cosmigo from "./Cosmigo.vue";
     /> -->
     <p id="username">@Username</p>
 
-    <ProgressBar :value="50" class="xp-bar" />
+     <p id="username">@{{ username }}</p>
 
     <div class="stats-row">
-      <small id="level">Level: 3</small>
-      <small id="xp">50 / 100 XP</small>
+      <small id="level">Level: {{ level }}</small>
+      <small id="xp">{{ xp }} / {{ LEVELS[level + 1] || xp }} XP</small>
     </div>
   </div>
 </template>
