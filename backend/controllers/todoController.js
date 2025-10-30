@@ -147,7 +147,3 @@ exports.getAllTodos = async (req, res) => {
         });
     }
 };
-
-/*var serverUrl = todoService.listen(3000, () => {
-    console.log(`Todo service running at http://localhost:3000`);
-});*/

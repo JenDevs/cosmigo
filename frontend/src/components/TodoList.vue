@@ -2,17 +2,19 @@
 
 <template>
   <div class="todoList">
-    <h2>Todo List <img src="" /></h2>
+    <h2>My To-Dos <img src="../assets/images/notepad.png" width="100%" height="100%" /></h2>
     <div class="row">
-      <input type="text" id="inputBox" placeholder="Add new task" v-model="newTask" @keyup.enter="addTask" />
+      <input type="text" id="inputBox" placeholder="Write a new task here" v-model="newTask" @keyup.enter="addTask" />
       <button @click="addTask">Add</button>
     </div>
 <ul id="listContainer">
   <li v-for="(t, i) in tasks" :key="t.id" :class="{ checked: t.done }">
     <span @click="completeTask(i)" class="todo-text">{{ t.text }}</span>
-    <button @click.stop="removeTask(i)">Delete</button>
+    <img src="../assets/images/xpix.svg" alt="" width="10%" height="1%" @click.stop="removeTask(i)" />
+
   </li>
 </ul>
+<p v-if="!loading && tasks.length === 0">No tasks found</p>
   </div>
 </template>
 
@@ -26,11 +28,21 @@
   color: white;
   margin-top: 16px;
 }
-.todoList h2{
+.todoList h2 {
   background-color: rgb(92, 0, 0);
-  padding: 16px;
+  padding: 8px 16px;
   border-radius: 8px;
   color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+  font-size: 1.5rem;
+}
+.todoList h2 img {
+  height: 2em;
+  width: auto;
 }
 .todoList .row {
   display: flex;
@@ -44,7 +56,7 @@
   padding: 8px;
   border: none;
   border-radius: 4px;
-  background: transparent;
+  background-color: rgba(0, 0, 0, 0.1);
   outline: none;
 }
 button {
@@ -101,39 +113,49 @@ ul li span:hover {
 
 <!-- Script -->
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 
 const newTask = ref('')
 const tasks = ref([])
+const loading = ref(false)
 
-onMounted(() => {
-  const raw = localStorage.getItem('tasks')
-  try {
-    const arr = raw ? JSON.parse(raw) : []
-    tasks.value = arr
-      .filter(t => t && typeof t === 'object')
-      .map(t => ({
-        id: t.id ?? crypto.randomUUID(),
-        text: t.text ?? String(t),
-        done: Boolean(t.done)
-      }))
-  } catch {
-    tasks.value = []
-  }
+const mapTodo = r => ({
+  id: r.todoId ?? Date.now() + Math.random(),
+  text: r.todoTitle ?? r.title ?? r.text ?? '',
+  done: !!(r.todoIsCompleted ?? r.completed ?? r.done),
+  todoId: r.todoId ?? r.id ?? null
 })
 
-function toggle(i) {
-  const t = tasks.value[i]
-  if (!t) return
-  t.done = !t.done
+function pickList(payload) {
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload.data)) return payload.data
+  if (Array.isArray(payload.items)) return payload.items
+  if (Array.isArray(payload.todos)) return payload.todos
+  return []
 }
+
+async function loadTasks() {
+  loading.value = true
+  try {
+    const res = await fetch('/api/todos/1')
+    if (!res.ok) throw new Error(await res.text())
+    const payload = await res.json()
+    const rows = pickList(payload)
+    tasks.value = rows.map(mapTodo)
+    console.log('loaded', { payload, rows, tasks: tasks.value })
+  } catch (e) {
+    console.error('load failed', e)
+    tasks.value = []
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(loadTasks)
 
 async function addTask() {
   const text = newTask.value.trim()
   if (!text) return
-  const localId = Date.now()
-  const item = { id: localId, todoId: null, text, done: false }
-
   newTask.value = ''
   const payload = { userId: 1, todoTitle: text, todoDescription: text, todoIsCompleted: false }
   try {
@@ -146,14 +168,13 @@ async function addTask() {
       console.error('Failed to create todo', await res.text())
       return
     }
-  
     const data = await res.json()
-    console.log('Response data:', data)
-    const idx = tasks.value.findIndex(x => x.id === localId)
-    if (idx !== -1) tasks.value[idx].todoId = data.todoId
-    item.todoId = data.todoId
-    console.log('Created todo with ID:', data.todoId)
-      tasks.value.push(item)
+    tasks.value.push({
+      id: data.todoId ?? Date.now() + Math.random(),
+      text,
+      done: false,
+      todoId: data.todoId ?? null
+    })
   } catch (err) {
     console.error(err)
   }
@@ -198,8 +219,4 @@ async function completeTask(i) {
   }
 }
 
-
-watch(tasks, () => {
-  localStorage.setItem('tasks', JSON.stringify(tasks.value))
-}, { deep: true })
 </script>
