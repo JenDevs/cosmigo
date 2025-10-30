@@ -1,5 +1,4 @@
 import axios from "axios";
-import { Quizzes } from "@/api/quizzes";
 
 export const Quizzes = {
   list(userId, opts = {}) {

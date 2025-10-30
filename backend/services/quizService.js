@@ -163,7 +163,7 @@ function addOneQuestion(quizId, userId, q) {
         const insSql = `INSERT INTO questions (quizId, text, answer, position) VALUES (?, ?, ?, ?)`;
         connectionMySQL.query(
           insSql,
-          [quizId, text, q.answer ?? null, position],
+          [quizId, text, (q.answer || "").trim() || null, position],
           (err, r) => {
             if (err) reject(err);
             else resolve({
