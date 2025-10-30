@@ -29,7 +29,7 @@ export const useUserStore = defineStore("user", () => {
     const nextLevel = level.value + 1;
     if (!LEVELS[nextLevel]) return null;
 
-    return LEVELS[nextLevel] - LEVELS[level.value];
+    return Math.max(LEVELS[nextLevel] - xp.value, 0);
   });
 
   const progress = computed(() => {
@@ -76,7 +76,7 @@ export const useUserStore = defineStore("user", () => {
   }
 
   async function addXP(activity) {
-    const xpGained = XP_REWARD[activity] || 0;
+    const xpGained = Number(XP_REWARD[activity]) || 0;
 
     try {
       const res = await fetch(

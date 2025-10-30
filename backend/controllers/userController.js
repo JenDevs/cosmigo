@@ -136,14 +136,16 @@ exports.addXp = async (req, res) => {
   const { id } = req.params;
   const { xpGained } = req.body;
 
-  if (!xpGained) {
+  const parsedXp = Number(xpGained);
+
+  if (!Number.isFinite(parsedXp) || parsedXp <= 0) {
     return res.status(400).json({ success: false, error: "Invalid XP value" });
   }
 
   try {
-    const result = await userService.addXp(Number(id), Number(xpGained));
+    const result = await userService.addXp(Number(id), parsedXp);
     res.json({
-      sucess: true,
+      success: true,
       userExperience: result.newXp,
       userLevel: result.newLevel,
     });

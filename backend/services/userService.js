@@ -59,7 +59,11 @@ function calcLevelFromXp(totalXp) {
   if (totalXp < 300) return 1;
   if (totalXp < 1200) return 2;
   if (totalXp < 3000) return 3;
-  return 4;
+  if (totalXp < 6600) return 4;
+  if (totalXp < 13800) return 5;
+  if (totalXp < 28200) return 6;
+  if (totalXp < 57000) return 7;
+  return 8;
 }
 
 function addXp(userId, xpGained) {
