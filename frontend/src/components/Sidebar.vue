@@ -15,7 +15,7 @@ const { selectNote, createNote, deleteNote } = notesStore;
 
 // QUIZZES
 const store = useQuizStore();
-const { list } = storeToRefs(store); 
+const { list } = storeToRefs(store);
 const loading = ref(false);
 const error = ref("");
 const userId = 1;
@@ -69,11 +69,7 @@ onMounted(loadQuizzes);
 
       <div class="quizzes-body">
         <template v-if="!loading && !error">
-          <QuizList
-            :quizzes="list"
-            @select="selectQuiz"
-            @delete="deleteQuiz"
-          />
+          <QuizList :quizzes="list" @select="selectQuiz" @delete="deleteQuiz" />
         </template>
         <p v-else-if="loading" class="q-muted">Loading…</p>
         <p v-else class="q-error">{{ error }}</p>
@@ -100,7 +96,7 @@ onMounted(loadQuizzes);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 300px;
+  width: 360px;
   height: 100%;
   background-color: rgb(63, 63, 70);
   padding: 12px;
@@ -141,8 +137,16 @@ onMounted(loadQuizzes);
   overflow: auto;
   padding-right: 4px;
 }
-.q-muted { opacity: .7; font-size: .95rem; margin: 6px 2px; }
-.q-error { color: #ffb3b3; font-size: .95rem; margin: 6px 2px; }
+.q-muted {
+  opacity: 0.7;
+  font-size: 0.95rem;
+  margin: 6px 2px;
+}
+.q-error {
+  color: #ffb3b3;
+  font-size: 0.95rem;
+  margin: 6px 2px;
+}
 
 /* Notes */
 .note-list {

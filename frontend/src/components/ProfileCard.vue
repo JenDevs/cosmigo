@@ -18,12 +18,6 @@ onMounted (() => {
 <template>
   <div id="profile-card">
     <Cosmigo />
-    <!-- Old hardcoded avatar
-    <img
-      id="avatar"
-      src="../assets/images/cosmigo_happiness.png"
-      alt="Avatar"
-    /> -->
      <p id="username">@{{ username }}</p>
 
      <ProgressBar :value="progress" class="xp-bar" />
