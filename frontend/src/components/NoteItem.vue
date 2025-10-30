@@ -72,16 +72,15 @@ const confirmDelete = () => {
   display: flex;
   justify-content: center;
   padding: 4px;
-  width: 120px;
+  width: 100px;
 }
 
 .file-tile {
   position: relative;
-  width: 120px;
   display: grid;
   justify-items: center;
   gap: 6px;
-  padding: 8px 6px 6px;
+  padding: 10px 4px 4px;
   width: 120px;
   border-radius: 10px;
   cursor: pointer;
@@ -94,8 +93,8 @@ const confirmDelete = () => {
 }
 
 .file-icon {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
   color: #d0d4da;
@@ -109,36 +108,41 @@ const confirmDelete = () => {
 .file-title {
   text-align: center;
   font-size: 0.85rem;
+  margin: 5px;
   color: #fff;
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .delete-note-btn {
   position: absolute;
   top: 4px;
   right: 4px;
-  font-size: 1rem;
-  width: 22px;
-  height: 22px;
+  font-size: 0.9rem;
+  width: 20px;
+  height: 20px;
   border: none;
   border-radius: 6px;
-  background: transparent;
-  color: rgba(255, 255, 255, 0);
+  background: #e74c3c;
   cursor: pointer;
   transition: all 0.2s ease;
-  opacity: 0.7;
+  opacity: 0;
 }
 
 .file-tile:hover .delete-note-btn {
-  background: #e74c3c;
   color: #fff;
   opacity: 1;
 }
 
 .delete-note-btn:hover {
-  background: #c0392b;
+  background: #c71704;
 }
 </style>
