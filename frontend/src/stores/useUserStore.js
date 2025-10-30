@@ -47,8 +47,20 @@ export const useUserStore = defineStore("user", () => {
   function loadFromLocalStorage() {
     const savedXp = localStorage.getItem("xp");
     const savedLevel = localStorage.getItem("level");
-    if (savedXp) xp.value = Number(savedXp);
-    if (savedLevel) level.value = Number(savedLevel);
+
+    if (savedXp) {
+      const parsed = Number(savedXp);
+      if (Number.isFinite(parsed) && parsed >= 0) {
+        xp.value = parsed;
+      }
+    }
+
+    if (savedLevel) {
+      const parsed = Number(savedLevel);
+      if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 8) {
+        level.value = parsed;
+      }
+    }
   }
 
   watch([xp, level], () => {
@@ -76,7 +88,16 @@ export const useUserStore = defineStore("user", () => {
   }
 
   async function addXP(activity) {
-    const xpGained = Number(XP_REWARD[activity]) || 0;
+    if (!XP_REWARD[activity]) {
+      console.warn(
+        `Invalid activity "${activity}". Must be one of: ${Object.keys(
+          XP_REWARD
+        ).join(", ")}`
+      );
+      return;
+    }
+
+    const xpGained = XP_REWARD[activity];
 
     try {
       const res = await fetch(
@@ -94,8 +115,10 @@ export const useUserStore = defineStore("user", () => {
 
       xp.value = savedData.userExperience;
       level.value = savedData.userLevel;
+      return { success: true };
     } catch (err) {
       console.error("Failed to add XP:", err);
+      return { success: false, error: err.message };
     }
   }
 

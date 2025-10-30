@@ -69,22 +69,30 @@ function calcLevelFromXp(totalXp) {
 function addXp(userId, xpGained) {
   return new Promise((resolve, reject) => {
     connectionMySQL.query(
-      "SELECT userExperience FROM User WHERE userId = ?",
-      [userId],
-      (err, rows) => {
+      "UPDATE User SET userExperience = userExperience + ? WHERE userId = ?",
+      [xpGained, userId],
+      (err, results) => {
         if (err) return reject(err);
-        if (rows.length === 0) return reject(new Error("User not found"));
-
-        const currentXp = rows[0].userExperience || 0;
-        const newXp = currentXp + xpGained;
-        const newLevel = calcLevelFromXp(newXp);
+        if (results.affectedRows === 0)
+          return reject(new Error("User not found"));
 
         connectionMySQL.query(
-          "UPDATE User SET userExperience = ?, userLevel = ? WHERE userId = ?",
-          [newXp, newLevel, userId],
-          (err2, results) => {
+          "SELECT userExperience FROM User WHERE userId = ?",
+          [userId],
+          (err2, rows) => {
             if (err2) return reject(err2);
-            resolve({ newXp, newLevel });
+
+            const newXp = rows[0].userExperience;
+            const newLevel = calcLevelFromXp(newXp);
+
+            connectionMySQL.query(
+              "UPDATE User SET userLevel = ? WHERE userId = ?",
+              [newLevel, userId],
+              (err3) => {
+                if (err3) return reject(err3);
+                resolve({ newXp, newLevel });
+              }
+            );
           }
         );
       }
