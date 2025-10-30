@@ -131,3 +131,23 @@ exports.updateUser = async (req, res) => {
     });
   }
 };
+
+exports.addXp = async (req, res) => {
+  const { id } = req.params;
+  const { xpGained } = req.body;
+
+  if (!xpGained) {
+    return res.status(400).json({ success: false, error: "Invalid XP value" });
+  }
+
+  try {
+    const result = await userService.addXp(Number(id), Number(xpGained));
+    res.json({
+      sucess: true,
+      userExperience: result.newXp,
+      userLevel: result.newLevel,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

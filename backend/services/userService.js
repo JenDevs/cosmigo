@@ -55,6 +55,39 @@ function updateUser(userId, userData) {
   });
 }
 
+function calcLevelFromXp(totalXp) {
+  if (totalXp < 300) return 1;
+  if (totalXp < 1200) return 2;
+  if (totalXp < 3000) return 3;
+  return 4;
+}
+
+function addXp(userId, xpGained) {
+  return new Promise((resolve, reject) => {
+    connectionMySQL.query(
+      "SELECT userExperience FROM User WHERE userId = ?",
+      [userId],
+      (err, rows) => {
+        if (err) return reject(err);
+        if (rows.length === 0) return reject(new Error("User not found"));
+
+        const currentXp = rows[0].userExperience || 0;
+        const newXp = currentXp + xpGained;
+        const newLevel = calcLevelFromXp(newXp);
+
+        connectionMySQL.query(
+          "UPDATE User SET userExperience = ?, userLevel = ? WHERE userId = ?",
+          [newXp, newLevel, userId],
+          (err2, results) => {
+            if (err2) return reject(err2);
+            resolve({ newXp, newLevel });
+          }
+        );
+      }
+    );
+  });
+}
+
 /* function deleteUser(db, userId) {
   return db
     .query("DELETE FROM User WHERE userId = ?", [userId])
@@ -66,5 +99,7 @@ module.exports = {
   getUserById,
   createUser,
   updateUser,
+  calcLevelFromXp,
+  addXp,
   // deleteUser,
 };
