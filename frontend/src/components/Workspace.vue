@@ -64,9 +64,7 @@ function onStart({ title, questions }) {
 
 // Efter save: sidan uppdateras direkt
 function onSaved({ id }) {
-  store.load(userId).finally(() => {
-    store.setCurrentById(Number(id));
-  });
+  store.setCurrentById(Number(id));
 }
 
 // Skapa nytt quiz

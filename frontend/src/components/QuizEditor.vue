@@ -154,21 +154,13 @@ async function save() {
     if (!quiz.value.id && res?.id) quiz.value.id = Number(res.id);
     emit("saved", { id: quiz.value.id, title: quiz.value.title });
     alert("Saved!");
-    // Vid nytt quiz: uppdatera listan & nollställ editorn
    if (wasNew) {
-     await store.load(userId);
      resetQuiz();
    }
   } catch (e) {
     console.error("Save failed:", e);
     alert("Save failed. Please try again.");
   }
-}
-
-// nytt quiz
-function newQuizDraft() {
-  store.clearCurrent(); 
-  resetQuiz();           
 }
 </script>
 
