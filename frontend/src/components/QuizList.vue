@@ -21,7 +21,7 @@ const items = computed(() =>
   <ul class="quiz-list" v-if="items.length">
     <QuizItem
       v-for="q in items"
-      :key="q.id"
+      :key="Number(q.id)"
       :quiz="q"
       @select="emit('select', $event)"
       @delete="emit('delete', $event)"
