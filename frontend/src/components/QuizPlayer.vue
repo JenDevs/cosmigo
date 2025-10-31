@@ -86,10 +86,15 @@ function justClose() {
   emit("close");
 }
 
-function markDone() {
+async function markDone() {
   showEndPrompt.value = false;
   emit("archive");
-  userStore.addXP("quiz");
+
+  try {
+    await userStore.addXP("quiz");
+  } catch (e) {
+    console.error("Failed to add XP for quiz:", e);
+  }
 }
 </script>
 
