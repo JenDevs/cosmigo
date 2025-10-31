@@ -1,7 +1,13 @@
 <script setup>
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { defineProps, defineEmits } from "vue";
 import ConfirmModal from "./ConfirmModal.vue";
+import { useNotesStore } from "@/stores/useNotesStore";
+import { storeToRefs } from "pinia";
+
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
+const isSelected = computed(() => activeNote.value?.id === props.note.id);
 
 const props = defineProps({
   note: { type: Object, required: true },
@@ -23,7 +29,9 @@ const confirmDelete = () => {
   <li class="note-item" role="listitem">
     <div
       class="file-tile"
-      role="button"
+      :class="{ selected: isSelected }"
+      role="option"
+      :aria-selected="isSelected ? 'true' : 'false'"
       tabindex="0"
       @click="handleSelect"
       @keyup.enter="handleSelect"
@@ -88,8 +96,18 @@ const confirmDelete = () => {
 }
 
 .file-tile:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.1);
   transform: translateY(-1px);
+}
+
+.file-tile:active {
+  background: rgba(0, 174, 255, 0.2);
+  transform: translateY(1px);
+}
+
+.file-tile.selected {
+  background: rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.2);
 }
 
 .file-icon {
