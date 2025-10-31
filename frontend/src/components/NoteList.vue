@@ -15,7 +15,7 @@ const emit = defineEmits(["delete", "select"]);
 <template>
   <div class="note-list">
     <div class="edge-fade top" aria-hidden="true"></div>
-    <ul role="list" aria-label="List of notes">
+    <ul role="listbox" aria-label="List of notes">
       <NoteItem
         v-for="note in notes"
         :key="note.id"

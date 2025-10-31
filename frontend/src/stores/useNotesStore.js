@@ -19,7 +19,8 @@ export const useNotesStore = defineStore("notes", () => {
         throw new Error(await res.text());
       }
       const raw = await res.json();
-      notes.value = raw.map((n) => ({ //raw iffy
+      notes.value = raw.map((n) => ({
+        //raw iffy
         id: n.noteId,
         title: n.noteTitle,
         content: n.noteContent,
@@ -28,6 +29,13 @@ export const useNotesStore = defineStore("notes", () => {
       }));
       notes.value.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
       console.log("Fetched Notes:", notes.value);
+      const prevId = activeNote.value?.id;
+      if (prevId) {
+        const found = notes.value.find((n) => n.id === prevId);
+        activeNote.value = found || notes.value[0] || null;
+      } else {
+        activeNote.value = notes.value[0] || null;
+      }
     } catch (e) {
       console.error("Failed to fetch notes:", e);
       notes.value = [];
@@ -49,6 +57,7 @@ export const useNotesStore = defineStore("notes", () => {
       }),
     });
     await fetchNotes();
+    activeNote.value = notes.value[0] || null;
   }
 
   async function updateNote(updatedNote) {
