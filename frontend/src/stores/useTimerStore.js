@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { useUserStore } from "@/stores/useUserStore";
 
 export const useTimerStore = defineStore("timer", () => {
   const state = ref("Idle");
@@ -43,6 +44,8 @@ export const useTimerStore = defineStore("timer", () => {
     SHORT_BREAK: "Short break",
     LONG_BREAK: "Long break",
   };
+
+  const userStore = useUserStore();
 
   function initTimer() {
     loadFromLocalStorage();
@@ -158,6 +161,12 @@ export const useTimerStore = defineStore("timer", () => {
       createPomodoro().catch((err) =>
         console.warn("Could not save pomodoro", err)
       );
+
+      if (sessionCount.value % 3 === 0) {
+        userStore.addXP("pomodoroStreak");
+      } else {
+        userStore.addXP("pomodoro");
+      }
 
       if (sessionCount.value % longBreakEvery.value === 0) {
         state.value = TIMER_STATES.LONG_BREAK;
