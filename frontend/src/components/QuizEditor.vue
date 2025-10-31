@@ -50,7 +50,7 @@ watch(
   { immediate: true }
 );
 
-// redigering
+// add fråga
 function addQuestion() {
   quiz.value.questions.push(mkQ());
 }
@@ -90,16 +90,32 @@ const validationMessage = computed(() => {
 });
 
 // starta quiz
-function startQuiz() {
+async function startQuiz() {
   triedSubmit.value = true;
-  const payload = getCurrentQuizData();
+  let payload = getCurrentQuizData();
+
   if (!payload.title || payload.questions.length === 0) {
-    alert(validationMessage.value);
-    return;
+    // Om quizet är sparat → hämta full version
+    if (payload.id) {
+      try {
+        const userId = 1;
+        const full = await store.getFull(userId, payload.id);
+        if (full?.questions?.length) {
+          payload = { id: full.id, title: full.title, questions: full.questions };
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    // Fortfarande ogiltigt? Visa fel & avbryt
+    if (!payload.title || payload.questions.length === 0) {
+      alert(validationMessage.value);
+      return;
+    }
   }
   emit("start", {
     title: payload.title,
-    questions: payload.questions.map(q => ({
+    questions: payload.questions.map((q) => ({
       text: q.text,
       answer: q.answer ?? "",
     })),
@@ -131,16 +147,28 @@ async function save() {
 
   const payload = getCurrentQuizData();
   const userId = 1; 
+  const wasNew = !quiz.value.id;
 
   try {
     const res = await store.save(userId, payload);
-    if (!quiz.value.id && res?.id) quiz.value.id = res.id;
+    if (!quiz.value.id && res?.id) quiz.value.id = Number(res.id);
     emit("saved", { id: quiz.value.id, title: quiz.value.title });
     alert("Saved!");
+    // Vid nytt quiz: uppdatera listan & nollställ editorn
+   if (wasNew) {
+     await store.load(userId);
+     resetQuiz();
+   }
   } catch (e) {
     console.error("Save failed:", e);
     alert("Save failed. Please try again.");
   }
+}
+
+// nytt quiz
+function newQuizDraft() {
+  store.clearCurrent(); 
+  resetQuiz();           
 }
 </script>
 

@@ -37,7 +37,7 @@ async function loadQuizzes() {
 
 // välj quiz
 function selectQuiz(id) {
-  store.setCurrentById(id);
+  store.setCurrentById(Number(id));
 }
 
 // ta bort quiz
@@ -63,7 +63,8 @@ onMounted(loadQuizzes);
     <!-- Quiz -->
     <div class="quizzes-container">
       <div class="quizzes-header">
-        <h3 class="quizzes-title">Your quizzes</h3>
+        <h3 class="quizzes-title">My quizzes</h3>
+        <button class="new-quiz-btn" @click="store.requestNew()">New Quiz</button>
       </div>
 
       <div class="quizzes-body">
@@ -120,6 +121,15 @@ onMounted(loadQuizzes);
   padding: 6px 10px;
   margin-bottom: 10px;
 }
+.new-quiz-btn {
+  background-color:#4caf50; 
+  color:#fff; 
+  border:none; 
+  border-radius:6px;
+  padding:6px 10px; 
+  cursor:pointer; 
+  font-size:.9rem;
+ }
 .quizzes-title {
   margin: 0;
   font-size: 1rem;
