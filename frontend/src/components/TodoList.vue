@@ -204,10 +204,6 @@ async function completeTask(i) {
 
   const prev = t.done;
   t.done = !t.done; 
-/* 
-  useUserStore().addXP("todo"); */
-  
-
 
   // If user unticks task, stops animation immediatly
   if (!t.done && typeof cosmigo?.cancelTemp === "function") {
@@ -223,8 +219,9 @@ async function completeTask(i) {
     return;
   }
 
-
   try {
+    const shoudSetRewardedAt = t.done && !t.todoRewardedAt;
+    const rewardTime = shoudSetRewardedAt ? new Date().toISOString() : t.todoRewardedAt;
     const res = await fetch(`/api/todos/${t.todoId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -232,38 +229,9 @@ async function completeTask(i) {
         todoTitle: t.text,
         todoDescription: t.text,
         todoIsCompleted: t.done,
-        todoRewardedAt : new Date().toISOString(),
+        todoRewardedAt : rewardTime,
       }),      
     });
-    
-    try {
-      const rewardTime = t.done &&!t.todoRewardedAt ? new Date().toISOString() : t.todoRewardedAt;
-      const res = await fetch(`/api/todos/${t.todoId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          todoTitle: t.text,
-          todoDescription: t.text,
-          todoIsCompleted: t.done,
-          todoRewardedAt : rewardTime,
-        }),      
-      });
-
-      if (!res.ok) throw new Error('Failed to update todo rewardedAt');
-      if(t.done && !t.todoRewardedAt){
-        useUserStore().addXP("todo");
-        t.todoRewardedAt = rewardTime;
-      }
-    }
-    catch (err) {
-      console.error("Error updating todo rewardedAt:", err);
-      return;
-    }
-
-
-/*     if(t.done === true && !t.todoRewardedAt){
-      useUserStore().addXP("todo");
-    } */
 
     if (!res.ok) {
       console.error("Failed to update todo completion", await res.text());
@@ -271,27 +239,10 @@ async function completeTask(i) {
       return;
     }
 
-
-/* try {
-
-  const res = await fetch(`/api/todos/${t.todoId}`, {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        todoRewardedAt : t.text,
-      }),
-    });
-      const data = await res.json();
-      var todoRewardedAt = data.todoRewardedAt;
-      if(todoRewardedAt !== null){
+    if (shoudSetRewardedAt) {
       useUserStore().addXP("todo");
-  
+      t.todoRewardedAt = rewardTime;
     }
-    } catch (err) {
-      console.error("Error fetching todo rewardedAt:", err);
-/*       var todoRewardedAt = null; 
-      return; 
-    } */
 
     // When user ticks task, cosmigo spins
     if (t.done && typeof cosmigo?.onCompletion === "function") {
@@ -299,20 +250,11 @@ async function completeTask(i) {
       
       cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
         restart: false,
-      });
-      
+      });      
     }
-
-    
-  
-
   } catch (err) {
     console.error("Error updating todo completion:", err);
     t.done = prev;
   }
-
-  //TODO: Fetch the rewardedAt value to check if XP should be awarded
-
-
 }
 </script>
