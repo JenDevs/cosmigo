@@ -54,8 +54,9 @@ function getAllTodos(userId) {
 function updateTodo(todoId, todo) {
   return new Promise((resolve, reject) => {
     console.log('Updating todo with id:', todoId, 'with data:', todo)
-    const sql = 'UPDATE Todo SET todoTitle = ?, todoDescription = ?, todoIsCompleted = ? WHERE todoId = ?'
-    const params = [todo.todoTitle, todo.todoDescription, todo.todoIsCompleted, todoId]
+    const sql = 'UPDATE Todo SET todoTitle = ?, todoDescription = ?, todoIsCompleted = ?, todoRewardedAt = ? WHERE todoId = ?'
+    const params = [todo.todoTitle, todo.todoDescription, todo.todoIsCompleted, todo.todoRewardedAt, todoId]
+    
 
     connectionMySQL.query(sql, params, (err, result) => {
       if (err) reject(err)

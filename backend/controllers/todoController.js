@@ -53,7 +53,7 @@ exports.updateTodo = async (req, res) => {
 
     const todoId = req.params.todoId;
 
-    const { todoTitle, todoDescription, todoIsCompleted } = req.body;
+    const { todoTitle, todoDescription, todoIsCompleted, todoRewardedAt } = req.body;
       if (!todoId) {
     return res.status(400).json({
       success: false,
@@ -66,7 +66,8 @@ exports.updateTodo = async (req, res) => {
         const result = await todoService.updateTodo(todoId, {
             todoTitle,
             todoDescription,
-            todoIsCompleted
+            todoIsCompleted,
+            todoRewardedAt,
         });
         console.log('Update result:', result);
         if (!result || result.affectedRows === 0) {

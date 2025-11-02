@@ -114,11 +114,14 @@ ul li span:hover {
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useCosmigoStore } from "@/stores/useCosmigoStore";
+import { useUserStore } from "@/stores/useUserStore";
 const cosmigo = useCosmigoStore();
 
 const newTask = ref('')
 const tasks = ref([])
 const loading = ref(false)
+
+
 
 const mapTodo = r => ({
   id: r.todoId ?? Date.now() + Math.random(),
@@ -171,7 +174,7 @@ async function addTask() {
     }
     const data = await res.json()
     tasks.value.push({
-      id: data.todoId ?? Date.now() + Math.random(),
+      id: data.todoId,
       text,
       done: false,
       todoId: data.todoId ?? null
@@ -200,7 +203,11 @@ async function completeTask(i) {
   if (!t) return;
 
   const prev = t.done;
-  t.done = !t.done;
+  t.done = !t.done; 
+/* 
+  useUserStore().addXP("todo"); */
+  
+
 
   // If user unticks task, stops animation immediatly
   if (!t.done && typeof cosmigo?.cancelTemp === "function") {
@@ -216,6 +223,7 @@ async function completeTask(i) {
     return;
   }
 
+
   try {
     const res = await fetch(`/api/todos/${t.todoId}`, {
       method: "PUT",
@@ -224,25 +232,87 @@ async function completeTask(i) {
         todoTitle: t.text,
         todoDescription: t.text,
         todoIsCompleted: t.done,
-      }),
+        todoRewardedAt : new Date().toISOString(),
+      }),      
     });
+    
+    try {
+      const rewardTime = t.done &&!t.todoRewardedAt ? new Date().toISOString() : t.todoRewardedAt;
+      const res = await fetch(`/api/todos/${t.todoId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          todoTitle: t.text,
+          todoDescription: t.text,
+          todoIsCompleted: t.done,
+          todoRewardedAt : rewardTime,
+        }),      
+      });
+
+      if (!res.ok) throw new Error('Failed to update todo rewardedAt');
+      if(t.done && !t.todoRewardedAt){
+        useUserStore().addXP("todo");
+        t.todoRewardedAt = rewardTime;
+      }
+    }
+    catch (err) {
+      console.error("Error updating todo rewardedAt:", err);
+      return;
+    }
+
+
+/*     if(t.done === true && !t.todoRewardedAt){
+      useUserStore().addXP("todo");
+    } */
 
     if (!res.ok) {
       console.error("Failed to update todo completion", await res.text());
       t.done = prev;
       return;
     }
+
+
+/* try {
+
+  const res = await fetch(`/api/todos/${t.todoId}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        todoRewardedAt : t.text,
+      }),
+    });
+      const data = await res.json();
+      var todoRewardedAt = data.todoRewardedAt;
+      if(todoRewardedAt !== null){
+      useUserStore().addXP("todo");
+  
+    }
+    } catch (err) {
+      console.error("Error fetching todo rewardedAt:", err);
+/*       var todoRewardedAt = null; 
+      return; 
+    } */
+
     // When user ticks task, cosmigo spins
     if (t.done && typeof cosmigo?.onCompletion === "function") {
       // ignore while active, or use restart:true to refresh one timer
+      
       cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
         restart: false,
       });
+      
     }
+
+    
+  
+
   } catch (err) {
     console.error("Error updating todo completion:", err);
     t.done = prev;
   }
-}
 
+  //TODO: Fetch the rewardedAt value to check if XP should be awarded
+
+
+}
 </script>
