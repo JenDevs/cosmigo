@@ -32,7 +32,7 @@ const emit = defineEmits(["delete", "select"]);
 .note-list {
   position: relative;
   max-height: 320px;
-  border-radius: 12pz;
+  border-radius: 12px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;

@@ -1,20 +1,15 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import { useQuizStore } from "@/stores/useQuizStore";
-import NoteEditor from "./NoteEditor.vue";
 
-// event upp till föräldern
 const emit = defineEmits(["start", "saved"]);
 
-// valt quiz att redigera
 const props = defineProps({
   quiz: { type: Object, default: null },
 });
 
-// Pinia-store
 const store = useQuizStore();
 
-// skapa fråga med unikt ID för v-for
 let _uid = 0;
 const mkQ = (q = {}) => ({
   _uid: _uid++,
@@ -22,20 +17,30 @@ const mkQ = (q = {}) => ({
   answer: q.answer || "",
 });
 
-// lokalt state
 const quiz = ref({ id: undefined, title: "", questions: [mkQ()] });
-
-// visa valideringsfel först efter Save/Start
 const triedSubmit = ref(false);
 
-// återställ editor
 function resetQuiz() {
   quiz.value = { id: undefined, title: "", questions: [mkQ()] };
   triedSubmit.value = false;
 }
+
+function getCurrentQuizData() {
+  return {
+    id: quiz.value.id,
+    title: (quiz.value.title || "").trim(),
+    questions: (quiz.value.questions || [])
+      .map((q, i) => ({
+        text: (q.text || "").trim(),
+        answer: (q.answer || "").trim() || null,
+        position: Number.isFinite(q.position) ? q.position : i,
+      }))
+      .filter((q) => q.text),
+  };
+}
+
 defineExpose({ resetQuiz, getCurrentQuizData });
 
-// synka in nytt props.quiz
 watch(
   () => props.quiz,
   (q) => {
@@ -50,7 +55,6 @@ watch(
   { immediate: true }
 );
 
-// add fråga
 function addQuestion() {
   quiz.value.questions.push(mkQ());
 }
@@ -68,7 +72,6 @@ function move(i, dir) {
   ];
 }
 
-// validering
 const titleMissing = computed(() => !quiz.value.title?.trim());
 const missingQuestions = computed(() =>
   quiz.value.questions.filter((q) => !q.text?.trim())
@@ -78,7 +81,6 @@ const hasValidQuestion = computed(() =>
 );
 const isValid = computed(() => !titleMissing.value && hasValidQuestion.value);
 
-// generera valideringsmeddelande
 const validationMessage = computed(() => {
   if (!triedSubmit.value) return "";
   if (titleMissing.value && missingQuestions.value.length > 0)
@@ -89,8 +91,7 @@ const validationMessage = computed(() => {
   return "";
 });
 
-// starta quiz
-async function startQuiz() {
+function startQuiz() {
   triedSubmit.value = true;
   let payload = getCurrentQuizData();
 
@@ -122,22 +123,6 @@ async function startQuiz() {
   });
 }
 
-// exponerad helper: hämta aktuellt editor-draft
-function getCurrentQuizData() {
-  return {
-    id: quiz.value.id,
-    title: (quiz.value.title || "").trim(),
-    questions: (quiz.value.questions || [])
-      .map((q, i) => ({
-        text: (q.text || "").trim(),
-        answer: (q.answer || "").trim() || null,
-        position: Number.isFinite(q.position) ? q.position : i,
-      }))
-      .filter((q) => q.text),
-  };
-}
-
-// spara quiz (skapa/uppdatera via store)
 async function save() {
   triedSubmit.value = true;
   if (!isValid.value) {
@@ -146,8 +131,8 @@ async function save() {
   }
 
   const payload = getCurrentQuizData();
-  const userId = 1; 
-  const wasNew = !quiz.value.id;
+  const userId = 1;
+  //const wasNew = !quiz.value.id;
 
   try {
     const res = await store.save(userId, payload);
@@ -166,39 +151,76 @@ async function save() {
 
 <template>
   <div class="quiz-editor">
-    <!-- Titel -->
-    <input v-model="quiz.title" placeholder="Quiz title" class="title-input" />
-
-    <!-- Titel-fel -->
-    <p v-if="triedSubmit && titleMissing" class="err">
-      You forgot the quiz title.
-    </p>
-
-    <!-- Frågor -->
-    <div v-for="(q, i) in quiz.questions" :key="q._uid" class="question-card">
-      <div class="row">
-        <strong>#{{ i + 1 }}</strong>
-        <div class="row-actions">
-          <button @click="move(i, -1)" :disabled="i === 0">▲</button>
-          <button @click="move(i, 1)" :disabled="i === quiz.questions.length - 1">▼</button>
-          <button class="danger" @click="removeQuestion(i)">✖</button>
-        </div>
-      </div>
-
-      <input v-model="q.text" placeholder="Write your question..." class="q-input" />
-      <input v-model="q.answer" placeholder="(Optional) Answer" class="a-input" />
-
-      <p v-if="triedSubmit && !q.text.trim()" class="err">
-        You forgot a question.
+    <div class="editor-header">
+      <input
+        v-model="quiz.title"
+        placeholder="Quiz title"
+        class="title-input"
+        aria-label="Quiz title"
+      />
+      <p v-if="triedSubmit && titleMissing" class="err">
+        You forgot the quiz title.
       </p>
     </div>
 
-    <!-- Gemensamt fel -->
-    <p v-if="triedSubmit && titleMissing && missingQuestions.length > 0" class="err">
-      Please enter a title and at least one question.
-    </p>
+    <div class="editor-content">
+      <div v-for="(q, i) in quiz.questions" :key="q._uid" class="question-card">
+        <div class="row">
+          <strong class="index">#{{ i + 1 }}</strong>
+          <div class="row-actions">
+            <button
+              @click="move(i, -1)"
+              :disabled="i === 0"
+              title="Move up"
+              aria-label="Move question up"
+            >
+              ▲
+            </button>
+            <button
+              @click="move(i, 1)"
+              :disabled="i === quiz.questions.length - 1"
+              title="Move down"
+              aria-label="Move question down"
+            >
+              ▼
+            </button>
+            <button
+              class="danger"
+              @click="removeQuestion(i)"
+              title="Delete question"
+              aria-label="Delete question"
+            >
+              ✖
+            </button>
+          </div>
+        </div>
 
-    <!-- Bottenknappar -->
+        <input
+          v-model="q.text"
+          placeholder="Write your question..."
+          class="q-input"
+          aria-label="Question text"
+        />
+        <input
+          v-model="q.answer"
+          placeholder="(Optional) Answer"
+          class="a-input"
+          aria-label="Optional answer"
+        />
+
+        <p v-if="triedSubmit && !q.text.trim()" class="err">
+          You forgot a question.
+        </p>
+      </div>
+
+      <p
+        v-if="triedSubmit && titleMissing && missingQuestions.length > 0"
+        class="err"
+      >
+        Please enter a title and at least one question.
+      </p>
+    </div>
+
     <div class="actions">
       <div class="left-actions">
         <button class="add" @click="addQuestion">Add Question</button>
@@ -206,13 +228,14 @@ async function save() {
           type="button"
           class="save"
           :disabled="!isValid"
-          :title="!isValid ? 'Title + at least 1 question required' : 'Save quiz'"
+          :title="
+            !isValid ? 'Title + at least 1 question required' : 'Save quiz'
+          "
           @click="save"
         >
           Save
         </button>
       </div>
-
       <button class="start" @click="startQuiz">Start Quiz</button>
     </div>
   </div>
@@ -222,87 +245,172 @@ async function save() {
 .quiz-editor {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
   background: #56565c;
-  border-radius: 8px;
-  padding: 16px;
-  width: 50%;
-  margin: 120px 0 0 0;
+  border-radius: 12px 0 0 12px;
+  padding: 16px 16px 12px;
+  width: 100%;
+  min-height: 560px;
+  height: 100%;
   color: #fff;
 }
 
-/* lite mindre text i fälten (inte knappar) */
-.title-input { font-size: 1.05rem; }
-.q-input     { font-size: 1rem; }
-.a-input     { font-size: 0.95rem; }
+.editor-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: linear-gradient(#56565c, rgba(86, 86, 92, 0.95));
+  padding-bottom: 6px;
+}
+
+/* Scrollable work area */
+.editor-content {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.title-input {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.q-input {
+  font-size: 1rem;
+}
+.a-input {
+  font-size: 0.95rem;
+}
 
 .title-input,
 .q-input,
 .a-input {
   width: 100%;
-  padding: 8px;
+  padding: 10px 12px;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: #3f3f46;
   color: #fff;
 }
 
 .question-card {
   background: rgba(0, 0, 0, 0.25);
-  border-radius: 8px;
-  padding: 10px;
+  border-radius: 10px;
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+}
+.index {
+  opacity: 0.9;
 }
 .row-actions {
   display: flex;
   gap: 6px;
 }
 
-/* knappar (standard) */
+/* Base button */
 button {
-  background: #555;
+  background: #4b4b51;
   color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 8px 12px;
   cursor: pointer;
+  transition: transform 0.05s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+button:hover {
+  transform: translateY(-1px);
+}
+button:active {
+  transform: translateY(0);
 }
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-button.danger { background: #a33; }
+button.danger {
+  background: #a33;
+}
 
-/* add/save/start layout & färger */
+/* Actions bar */
 .actions {
+  position: sticky;
+  bottom: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
+  padding-top: 8px;
+  background: linear-gradient(rgba(86, 86, 92, 0.6), #56565c 60%);
+  backdrop-filter: blur(2px);
 }
-.left-actions { 
-  display: flex; 
-  gap: 8px; }
+.left-actions {
+  display: flex;
+  gap: 8px;
+}
 
-button.add  { 
-  background-color: #4caf50; 
-  color: white; }
-button.save { 
-  background: #007bff; 
-  color: white; }
-button.start { 
-  background: #555; 
-  color: #fff; }
+/* Secondary buttons: Add & Save (subtle) */
+button.add {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+button.add:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+button.save {
+  background: transparent;
+  border-color: rgba(0, 123, 255, 0.6);
+}
+button.save:hover {
+  background: rgba(0, 123, 255, 0.12);
+}
+
+/* Primary CTA: Start Quiz */
+button.start {
+  background: #0bad77;
+  color: white;
+  font-weight: 600;
+  padding: 10px 18px; /* larger target */
+  border: none;
+}
+button.start:hover {
+  background: #14ce90;
+  color: black;
+}
+button.start:active {
+  filter: brightness(0.98);
+}
 
 .err {
   color: #ffb3b3;
   margin: 6px 0 0;
   font-size: 0.9rem;
+}
+
+/* Slightly larger targets on small screens; place Start full-width below */
+@media (max-width: 960px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .left-actions {
+    order: 2;
+    justify-content: space-between;
+  }
+  button.start {
+    order: 1;
+    width: 100%;
+    text-align: center;
+  }
 }
 </style>

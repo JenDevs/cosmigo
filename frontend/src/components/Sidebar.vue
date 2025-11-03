@@ -12,7 +12,7 @@ import { storeToRefs } from "pinia";
 const notesStore = useNotesStore();
 const { notes } = storeToRefs(notesStore);
 const { selectNote, createNote, deleteNote } = notesStore;
-
+/*
 // QUIZZES
 const store = useQuizStore();
 const { list } = storeToRefs(store);
@@ -52,7 +52,7 @@ async function deleteQuiz(id) {
 }
 
 // ladda quiz vid mount
-onMounted(loadQuizzes);
+onMounted(loadQuizzes);*/
 </script>
 
 <template>
@@ -61,7 +61,7 @@ onMounted(loadQuizzes);
     <TodoList />
 
     <!-- Quiz -->
-    <div class="quizzes-container">
+    <!-- <div class="quizzes-container">
       <div class="quizzes-header">
         <h3 class="quizzes-title">My quizzes</h3>
         <button class="new-quiz-btn" @click="store.requestNew()">New Quiz</button>
@@ -74,7 +74,7 @@ onMounted(loadQuizzes);
         <p v-else-if="loading" class="q-muted">Loading…</p>
         <p v-else class="q-error">{{ error }}</p>
       </div>
-    </div>
+    </div> -->
 
     <!-- Notes -->
     <div class="note-list-container">
@@ -118,14 +118,14 @@ onMounted(loadQuizzes);
   margin-bottom: 10px;
 }
 .new-quiz-btn {
-  background-color:#4caf50; 
-  color:#fff; 
-  border:none; 
-  border-radius:6px;
-  padding:6px 10px; 
-  cursor:pointer; 
-  font-size:.9rem;
- }
+  background-color: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
 .quizzes-title {
   margin: 0;
   font-size: 1rem;
