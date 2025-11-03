@@ -1,6 +1,8 @@
 <script setup>
 import { ref, watch, computed, onMounted, onBeforeUnmount } from "vue";
+import { useUserStore } from "@/stores/useUserStore";
 
+const userStore = useUserStore();
 const emit = defineEmits(["close", "archive", "restart"]);
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -79,14 +81,20 @@ function doAgain() {
   emit("restart");
 }
 
-function markDone() {
-  showEndPrompt.value = false;
-  emit("archive");
-}
-
 function justClose() {
   showEndPrompt.value = false;
   emit("close");
+}
+
+async function markDone() {
+  showEndPrompt.value = false;
+  emit("archive");
+
+  try {
+    await userStore.addXP("quiz");
+  } catch (e) {
+    console.error("Failed to add XP for quiz:", e);
+  }
 }
 </script>
 
