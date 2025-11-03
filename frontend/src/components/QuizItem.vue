@@ -8,7 +8,7 @@ function handleDelete() {
   emit("delete", props.quiz.id);
 }
 function handleSelect() {
-  emit("select", props.quiz.id);
+  emit("select", Number(props.quiz.id));
 }
 </script>
 
