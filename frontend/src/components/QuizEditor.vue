@@ -357,7 +357,7 @@ button.danger {
   gap: 8px;
 }
 
-/* Secondary buttons: Add & Save (subtle) */
+/* Secondary buttons - Add and Save */
 button.add {
   background: transparent;
   border-color: rgba(255, 255, 255, 0.25);
@@ -374,12 +374,12 @@ button.save:hover {
   background: rgba(0, 123, 255, 0.12);
 }
 
-/* Primary CTA: Start Quiz */
+/* Primary button Start Quiz */
 button.start {
   background: #0bad77;
   color: white;
   font-weight: 600;
-  padding: 10px 18px; /* larger target */
+  padding: 10px 18px;
   border: none;
 }
 button.start:hover {
@@ -396,7 +396,6 @@ button.start:active {
   font-size: 0.9rem;
 }
 
-/* Slightly larger targets on small screens; place Start full-width below */
 @media (max-width: 960px) {
   .actions {
     flex-direction: column;

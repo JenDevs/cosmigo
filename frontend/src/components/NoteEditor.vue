@@ -5,7 +5,9 @@ import Editor from "primevue/editor";
 
 const notesStore = useNotesStore();
 const activeNote = computed(() => notesStore.activeNote);
-
+const closeNote = () => {
+  notesStore.activeNote = null;
+};
 const formats = ["bold", "italic", "underline", "size", "align"];
 
 const savedAt = computed(() =>
@@ -58,12 +60,17 @@ onBeforeUnmount(stopCurrentNoteWatch);
 
 <template>
   <div v-if="activeNote" class="note-editor">
-    <input
-      class="title-input"
-      type="text"
-      v-model="activeNote.title"
-      placeholder="Untitled"
-    />
+    <div class="note-header">
+      <input
+        class="title-input"
+        type="text"
+        v-model="activeNote.title"
+        placeholder="Untitled"
+      />
+      <button id="close-note-btn" @click="closeNote" aria-label="close note">
+        ×
+      </button>
+    </div>
     <Editor v-model="activeNote.content" :formats="formats">
       <template #toolbar>
         <span class="ql-formats">
@@ -100,7 +107,6 @@ onBeforeUnmount(stopCurrentNoteWatch);
 :deep(.p-editor) {
   height: 90%;
   border: none;
-  background: ;
 }
 :deep(.p-editor .ql-toolbar) {
   display: flex;
@@ -163,13 +169,21 @@ onBeforeUnmount(stopCurrentNoteWatch);
   max-height: 100vh;
   overflow: hidden;
 }
+.note-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background-color: white;
+  border-radius: 8px 8px 0 0;
+}
 .title-input {
+  flex: 1;
   font-size: 1.2rem;
-  padding: 12px;
+  padding: 8px 12px;
   border-radius: 8px 8px 0 0;
   background: white;
   color: rgb(104, 104, 104);
-  padding: 8px 12px;
   border: none;
 }
 .title-input:focus {
@@ -178,6 +192,31 @@ onBeforeUnmount(stopCurrentNoteWatch);
 }
 .title-input:hover {
   border: #222;
+}
+
+#close-note-btn {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  background: rgba(0, 0, 0, 0.2);
+  color: rgb(0, 0, 0);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 150ms;
+}
+#close-note-btn:hover {
+  background: rgb(255, 56, 56);
+  color: white;
+  transition: all 150ms;
+  scale: 1.1;
+}
+#close-note-btn:active {
+  scale: 0.95;
 }
 .last-saved {
   display: inline;
