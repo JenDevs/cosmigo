@@ -57,7 +57,12 @@ exports.createPomodoro = async (req, res) => {
     });
   }
 
-  if (typeof duration !== "number" || duration < 0.25 || duration > 120) {
+  if (
+    typeof duration !== "number" ||
+    isNaN(duration) ||
+    duration < 0.25 ||
+    duration > 120
+  ) {
     return res.status(400).json({
       success: false,
       error: "Invalid duration: must be between 0.25 and 120 minutes",
@@ -71,7 +76,15 @@ exports.createPomodoro = async (req, res) => {
     });
   }
 
-  if (!startTime || !endTime || new Date(startTime) > new Date(endTime)) {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  if (
+    !startTime ||
+    !endTime ||
+    isNaN(start.getTime()) ||
+    isNaN(end.getTime()) ||
+    start > end
+  ) {
     return res.status(400).json({
       success: false,
       error: "Invalid time range",
@@ -118,7 +131,12 @@ exports.updatePomodoro = async (req, res) => {
     });
   }
 
-  if (typeof duration !== "number" || duration < 0.25 || duration > 120) {
+  if (
+    typeof duration !== "number" ||
+    isNaN(duration) ||
+    duration < 0.25 ||
+    duration > 120
+  ) {
     return res.status(400).json({
       success: false,
       error: "Invalid duration: must be between 0.25 and 120 minutes",
@@ -132,7 +150,15 @@ exports.updatePomodoro = async (req, res) => {
     });
   }
 
-  if (!startTime || !endTime || new Date(startTime) > new Date(endTime)) {
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  if (
+    !startTime ||
+    !endTime ||
+    isNaN(start.getTime()) ||
+    isNaN(end.getTime()) ||
+    start > end
+  ) {
     return res.status(400).json({
       success: false,
       error: "Invalid time range",
