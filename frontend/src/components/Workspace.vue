@@ -30,6 +30,14 @@ const playerQuestions = ref([]);
 // Ladda quiz-listan
 onMounted(() => store.load(userId));
 
+// När Sidebar klickar "New Quiz"
+watch(() => store.createSignal, () => {
+  store.clearCurrent();
+  selectedQuiz.value = null;
+  isQuizEditor.value = true;
+  quizEditorRef.value?.resetQuiz?.();
+});
+
 // När valt quiz ändras i storen → hämta full version
 watch(
   () => current.value?.id,
@@ -39,6 +47,7 @@ watch(
       const full = await store.getFull(userId, id);
       selectedQuiz.value = full;
       isQuizEditor.value = true;
+      console.log("Loaded quiz:", full.id, full.title, full.questions?.length);
     } catch (e) {
       console.error(e);
       alert("Could not load quiz");
@@ -53,9 +62,9 @@ function onStart({ title, questions }) {
   playerOpen.value = true;
 }
 
-// Efter save
+// Efter save: sidan uppdateras direkt
 function onSaved({ id }) {
-  store.setCurrentById(id);
+  store.setCurrentById(Number(id));
 }
 
 // Skapa nytt quiz
