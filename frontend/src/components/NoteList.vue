@@ -1,15 +1,26 @@
 <script setup>
-import { defineProps, defineEmits } from "vue";
 import NoteItem from "./NoteItem.vue";
 
 const props = defineProps({
-  notes: {
-    type: Array,
-    required: true,
-  },
+  notes: { type: Array, required: true },
 });
-
 const emit = defineEmits(["delete", "select"]);
+
+const noteEls = new Map();
+
+function scrollToNoteId(id) {
+  const el = noteEls.get(id);
+  if (!el) return;
+  el.scrollIntoView({
+    behavior: "smooth",
+    block: "nearest",
+    inline: "nearest",
+  });
+  el.classList.add("flash");
+  setTimeout(() => el.classList.remove("flash"), 800);
+}
+
+defineExpose({ scrollToNoteId });
 </script>
 
 <template>
@@ -22,6 +33,13 @@ const emit = defineEmits(["delete", "select"]);
         :note="note"
         @select="emit('select', $event)"
         @delete="emit('delete', $event)"
+        :ref="
+          (vm) => {
+            const el = vm && vm.$el;
+            if (el) noteEls.set(note.id, el);
+            else noteEls.delete(note.id);
+          }
+        "
       />
     </ul>
     <div class="edge-fade bottom" aria-hidden="true"></div>
@@ -36,9 +54,8 @@ const emit = defineEmits(["delete", "select"]);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable both-edges;
-  scrollbar-width: none; /* or thin */
+  scrollbar-width: none;
 }
-
 .edge-fade {
   position: sticky;
   left: 0;
@@ -49,7 +66,6 @@ const emit = defineEmits(["delete", "select"]);
 }
 .edge-fade.top {
   top: 0;
-  margin-bottom: -20px;
   background: radial-gradient(
     ellipse 80% 80% at 50% -40%,
     rgba(0, 0, 0, 0.4) 50%,
@@ -59,7 +75,6 @@ const emit = defineEmits(["delete", "select"]);
 }
 .edge-fade.bottom {
   bottom: 0;
-  margin-top: -20px;
   background: radial-gradient(
     ellipse 80% 70% at 50% 140%,
     rgba(0, 0, 0, 0.6) 0%,
@@ -67,7 +82,6 @@ const emit = defineEmits(["delete", "select"]);
     rgba(0, 0, 0, 0) 100%
   );
 }
-
 .note-list ul {
   display: grid;
   grid-template-columns: repeat(3, 100px);
@@ -77,5 +91,11 @@ const emit = defineEmits(["delete", "select"]);
   list-style: none;
   padding: 0;
   margin: 0;
+}
+.note-item.flash {
+  padding: 0;
+  background: rgba(255, 230, 85, 0.5);
+  border-radius: 10px;
+  transition: all 0.2s;
 }
 </style>

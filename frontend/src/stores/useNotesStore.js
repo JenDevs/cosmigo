@@ -129,6 +129,15 @@ export const useNotesStore = defineStore("notes", () => {
     }
   }
 
+  function getFirstMatchIdByTitle(query) {
+    const q = (query || "").trim().toLowerCase();
+    if (!q) return null;
+    const found = notes.value.find((n) =>
+      (n?.title || "").toLowerCase().includes(q)
+    );
+    return found?.id ?? null;
+  }
+
   return {
     notes,
     activeNote,
@@ -137,5 +146,6 @@ export const useNotesStore = defineStore("notes", () => {
     updateNote,
     deleteNote,
     selectNote,
+    getFirstMatchIdByTitle,
   };
 });

@@ -1,17 +1,16 @@
 <script setup>
 import { computed, ref } from "vue";
-import { defineProps, defineEmits } from "vue";
 import ConfirmModal from "./ConfirmModal.vue";
 import { useNotesStore } from "@/stores/useNotesStore";
 import { storeToRefs } from "pinia";
 
-const notesStore = useNotesStore();
-const { activeNote } = storeToRefs(notesStore);
-const isSelected = computed(() => activeNote.value?.id === props.note.id);
-
 const props = defineProps({
   note: { type: Object, required: true },
 });
+
+const notesStore = useNotesStore();
+const { activeNote } = storeToRefs(notesStore);
+const isSelected = computed(() => activeNote.value?.id === props.note.id);
 
 const emit = defineEmits(["delete", "select"]);
 
@@ -23,10 +22,13 @@ const confirmDelete = () => {
   emit("delete", props.note.id);
   showConfirm.value = false;
 };
+
+const rootEl = ref(null);
+defineExpose({ rootEl });
 </script>
 
 <template>
-  <li class="note-item" role="listitem">
+  <li ref="rootEl" class="note-item" role="listitem">
     <div
       class="file-tile"
       :class="{ selected: isSelected }"
@@ -81,6 +83,7 @@ const confirmDelete = () => {
   justify-content: center;
   padding: 4px;
   width: 100px;
+  border-radius: 8px;
 }
 
 .file-tile {

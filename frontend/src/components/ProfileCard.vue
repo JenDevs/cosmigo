@@ -9,18 +9,17 @@ const userStore = useUserStore();
 const { username, level, xp, xpToNextLevel, progress } = storeToRefs(userStore);
 const { LEVELS, fetchUser } = userStore;
 
-onMounted (() => {
+onMounted(() => {
   fetchUser();
 });
-
 </script>
 
 <template>
   <div id="profile-card">
     <Cosmigo />
-     <p id="username">@{{ username }}</p>
+    <p id="username">@{{ username }}</p>
 
-     <ProgressBar :value="progress" class="xp-bar" />
+    <ProgressBar :value="progress" class="xp-bar" />
 
     <div class="stats-row">
       <small id="level">Level: {{ level }}</small>
@@ -41,6 +40,7 @@ onMounted (() => {
   padding: 16px;
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.1);
   color: white;
+  user-select: none;
 }
 
 #avatar {
@@ -53,6 +53,7 @@ onMounted (() => {
   font-size: 1.2em;
   font-weight: bold;
   margin-bottom: 10px;
+  user-select: all;
 }
 
 .xp-bar {
