@@ -158,15 +158,19 @@ export const useTimerStore = defineStore("timer", () => {
 
     if (state.value === TIMER_STATES.WORK) {
       sessionCount.value++;
-      createPomodoro().catch((err) =>
-        console.warn("Could not save pomodoro", err)
-      );
 
-      if (sessionCount.value % 3 === 0) {
-        userStore.addXP("pomodoroStreak");
-      } else {
-        userStore.addXP("pomodoro");
-      }
+      Promise.allSettled([
+        createPomodoro(),
+        userStore.addXP(
+          sessionCount.value % 3 === 0 ? "pomodoroStreak" : "pomodoro"
+        ),
+      ]).then((results) => {
+        results.forEach((r) => {
+          if (r.status === "rejected") {
+            console.warn("Error while saving pomodoro or adding XP:", r.reason);
+          }
+        });
+      });
 
       if (sessionCount.value % longBreakEvery.value === 0) {
         state.value = TIMER_STATES.LONG_BREAK;
