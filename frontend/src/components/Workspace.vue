@@ -12,55 +12,44 @@ import { useQuizStore } from "@/stores/useQuizStore";
 
 const USER_ID = 1;
 
-// Notes
+/* Notes */
 const notesStore = useNotesStore();
 const { activeNote } = storeToRefs(notesStore);
 
-// Quiz
+/* Quiz store */
 const quizStore = useQuizStore();
 const { current, list } = storeToRefs(quizStore);
 
+/* Local state */
 const isQuizEditor = ref(false);
 const selectedQuiz = ref(null);
 const quizEditorRef = ref(null);
 
-// Player state
 const playerOpen = ref(false);
 const playerTitle = ref("Quiz");
 const playerQuestions = ref([]);
 
-// Ladda quiz-listan
-onMounted(() => store.load(userId));
-
-// När Sidebar klickar "New Quiz"
-/*
-watch(() => store.createSignal, () => {
-  store.clearCurrent();
-  selectedQuiz.value = null;
-  isQuizEditor.value = true;
-  quizEditorRef.value?.resetQuiz?.();
-});*/
-
-//________________________
-/*
+/* Loading/error for the list panel */
 const loading = ref(false);
 const error = ref("");
 
-const currentId = computed(
-  () => current.value?.id || selectedQuiz.value?.id || null
-);
+/* Derived */
+const currentId = computed(() => current.value?.id ?? null);
 
+/* Helpers the code already expects */
 function getDraftFromEditor() {
-  const draft = quizEditorRef.value?.getCurrentQuizData?.();
-  const hasEditorData = !!(draft && draft.title && draft.questions?.length);
-  return { draft: hasEditorData ? draft : null, hasEditorData };
+  // Expects QuizEditor to optionally expose getDraft()
+  const draft = quizEditorRef.value?.getDraft?.() ?? null;
+  return { draft };
 }
 
 function resetView() {
+  isQuizEditor.value = true;
   selectedQuiz.value = null;
-  playerOpen.value = false;
+  quizStore.clearCurrent();
 }
 
+/* Load quizzes (single source of truth) */
 async function loadQuizzes() {
   loading.value = true;
   error.value = "";
@@ -73,14 +62,20 @@ async function loadQuizzes() {
     loading.value = false;
   }
 }
-
 onMounted(loadQuizzes);
- */
 
+/* Optional: react to a create signal if your store exposes one */
+watch(
+  () => quizStore.createSignal,
+  () => {
+    quizStore.clearCurrent();
+    selectedQuiz.value = null;
+    isQuizEditor.value = true;
+    quizEditorRef.value?.resetQuiz?.();
+  }
+);
 
-
-
-// När valt quiz ändras i storen → hämta full version
+/* When a quiz is selected in the store → fetch full */
 watch(
   () => current.value?.id,
   async (id) => {
@@ -89,23 +84,28 @@ watch(
       const full = await quizStore.getFull(USER_ID, id);
       selectedQuiz.value = full;
       isQuizEditor.value = true;
-      //console.log("Loaded quiz:", full.id, full.title, full.questions?.length);
+      console.log("Loaded quiz:", full.id, full.title, full.questions?.length);
     } catch (e) {
       console.error(e);
-      window.alert("Could not load quiz");
+      alert("Could not load quiz");
     }
   }
 );
 
-function onStart({ title, questions }) {
-  playerTitle.value = title;
-  playerQuestions.value = questions;
-  playerOpen.value = true;
+/* UI callbacks */
+function selectQuiz(id) {
+  // Ensure numeric once
+  quizStore.setCurrentById(Number(id));
 }
 
-// Efter save: sidan uppdateras direkt
-function onSaved({ id }) {
-  quizStore.setCurrentById(Number(id));
+async function deleteQuiz(id) {
+  if (!confirm("Do you want to delete this quiz?")) return;
+  try {
+    await quizStore.remove(USER_ID, id);
+  } catch (e) {
+    console.error(e);
+    alert("Could not delete quiz.");
+  }
 }
 
 function newQuiz() {
@@ -113,6 +113,16 @@ function newQuiz() {
   quizStore.clearCurrent();
   selectedQuiz.value = null;
   quizEditorRef.value?.resetQuiz?.();
+}
+
+function onStart({ title, questions }) {
+  playerTitle.value = title;
+  playerQuestions.value = questions;
+  playerOpen.value = true;
+}
+
+function onSaved({ id }) {
+  quizStore.setCurrentById(Number(id));
 }
 
 async function handleArchive() {
@@ -142,8 +152,9 @@ async function handleArchive() {
       }
     } else {
       const { draft } = getDraftFromEditor();
-      if (draft)
+      if (draft) {
         await quizStore.save(USER_ID, { ...draft, id: currentId.value });
+      }
       await quizStore.archive(USER_ID, currentId.value);
       archived = true;
     }
@@ -175,29 +186,6 @@ async function handleClose() {
 
 function handleRestart() {
   console.log("Quiz restarted");
-}
-
-function selectQuiz(id) {
-  quizStore.setCurrentById(id);
-}
-
-async function deleteQuiz(id) {
-  if (!id) return;
-  if (!window.confirm("Delete this quiz? This can’t be undone.")) return;
-  try {
-    if (typeof quizStore.remove === "function") {
-      await quizStore.remove(USER_ID, id);
-    } else if (typeof quizStore.delete === "function") {
-      await quizStore.delete(USER_ID, id);
-    } else {
-      await quizStore.archive(USER_ID, id);
-    }
-    if (currentId.value === id) resetView();
-    await loadQuizzes();
-  } catch (e) {
-    console.error(e);
-    window.alert(e?.message || "Could not delete quiz");
-  }
 }
 </script>
 
@@ -231,6 +219,7 @@ async function deleteQuiz(id) {
           @saved="onSaved"
         />
       </section>
+
       <aside class="quizzes-container">
         <div class="quizzes-header">
           <h3 class="quizzes-title">Your quizzes</h3>
@@ -254,6 +243,7 @@ async function deleteQuiz(id) {
         </div>
       </aside>
     </div>
+
     <QuizPlayer
       :open="playerOpen"
       :title="playerTitle"

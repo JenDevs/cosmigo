@@ -91,7 +91,7 @@ const validationMessage = computed(() => {
   return "";
 });
 
-function startQuiz() {
+async function startQuiz() {
   triedSubmit.value = true;
   let payload = getCurrentQuizData();
 
@@ -102,7 +102,11 @@ function startQuiz() {
         const userId = 1;
         const full = await store.getFull(userId, payload.id);
         if (full?.questions?.length) {
-          payload = { id: full.id, title: full.title, questions: full.questions };
+          payload = {
+            id: full.id,
+            title: full.title,
+            questions: full.questions,
+          };
         }
       } catch (e) {
         console.error(e);
@@ -139,9 +143,9 @@ async function save() {
     if (!quiz.value.id && res?.id) quiz.value.id = Number(res.id);
     emit("saved", { id: quiz.value.id, title: quiz.value.title });
     alert("Saved!");
-   if (wasNew) {
-     resetQuiz();
-   }
+    if (wasNew) {
+      resetQuiz();
+    }
   } catch (e) {
     console.error("Save failed:", e);
     alert("Save failed. Please try again.");
