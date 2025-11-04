@@ -125,9 +125,10 @@ const loading = ref(false)
 
 const mapTodo = r => ({
   id: r.todoId ?? Date.now() + Math.random(),
-  text: r.todoTitle ?? r.title ?? r.text ?? '',
+  text: r.todoTitle ?? r.title ?? r.text ?? "",
   done: !!(r.todoIsCompleted ?? r.completed ?? r.done),
-  todoId: r.todoId ?? r.id ?? null
+  todoId: r.todoId ?? r.id ?? null,
+  todoRewardedAt: r.todoRewardedAt ?? r.rewardedAt ?? null
 })
 
 function pickList(payload) {
@@ -141,19 +142,19 @@ function pickList(payload) {
 async function loadTasks() {
   loading.value = true
   try {
-    const res = await fetch('/api/todos/1')
+    const res = await fetch("/api/todos/1")
     if (!res.ok) throw new Error(await res.text())
     const payload = await res.json()
     const rows = pickList(payload)
     tasks.value = rows.map(mapTodo)
-    console.log('loaded', { payload, rows, tasks: tasks.value })
   } catch (e) {
-    console.error('load failed', e)
+    console.error("load failed", e)
     tasks.value = []
   } finally {
     loading.value = false
   }
 }
+
 
 onMounted(loadTasks)
 
