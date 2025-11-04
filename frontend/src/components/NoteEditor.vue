@@ -165,7 +165,7 @@ onBeforeUnmount(stopCurrentNoteWatch);
   padding: 12px;
   width: 80%;
   max-width: 900px;
-  height: 80%;
+  height: 90%;
   max-height: 100vh;
   overflow: hidden;
 }

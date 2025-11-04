@@ -12,15 +12,12 @@ import { useQuizStore } from "@/stores/useQuizStore";
 
 const USER_ID = 1;
 
-/* Notes */
 const notesStore = useNotesStore();
 const { activeNote } = storeToRefs(notesStore);
 
-/* Quiz store */
 const quizStore = useQuizStore();
 const { current, list } = storeToRefs(quizStore);
 
-/* Local state */
 const isQuizEditor = ref(false);
 const selectedQuiz = ref(null);
 const quizEditorRef = ref(null);
@@ -29,18 +26,16 @@ const playerOpen = ref(false);
 const playerTitle = ref("Quiz");
 const playerQuestions = ref([]);
 
-/* Loading/error for the list panel */
 const loading = ref(false);
 const error = ref("");
 
-/* Derived */
 const currentId = computed(() => current.value?.id ?? null);
 
-/* Helpers the code already expects */
 function getDraftFromEditor() {
-  // Expects QuizEditor to optionally expose getDraft()
-  const draft = quizEditorRef.value?.getDraft?.() ?? null;
-  return { draft };
+  const draft = quizEditorRef.value?.getCurrentQuizData?.() ?? null;
+  if (!draft) return { draft: null };
+  const hasContent = Boolean(draft.title) || (draft.questions?.length ?? 0) > 0;
+  return { draft: hasContent ? draft : null };
 }
 
 function resetView() {
@@ -49,7 +44,6 @@ function resetView() {
   quizStore.clearCurrent();
 }
 
-/* Load quizzes (single source of truth) */
 async function loadQuizzes() {
   loading.value = true;
   error.value = "";
@@ -64,7 +58,6 @@ async function loadQuizzes() {
 }
 onMounted(loadQuizzes);
 
-/* Optional: react to a create signal if your store exposes one */
 watch(
   () => quizStore.createSignal,
   () => {
@@ -75,7 +68,6 @@ watch(
   }
 );
 
-/* When a quiz is selected in the store → fetch full */
 watch(
   () => current.value?.id,
   async (id) => {
@@ -92,9 +84,7 @@ watch(
   }
 );
 
-/* UI callbacks */
 function selectQuiz(id) {
-  // Ensure numeric once
   quizStore.setCurrentById(Number(id));
 }
 

@@ -62,10 +62,12 @@ function handleSelect() {
   padding: 4px 8px;
   cursor: pointer;
   opacity: 0;
-  transition: 100ms;
+  transition: opacity 100ms;
   background-color: #e74c3c;
 }
-.quiz-item:hover .delete-quiz-btn {
+
+.quiz-item:hover .delete-quiz-btn,
+.delete-quiz-btn:focus-visible {
   background-color: #e74c3c;
   opacity: 1;
 }

@@ -28,12 +28,16 @@ defineExpose({ rootEl });
 </script>
 
 <template>
-  <li ref="rootEl" class="note-item" role="listitem">
+  <li
+    ref="rootEl"
+    class="note-item"
+    role="option"
+    :aria-selected="isSelected ? 'true' : 'false'"
+  >
     <div
       class="file-tile"
       :class="{ selected: isSelected }"
       role="option"
-      :aria-selected="isSelected ? 'true' : 'false'"
       tabindex="0"
       @click="handleSelect"
       @keyup.enter="handleSelect"
