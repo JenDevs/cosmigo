@@ -14,7 +14,7 @@ function handleSelect() {
 
 <template>
   <li class="quiz-item" @click="handleSelect">
-    {{ quiz.title }} 
+    {{ quiz.title }}
     <button class="delete-quiz-btn" @click.stop="handleDelete">x</button>
   </li>
 </template>
@@ -26,10 +26,10 @@ function handleSelect() {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin: 8px 0; 
-  width: 100%;
+  margin: 6px;
+  max-width: 95%;
   padding: 8px;
-  background-color: rgba(0, 0, 0, 0.2); 
+  background-color: rgba(0, 0, 0, 0.2);
   color: white;
   border-radius: 4px;
   list-style: none;
@@ -56,11 +56,19 @@ function handleSelect() {
 .delete-quiz-btn {
   float: right;
   font-size: 1rem;
-  background-color: #e74c3c;
   color: white;
   border: none;
   border-radius: 4px;
   padding: 4px 8px;
   cursor: pointer;
+  opacity: 0;
+  transition: opacity 100ms;
+  background-color: #e74c3c;
+}
+
+.quiz-item:hover .delete-quiz-btn,
+.delete-quiz-btn:focus-visible {
+  background-color: #e74c3c;
+  opacity: 1;
 }
 </style>

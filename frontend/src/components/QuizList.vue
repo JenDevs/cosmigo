@@ -12,13 +12,17 @@ const emit = defineEmits(["select", "delete"]);
 
 // Filtrerar bort ogiltiga quiz (utan id eller titel)
 const items = computed(() =>
-  (props.quizzes || []).filter(q => q && q.id && q.title && q.title.trim())
+  (props.quizzes || []).filter((q) => q && q.id && q.title && q.title.trim())
 );
 </script>
 
 <template>
-  <!-- Visa lista om det finns quiz -->
-  <ul class="quiz-list" v-if="items.length">
+  <ul
+    class="quiz-list"
+    v-if="items.length"
+    role="listbox"
+    aria-label="List of quizzes"
+  >
     <QuizItem
       v-for="q in items"
       :key="Number(q.id)"
@@ -28,17 +32,20 @@ const items = computed(() =>
     />
   </ul>
 
-  <!-- Om ingenting finns -->
-  <p v-else class="empty-text">
-    Quiz does not exist yet. Create one?
-  </p>
+  <p v-else class="empty-text">Quiz does not exist yet. Create one?</p>
 </template>
 
 <style scoped>
 .quiz-list {
   list-style: none;
   padding: 0;
+  padding-top: 12px;
+  padding-bottom: 12px;
   margin: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: baseline;
+  justify-content: center;
 }
 
 .empty-text {
