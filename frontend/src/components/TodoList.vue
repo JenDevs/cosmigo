@@ -114,17 +114,21 @@ ul li span:hover {
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useCosmigoStore } from "@/stores/useCosmigoStore";
+import { useUserStore } from "@/stores/useUserStore";
 const cosmigo = useCosmigoStore();
 
 const newTask = ref('')
 const tasks = ref([])
 const loading = ref(false)
 
+
+
 const mapTodo = r => ({
   id: r.todoId ?? Date.now() + Math.random(),
-  text: r.todoTitle ?? r.title ?? r.text ?? '',
+  text: r.todoTitle ?? r.title ?? r.text ?? "",
   done: !!(r.todoIsCompleted ?? r.completed ?? r.done),
-  todoId: r.todoId ?? r.id ?? null
+  todoId: r.todoId ?? r.id ?? null,
+  todoRewardedAt: r.todoRewardedAt ?? r.rewardedAt ?? null
 })
 
 function pickList(payload) {
@@ -138,19 +142,19 @@ function pickList(payload) {
 async function loadTasks() {
   loading.value = true
   try {
-    const res = await fetch('/api/todos/1')
+    const res = await fetch("/api/todos/1")
     if (!res.ok) throw new Error(await res.text())
     const payload = await res.json()
     const rows = pickList(payload)
     tasks.value = rows.map(mapTodo)
-    console.log('loaded', { payload, rows, tasks: tasks.value })
   } catch (e) {
-    console.error('load failed', e)
+    console.error("load failed", e)
     tasks.value = []
   } finally {
     loading.value = false
   }
 }
+
 
 onMounted(loadTasks)
 
@@ -171,7 +175,7 @@ async function addTask() {
     }
     const data = await res.json()
     tasks.value.push({
-      id: data.todoId ?? Date.now() + Math.random(),
+      id: data.todoId,
       text,
       done: false,
       todoId: data.todoId ?? null
@@ -200,7 +204,7 @@ async function completeTask(i) {
   if (!t) return;
 
   const prev = t.done;
-  t.done = !t.done;
+  t.done = !t.done; 
 
   // If user unticks task, stops animation immediatly
   if (!t.done && typeof cosmigo?.cancelTemp === "function") {
@@ -217,6 +221,8 @@ async function completeTask(i) {
   }
 
   try {
+    const shoudSetRewardedAt = t.done && !t.todoRewardedAt;
+    const rewardTime = shoudSetRewardedAt ? new Date().toISOString() : t.todoRewardedAt;
     const res = await fetch(`/api/todos/${t.todoId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -224,7 +230,8 @@ async function completeTask(i) {
         todoTitle: t.text,
         todoDescription: t.text,
         todoIsCompleted: t.done,
-      }),
+        todoRewardedAt : rewardTime,
+      }),      
     });
 
     if (!res.ok) {
@@ -232,17 +239,23 @@ async function completeTask(i) {
       t.done = prev;
       return;
     }
+
+    if (shoudSetRewardedAt) {
+      useUserStore().addXP("todo");
+      t.todoRewardedAt = rewardTime;
+    }
+
     // When user ticks task, cosmigo spins
     if (t.done && typeof cosmigo?.onCompletion === "function") {
       // ignore while active, or use restart:true to refresh one timer
+      
       cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
         restart: false,
-      });
+      });      
     }
   } catch (err) {
     console.error("Error updating todo completion:", err);
     t.done = prev;
   }
 }
-
 </script>
