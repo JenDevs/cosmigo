@@ -57,6 +57,40 @@ exports.createPomodoro = async (req, res) => {
     });
   }
 
+  if (
+    typeof duration !== "number" ||
+    isNaN(duration) ||
+    duration < 0.25 ||
+    duration > 120
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid duration: must be between 0.25 and 120 minutes",
+    });
+  }
+
+  if (!(completed === 0 || completed === 1)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid completed flag",
+    });
+  }
+
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  if (
+    !startTime ||
+    !endTime ||
+    isNaN(start.getTime()) ||
+    isNaN(end.getTime()) ||
+    start > end
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid time range",
+    });
+  }
+
   try {
     await pomodoroService.createPomodoro(
       sessionType,
@@ -94,6 +128,40 @@ exports.updatePomodoro = async (req, res) => {
     return res.status(400).json({
       success: false,
       error: "You must specify a session type for the pomodoro.",
+    });
+  }
+
+  if (
+    typeof duration !== "number" ||
+    isNaN(duration) ||
+    duration < 0.25 ||
+    duration > 120
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid duration: must be between 0.25 and 120 minutes",
+    });
+  }
+
+  if (!(completed === 0 || completed === 1)) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid completed flag",
+    });
+  }
+
+  const start = new Date(startTime);
+  const end = new Date(endTime);
+  if (
+    !startTime ||
+    !endTime ||
+    isNaN(start.getTime()) ||
+    isNaN(end.getTime()) ||
+    start > end
+  ) {
+    return res.status(400).json({
+      success: false,
+      error: "Invalid time range",
     });
   }
 

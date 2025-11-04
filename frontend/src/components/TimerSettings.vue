@@ -19,13 +19,13 @@ const tempValues = reactive ( {
 
 function applySettings() {
   const isValid =
-    tempValues.work >= 1 && tempValues.work <= 120 &&
-    tempValues.short >= 1 && tempValues.short <= 120 &&
-    tempValues.long >= 1 && tempValues.long <= 120 &&
+    tempValues.work >= 0.25 && tempValues.work <= 120 &&
+    tempValues.short >= 0.25 && tempValues.short <= 120 &&
+    tempValues.long >= 0.25 && tempValues.long <= 120 &&
     tempValues.every >= 1 && tempValues.every <= 10
 
   if(!isValid) {
-    alert('Please enter valid values(work/breaks: 1-120 min, session: 1-10)')
+    alert('Please enter valid values(work/breaks: 0.25-120 min, session: 1-10)')
   }
   
   emit('apply', tempValues
@@ -36,9 +36,9 @@ function applySettings() {
 <template>
   <div class="settingsFields">
     <h3>Settings</h3>
-    <label>Work: <input type="number" v-model.number="tempValues.work" min="1" /></label>
-    <label>Short break: <input type="number" v-model.number="tempValues.short" min="1" /></label>
-    <label>Long break: <input type="number" v-model.number="tempValues.long" min="1" /></label>
+    <label>Work: <input type="number" v-model.number="tempValues.work" min="0.25" /></label>
+    <label>Short break: <input type="number" v-model.number="tempValues.short" min="0.25" /></label>
+    <label>Long break: <input type="number" v-model.number="tempValues.long" min="0.25" /></label>
     <label>Long break every: <input type="number" v-model.number="tempValues.every" min="1" /></label>
     <div class="settingsButtons">
       <button @click="applySettings">Apply</button>

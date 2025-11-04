@@ -1,7 +1,6 @@
 const connectionMySQL = require("./../connectionMySQL");
 
 function getAllPomodoros() {
-  console.log("In getAllPomodoros service");
   return new Promise((resolve, reject) => {
     let sql = "SELECT * FROM pomodoro";
     connectionMySQL.query(sql, (err, rows) => {
@@ -11,7 +10,7 @@ function getAllPomodoros() {
       } else resolve(rows);
     });
   });
-}  
+}
 
 function getPomodoroById(id) {
   return new Promise((resolve, reject) => {
