@@ -136,7 +136,7 @@ async function save() {
 
   const payload = getCurrentQuizData();
   const userId = 1;
-  //const wasNew = !quiz.value.id;
+  const wasNew = !quiz.value.id;
 
   try {
     const res = await store.save(userId, payload);

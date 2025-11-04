@@ -7,6 +7,17 @@ export const useNotesStore = defineStore("notes", () => {
   const isSaving = ref(false);
   const mockUserId = 1;
 
+  function normalizeNotesResponse(raw) {
+    if (raw == null) return [];
+    if (Array.isArray(raw)) return raw;
+    if (Array.isArray(raw.data)) return raw.data;
+    if (Array.isArray(raw.notes)) return raw.notes;
+    if (typeof raw === "object" && (raw.noteId != null || raw.id != null)) {
+      return [raw];
+    }
+    return [];
+  }
+
   async function fetchNotes() {
     try {
       const res = await fetch(`/api/users/1/notes`);
@@ -18,21 +29,35 @@ export const useNotesStore = defineStore("notes", () => {
         }
         throw new Error(await res.text());
       }
-      const raw = await res.json();
-      notes.value = raw.map((n) => ({
-        //raw iffy
-        id: n.noteId,
-        title: n.noteTitle,
-        content: n.noteContent,
-        userId: n.userId,
-        updatedAt: n.updatedAt ? new Date(n.updatedAt).getTime() : 0,
-      }));
-      notes.value.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
-      console.log("Fetched Notes:", notes.value);
+
+      let raw;
+      try {
+        raw = await res.json();
+      } catch (e) {
+        console.error("Failed to parse JSON from /notes:", e);
+        raw = null;
+      }
+
+      const list = normalizeNotesResponse(raw);
+
+      const mapped = list
+        .map((n) => ({
+          id: n.noteId ?? n.id ?? null,
+          title: n.noteTitle ?? n.title ?? "",
+          content: n.noteContent ?? n.content ?? "",
+          userId: n.userId ?? n.user_id ?? 1,
+          updatedAt: n.updatedAt ? new Date(n.updatedAt).getTime() : 0,
+        }))
+        .filter((n) => n.id != null); // prevent shady notes
+
+      mapped.sort((a, b) => (b.updatedAt ?? 0) - (a.updatedAt ?? 0));
+
+      notes.value = mapped;
+      console.log("Fetched Notes (normalized):", notes.value);
+
       const prevId = activeNote.value?.id;
-      if (prevId) {
-        const found = notes.value.find((n) => n.id === prevId);
-        activeNote.value = found || notes.value[0] || null;
+      if (prevId && notes.value.some((n) => n.id === prevId)) {
+        activeNote.value = notes.value.find((n) => n.id === prevId) || null;
       } else {
         activeNote.value = notes.value[0] || null;
       }
@@ -42,6 +67,7 @@ export const useNotesStore = defineStore("notes", () => {
       activeNote.value = null;
     }
   }
+
   onMounted(fetchNotes);
 
   async function createNote() {
