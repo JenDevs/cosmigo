@@ -151,7 +151,7 @@ button {
   position: fixed;
   top: 16px;       
   right: 16px;    
-  z-index: 999999; 
+  z-index: 1050; 
   background: none;
   padding: 0;
   margin: 0;
@@ -279,9 +279,6 @@ button {
     position: fixed;
     z-index: 1000;
   }
-
-  
-
 }
 
 </style>
