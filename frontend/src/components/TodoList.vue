@@ -1,24 +1,47 @@
-<!-- HTML -->
-
 <template>
   <div class="todoList">
-    <h2>My To-Dos <img src="../assets/images/notepad.png" width="100%" height="100%" /></h2>
+    <h2>
+      My To-Dos
+      <img src="../assets/images/notepad.png" width="100%" height="100%" />
+    </h2>
+
     <div class="row">
-      <input type="text" id="inputBox" placeholder="Write a new task here" v-model="newTask" @keyup.enter="addTask" />
+      <input
+        type="text"
+        id="inputBox"
+        placeholder="Write a new task here"
+        v-model="newTask"
+        @keyup.enter="addTask"
+      />
       <button @click="addTask">Add</button>
     </div>
-<ul id="listContainer">
-  <li v-for="(t, i) in tasks" :key="t.id" :class="{ checked: t.done }">
-    <span @click="completeTask(i)" class="todo-text">{{ t.text }}</span>
-    <img src="../assets/images/xpix.svg" alt="" width="10%" height="1%" @click.stop="removeTask(i)" />
 
-  </li>
-</ul>
-<p v-if="!loading && tasks.length === 0">No tasks found</p>
+    <div class="todo-scroll">
+      <div class="edge-fade top" aria-hidden="true"></div>
+
+      <ul id="listContainer" role="list" aria-label="To-do items">
+        <li
+          v-for="(t, i) in tasks"
+          :key="t.id"
+          :class="{ checked: t.done }"
+          @click="completeTask(i)"
+        >
+          <span class="todo-text">{{ t.text }}</span>
+          <img
+            src="../assets/images/xpix.svg"
+            alt="Delete"
+            width="16"
+            height="16"
+            @click.stop="removeTask(i)"
+          />
+        </li>
+      </ul>
+
+      <p v-if="!loading && tasks.length === 0">No tasks found</p>
+      <div class="edge-fade bottom" aria-hidden="true"></div>
+    </div>
   </div>
 </template>
-
-<!-- CSS -->
 
 <style scoped>
 .todoList {
@@ -28,6 +51,7 @@
   color: white;
   margin-top: 16px;
 }
+
 .todoList h2 {
   background-color: rgb(92, 0, 0);
   padding: 8px 16px;
@@ -40,10 +64,12 @@
   white-space: nowrap;
   font-size: 1.5rem;
 }
+
 .todoList h2 img {
   height: 2em;
   width: auto;
 }
+
 .todoList .row {
   display: flex;
   align-items: center;
@@ -51,6 +77,7 @@
   gap: 8px;
   margin-bottom: 16px;
 }
+
 .todoList input[type="text"] {
   flex: 1;
   padding: 8px;
@@ -58,7 +85,9 @@
   border-radius: 4px;
   background-color: rgba(0, 0, 0, 0.1);
   outline: none;
+  color: #222;
 }
+
 button {
   padding: 8px 16px;
   border: none;
@@ -66,103 +95,185 @@ button {
   background: pink;
   color: black;
   cursor: pointer;
+  transition: background 0.2s ease;
 }
-ul li {
+
+button:hover {
+  background: rgb(255, 200, 200);
+}
+
+.todo-scroll {
+  --row-h: 48px;
+  --visible-rows: 3;
+  --ul-pad: 12px;
+
+  max-height: calc(var(--visible-rows) * var(--row-h) + 2 * var(--ul-pad));
+  overflow: auto;
+  scrollbar-width: none;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.edge-fade {
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.edge-fade.top {
+  top: 0;
+  margin-bottom: -20px;
+  background: radial-gradient(
+    ellipse 80% 70% at 50% -40%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.28) 45%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+.edge-fade.bottom {
+  bottom: 0;
+  margin-top: -20px;
+  background: radial-gradient(
+    ellipse 80% 65% at 50% 140%,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.24) 40%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+#listContainer {
+  list-style: none;
+  padding: var(--ul-pad);
+  margin: 0;
+}
+
+#listContainer > li {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  list-style: none;
-  user-select: none;
+  min-height: var(--row-h);
+  line-height: var(--row-h);
+  padding-left: 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 8px;
   cursor: pointer;
-  position: relative;
+  color: #222;
+  background: transparent;
+  user-select: none;
+  transition: background 0.15s ease;
 }
-ul li::before {
+
+#listContainer > li:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+#listContainer > li.checked:hover {
+  background-color: rgba(0, 179, 45, 0.1);
+}
+
+/* bullet / checkmark */
+#listContainer > li::before {
   content: "•";
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
   color: white;
-  display: inline-block;
-  width: 1em;
-  margin-left: -1em;
-  background-size: cover;
-  background-position: center;
+  line-height: 1;
 }
-ul li.checked {
-  color: rgba(255, 255, 255, 0.6);
-  text-decoration: line-through;
-}
-ul li.checked::before {
+
+#listContainer > li.checked::before {
   content: "✓";
   color: rgb(0, 179, 45);
+  font-weight: bold;
 }
-ul li span {
+
+.todo-text {
   flex: 1;
   margin-left: 8px;
-  color: #555555;
-  line-height: 40px;
   text-align: left;
-  border-radius: 0;
+  color: #222;
+  transition: color 0.15s ease;
 }
-/* hover on tasks text*/
-ul li span:hover {
-  background-color: transparent;
-  color: #222222;
+
+#listContainer > li.checked .todo-text {
+  color: rgba(0, 0, 0, 0.45);
+  text-decoration: line-through;
+}
+
+#listContainer > li img {
+  width: 16px;
+  height: 16px;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+#listContainer > li img:hover {
+  opacity: 1;
 }
 </style>
 
-<!-- Script -->
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted } from "vue";
 import { useCosmigoStore } from "@/stores/useCosmigoStore";
 import { useUserStore } from "@/stores/useUserStore";
 const cosmigo = useCosmigoStore();
 
-const newTask = ref('')
-const tasks = ref([])
-const loading = ref(false)
+const newTask = ref("");
+const tasks = ref([]);
+const loading = ref(false);
 
-
-
-const mapTodo = r => ({
+const mapTodo = (r) => ({
   id: r.todoId ?? Date.now() + Math.random(),
   text: r.todoTitle ?? r.title ?? r.text ?? "",
   done: !!(r.todoIsCompleted ?? r.completed ?? r.done),
   todoId: r.todoId ?? r.id ?? null,
-  todoRewardedAt: r.todoRewardedAt ?? r.rewardedAt ?? null
-})
+  todoRewardedAt: r.todoRewardedAt ?? r.rewardedAt ?? null,
+});
 
 function pickList(payload) {
-  if (Array.isArray(payload)) return payload
-  if (Array.isArray(payload.data)) return payload.data
-  if (Array.isArray(payload.items)) return payload.items
-  if (Array.isArray(payload.todos)) return payload.todos
-  return []
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload.data)) return payload.data;
+  if (Array.isArray(payload.items)) return payload.items;
+  if (Array.isArray(payload.todos)) return payload.todos;
+  return [];
 }
 
 async function loadTasks() {
-  loading.value = true
+  loading.value = true;
   try {
-    const res = await fetch("/api/todos/1")
-    if (!res.ok) throw new Error(await res.text())
-    const payload = await res.json()
-    const rows = pickList(payload)
-    tasks.value = rows.map(mapTodo)
+    const res = await fetch("/api/todos/1");
+    if (!res.ok) throw new Error(await res.text());
+    const payload = await res.json();
+    const rows = pickList(payload);
+    tasks.value = rows.map(mapTodo);
+    console.log("loaded", { payload, rows, tasks: tasks.value });
   } catch (e) {
-    console.error("load failed", e)
-    tasks.value = []
+    console.error("load failed", e);
+    tasks.value = [];
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
-
-onMounted(loadTasks)
+onMounted(loadTasks);
 
 async function addTask() {
-  const text = newTask.value.trim()
-  if (!text) return
-  newTask.value = ''
-  const payload = { userId: 1, todoTitle: text, todoDescription: text, todoIsCompleted: false }
+  const text = newTask.value.trim();
+  if (!text) return;
+  newTask.value = "";
+  const payload = {
+    userId: 1,
+    todoTitle: text,
+    todoDescription: text,
+    todoIsCompleted: false,
+  };
   try {
     const res = await fetch("/api/todos", {
       method: "POST",
@@ -173,13 +284,13 @@ async function addTask() {
       console.error("Failed to create todo", await res.text());
       return;
     }
-    const data = await res.json()
+    const data = await res.json();
     tasks.value.push({
       id: data.todoId,
       text,
       done: false,
-      todoId: data.todoId ?? null
-    })
+      todoId: data.todoId ?? null,
+    });
   } catch (err) {
     console.error(err);
   }
@@ -204,7 +315,7 @@ async function completeTask(i) {
   if (!t) return;
 
   const prev = t.done;
-  t.done = !t.done; 
+  t.done = !t.done;
 
   // If user unticks task, stops animation immediatly
   if (!t.done && typeof cosmigo?.cancelTemp === "function") {
@@ -222,7 +333,9 @@ async function completeTask(i) {
 
   try {
     const shoudSetRewardedAt = t.done && !t.todoRewardedAt;
-    const rewardTime = shoudSetRewardedAt ? new Date().toISOString() : t.todoRewardedAt;
+    const rewardTime = shoudSetRewardedAt
+      ? new Date().toISOString()
+      : t.todoRewardedAt;
     const res = await fetch(`/api/todos/${t.todoId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -230,8 +343,8 @@ async function completeTask(i) {
         todoTitle: t.text,
         todoDescription: t.text,
         todoIsCompleted: t.done,
-        todoRewardedAt : rewardTime,
-      }),      
+        todoRewardedAt: rewardTime,
+      }),
     });
 
     if (!res.ok) {
@@ -248,10 +361,10 @@ async function completeTask(i) {
     // When user ticks task, cosmigo spins
     if (t.done && typeof cosmigo?.onCompletion === "function") {
       // ignore while active, or use restart:true to refresh one timer
-      
+
       cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
         restart: false,
-      });      
+      });
     }
   } catch (err) {
     console.error("Error updating todo completion:", err);
