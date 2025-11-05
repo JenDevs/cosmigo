@@ -63,9 +63,9 @@ fetchStats();
        <!-- Popup -->
     <div v-if="showStats" class="overlay" @click.self="showStats = false">
       <div class="modal">
-        <h3>Din statistik</h3>
+        <h3>My Stats</h3>
 
-        <div v-if="loading">Laddar...</div>
+        <div v-if="loading">Loading...</div>
         <div v-else-if="error" class="error">{{ error }}</div>
         <div v-else-if="stats">
           <p><strong>Pomodoros:</strong> {{ stats.totalPomodoro }}</p>
