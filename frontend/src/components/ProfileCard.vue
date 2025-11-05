@@ -45,6 +45,7 @@ fetchStats();
 <template>
   <div id="profile-card">
     <Cosmigo />
+
     <p id="username">@{{ username }}</p>
 
  <!-- Stats-knapp -->

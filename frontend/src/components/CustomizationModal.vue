@@ -1,22 +1,29 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { storeToRefs } from "pinia";
 import { useCosmigoStore } from "@/stores/useCosmigoStore";
 import { COSMIGO_REWARDS } from "@/constants/cosmigoRewards";
 
 const cosmigo = useCosmigoStore();
-const emit = defineEmits(["close"]);
+const { unlocked, equippedKey } = storeToRefs(cosmigo);
 
-const selectedKey = ref(cosmigo.equippedKey); // preselect current
+onMounted(() => {
+  cosmigo.fetchProfile().catch(() => {});
+});
+
+const selectedKey = ref(null);
+watch(equippedKey, (v) => (selectedKey.value = v), { immediate: true });
+
 const unlockedItems = computed(() =>
-  (cosmigo.unlocked || [])
-    .map((key) => ({ key, ...COSMIGO_REWARDS[key] }))
+  (unlocked.value || [])
+    .map((key) => ({ key, ...(COSMIGO_REWARDS[key] || {}) }))
     .filter((x) => x.src)
 );
 
 async function onEquip() {
   if (!selectedKey.value) return;
-  await cosmigo.equip(selectedKey.value); // updates DB (equipped_key) + store
-  emit("close");
+  await cosmigo.equip(selectedKey.value);
+  // or auto close -> emit("close");
 }
 
 function closeModal() {
@@ -29,6 +36,8 @@ function onKeyDown(e, key) {
     selectedKey.value = key;
   }
 }
+
+const emit = defineEmits(["close"]);
 </script>
 
 <template>

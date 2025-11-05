@@ -19,17 +19,15 @@ function ensureRow(userId) {
 
 function normalizeUnlocked(val) {
   try {
-    if (Array.isArray(val)) return val; // already parsed somehow
-    if (val && typeof val === "object") return val; // JSON already parsed to object
+    if (Array.isArray(val)) return val;
+    if (val && typeof val === "object") return val;
 
     if (typeof val === "string") {
       const s = val.trim();
-      // If proper JSON array/object string, parse it
       if (s.startsWith("[") || s.startsWith("{") || s.startsWith('"')) {
         const parsed = JSON.parse(s);
         return Array.isArray(parsed) ? parsed : [parsed];
       }
-      // Fallback: treat as a single key
       return s ? [s] : [];
     }
   } catch (_) {}
@@ -45,7 +43,6 @@ function getProfile(userId) {
         if (err) return reject(err);
         const row = rows && rows[0];
         if (!row) {
-          // last resort create (shouldn’t happen, but avoids 500)
           return resolve({
             userId,
             unlocked: [],
@@ -66,7 +63,6 @@ function getProfile(userId) {
   });
 }
 
-// Add key only if not present
 function unlockKey(userId, key) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -74,9 +70,9 @@ function unlockKey(userId, key) {
       const sql = `
         UPDATE Cosmigo
         SET unlocked = IF(
-          JSON_CONTAINS(unlocked, JSON_QUOTE(?)),
+          JSON_SEARCH(unlocked, 'one', ?) IS NOT NULL,
           unlocked,
-          JSON_ARRAY_APPEND(unlocked, '$', JSON_QUOTE(?))
+          JSON_ARRAY_APPEND(unlocked, '$', ?)
         )
         WHERE userId = ?;
       `;
