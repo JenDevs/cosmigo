@@ -444,4 +444,35 @@ input:checked + .slider:before {
     margin-left: 0;
   }
 }
+
+@media (max-width: 768px) {
+  .quiz-layout {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .editor-panel,
+  .quizzes-container {
+    width: 90% !important;
+    max-width: 380px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    border-radius: 10px !important;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-sizing: border-box;
+  }
+
+  .editor-panel {
+    border-right: none !important;
+  }
+
+  .quizzes-container {
+    margin-top: 0.5rem !important;
+  }
+
+}
+
 </style>

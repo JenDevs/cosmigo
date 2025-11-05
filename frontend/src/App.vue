@@ -180,6 +180,7 @@ button {
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
   }
 
   .sidebar {
@@ -229,27 +230,31 @@ button {
     gap: 1rem;
     width: 100%;
   }
-
-  .editor-panel {
-    width: 95%;
-    max-width: 50px;
+  
+  .editor-panel,
+  .quizzes-container {
+    width: 90%;
+    max-width: 370px;
     background-color: rgba(255, 255, 255, 0.08);
     border-radius: 10px;
-    border-right: none;
+    margin-left: auto;
+    margin-right: auto;
     padding: 1rem;
     box-sizing: border-box;
   }
-
-    .quizzes-container {
-    width: 95%;
-    max-width: 365px;
-    background-color: rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
-    margin: 0 auto;
-    padding: 1rem;
-    box-sizing: border-box;
+  
+   .editor-panel {
+    border: none !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
   }
-
+  
+  .quizzes-container {
+    border: none !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
   .quizzes-header {
     border-radius: 8px;
     background: rgba(0, 0, 0, 0.2);
@@ -258,7 +263,7 @@ button {
 
   .quiz-editor {
     width: 95% !important;
-    max-width: 300px !important;
+    max-width: 450px !important;
     margin: 40px auto 0 !important;
     padding: 14px !important;
     background-color: #56565c !important;
@@ -274,6 +279,9 @@ button {
     position: fixed;
     z-index: 1000;
   }
+
+  
+
 }
 
 </style>
