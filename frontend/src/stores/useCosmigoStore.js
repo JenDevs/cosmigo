@@ -1,12 +1,24 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
+import { COSMIGO_REWARDS, CR_BUNDLED } from "@/constants/cosmigoRewards";
+
+function sanitizeKey(k) {
+  if (typeof k !== "string") return k;
+  if (k.length >= 2 && k[0] === '"' && k[k.length - 1] === '"') {
+    try {
+      return JSON.parse(k);
+    } catch {
+      return k.replace(/"/g, "");
+    }
+  }
+  return k;
+}
 
 export const useCosmigoStore = defineStore("cosmigo", () => {
   const mockUserId = 1;
   const unlocked = ref([]);
   const equippedKey = ref(null);
 
-  // Temp animation state
   let tempTimer = null;
   const tempActive = ref(false);
   const baseKey = ref(null);
@@ -30,54 +42,69 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
       const res = await fetch(`/api/users/${mockUserId}/cosmigo`);
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      unlocked.value = data.unlocked ?? [];
-      equippedKey.value = data.equippedKey ?? null;
+
+      const safe = Array.isArray(data.unlocked)
+        ? data.unlocked.map(sanitizeKey)
+        : [];
+      unlocked.value = safe;
+      equippedKey.value = sanitizeKey(data.equippedKey ?? null);
     } catch (err) {
       console.error("Failed to fetch Cosmigo profile:", err);
     }
   }
 
   async function unlock(key) {
-    // skip if already unlocked
-    if (unlocked.value.includes(key)) return;
+    const clean = sanitizeKey(key);
 
-    // optimistic update
-    unlocked.value.push(key);
+    if (unlocked.value.includes(clean)) return;
+
+    unlocked.value = [...unlocked.value, clean];
 
     try {
       const res = await fetch(`/api/users/${mockUserId}/cosmigo/unlock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
+        body: JSON.stringify({ key: clean }),
       });
       if (!res.ok) throw new Error(await res.text());
       const data = await res.json();
-      unlocked.value = data.unlocked ?? [];
+
+      const safe = Array.isArray(data.unlocked)
+        ? data.unlocked.map(sanitizeKey)
+        : [];
+      unlocked.value = safe;
     } catch (err) {
       console.error("Unlock failed:", err);
-      // rollback
-      unlocked.value = unlocked.value.filter((k) => k !== key);
+      unlocked.value = unlocked.value.filter((k) => k !== clean);
+    }
+  }
+
+  async function grantLevelRewards(level) {
+    const bundle = CR_BUNDLED[level] ?? [];
+    for (const key of bundle) {
+      await unlock(key);
     }
   }
 
   async function equip(key) {
-    const previous = equippedKey.value;
-    equippedKey.value = key;
+    const clean = sanitizeKey(key);
+    const prev = equippedKey.value;
+    equippedKey.value = clean;
     try {
       const res = await fetch(`/api/users/${mockUserId}/cosmigo/equip`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key }),
+        body: JSON.stringify({ key: clean }),
       });
       if (!res.ok) throw new Error(await res.text());
     } catch (err) {
       console.error("Equip failed:", err);
-      equippedKey.value = previous; // rollback
+      equippedKey.value = prev;
     }
   }
 
   function hasKey(key) {
-    return unlocked.value.includes(key);
+    return unlocked.value.includes(sanitizeKey(key));
   }
 
   function onCompletion(
@@ -87,16 +114,14 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
   ) {
     const now = Date.now();
 
-    // Cooldown to avoid spam
     if (!tempActive.value && now - lastTempAt < cooldownMs) return;
 
     if (tempActive.value) {
-      // Already showing: either ignore, or restart the ONE timer
       if (restart) {
         if (tempTimer) clearTimeout(tempTimer);
         tempTimer = setTimeout(endTemp, duration);
       }
-      return; // don't create new timers
+      return;
     }
 
     baseKey.value = equippedKey.value;
@@ -107,7 +132,23 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     tempTimer = setTimeout(endTemp, duration);
   }
 
-  // Cancel gif animation on task untick
+  function onLevelUp(duration = 1200, { interrupt = true } = {}) {
+    const levelUpKey = Object.keys(COSMIGO_REWARDS).find(
+      (k) => k === "cosmigo_levelup"
+    );
+
+    if (!levelUpKey) {
+      console.warn("[Cosmigo] Missing cosmigo_levelup key in COSMIGO_REWARDS");
+      return;
+    }
+
+    if (interrupt && tempActive.value) {
+      endTemp();
+    }
+
+    onCompletion(levelUpKey, duration, { cooldownMs: 0, restart: false });
+  }
+
   function cancelTemp() {
     endTemp();
   }
@@ -120,6 +161,8 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
     equip,
     hasKey,
     onCompletion,
+    onLevelUp,
     cancelTemp,
+    grantLevelRewards,
   };
 });
