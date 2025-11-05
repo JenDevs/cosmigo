@@ -105,7 +105,7 @@ function onKey(e) {
   if (e.key === "ArrowRight") { e.preventDefault(); next(); }
   if (e.key === "ArrowLeft")  { e.preventDefault(); prev(); }
   if (e.key.toLowerCase() === "f" || e.key === " ") { e.preventDefault(); flip(); }
-  if (e.key.toLowerCase() === "r") { e.preventDefault(); reshuffle(); } 
+  if (e.key.toLowerCase() === "r" && props.randomize) { e.preventDefault(); reshuffle(); } 
 }
 
 onMounted(() => window.addEventListener("keydown", onKey));
@@ -128,7 +128,7 @@ function flip() { showAnswer.value = !showAnswer.value; }
 // Slutprompt-knappar
 function doAgain() {
   // Slumpa endast om användaren tidigare valt att slumpa och det är tillåtet
-  if (props.reshuffleOnRestart && lastShuffled.value) buildOrder({ shuffle: true });
+  if (props.randomize && props.reshuffleOnRestart && lastShuffled.value) buildOrder({ shuffle: true });
   idx.value = 0;
   showAnswer.value = false;
   showEndPrompt.value = false;
@@ -166,7 +166,7 @@ async function markDone() {
       <div class="actions">
         <button @click="prev" :disabled="!canPrev" title="Previous (<)">◀</button>
         <button @click="flip" title="Flip for answer (Space/F)">↻</button>
-        <button class="shuffle" @click="reshuffle" title="Shuffle cards (R)">🔀</button>
+        <button v-if="props.randomize && total > 1" class="shuffle" @click="reshuffle" title="Shuffle cards (R)" >🔀</button>
         <button @click="next" :disabled="!hasQuestions" title="Next (>)">{{ isLast ? "Avsluta" : "▶" }}</button>
       </div>
     </div>
