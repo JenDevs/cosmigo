@@ -26,6 +26,9 @@ app.use("/api/pomodoro", pomodoroRoutes);
 const cosmigoRoutes = require("./routes/cosmigoRoutes");
 app.use(cosmigoRoutes);
 
+const statisticRoutes = require("./routes/statisticRoutes");
+app.use(statisticRoutes);
+
 // felhanterare
 app.use((req, res, next) => {
   console.log(` ${req.method} ${req.url}`);
