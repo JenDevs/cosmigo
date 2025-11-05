@@ -177,7 +177,6 @@ button {
     padding: 8px;
     width: 45px;
     height: 45px;
-    display: flex;
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
