@@ -17,6 +17,7 @@ onMounted(() => {
 <template>
   <div id="profile-card">
     <Cosmigo />
+
     <p id="username">@{{ username }}</p>
 
     <ProgressBar :value="progress" class="xp-bar" />
