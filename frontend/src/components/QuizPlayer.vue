@@ -175,7 +175,7 @@ async function markDone() {
     <div v-if="showEndPrompt" class="modal-backdrop">
       <div class="modal">
         <h4>Finished?</h4>
-        <p>Vill du arkivera, köra igen eller bara avsluta?</p>
+        <p>Would you like to archive your quiz, do it again or exit?</p>
         <div class="modal-actions">
           <button @click="doAgain">Do it again!</button>
           <button class="primary" @click="markDone">Done and archive the quiz</button>
