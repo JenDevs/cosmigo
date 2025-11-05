@@ -42,7 +42,7 @@ function updateNote(noteId, userId, noteTitle, noteContent) {
   return new Promise((resolve, reject) => {
     const sqlUpdate = `
       UPDATE Note
-      SET noteTitle = ?, noteContent = ?, updatedAt = CURRENT_TIMESTAMP
+      SET noteTitle = ?, noteContent = ?, updatedAt = UTC_TIMESTAMP()
       WHERE noteId = ? AND userId = ?
     `;
     const params = [noteTitle, noteContent, Number(noteId), Number(userId)];
@@ -53,7 +53,7 @@ function updateNote(noteId, userId, noteTitle, noteContent) {
         return reject(new Error("Note not found or not authorized"));
 
       const sqlSelect = `
-        SELECT noteId, userId, noteTitle, noteContent, updatedAt
+        SELECT noteId, userId, noteTitle, noteContent, DATE_FORMAT(updatedAt, '%Y-%m-%dT%H:%i:%sZ') AS updatedAt
         FROM Note
         WHERE noteId = ? AND userId = ?
       `;
