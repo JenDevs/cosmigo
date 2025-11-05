@@ -3,15 +3,43 @@ import ProgressBar from "primevue/progressbar";
 import Cosmigo from "./Cosmigo.vue";
 import { useUserStore } from "@/stores/useUserStore";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios";
 
 const userStore = useUserStore();
 const { username, level, xp, xpToNextLevel, progress } = storeToRefs(userStore);
 const { LEVELS, fetchUser } = userStore;
 
+// popup (statestik)
+const showStats = ref(false);
+const stats = ref(null);
+const loading = ref(false);
+const error = ref(null);
+
 onMounted(() => {
   fetchUser();
 });
+
+//hämta statestik från backend
+async function fetchStats() {
+  try {
+    loading.value = true;
+    error.value = null;
+    const res = await axios.get(`http://localhost:3000/api/statistics/${userStore.userId}`);
+    stats.value = res.data;
+  } catch (err) {
+   console.error(err);
+   error.value = "Could not get stats";
+   } finally {
+    loading.value = false;
+  }
+}
+
+function openStats() {
+showStats.value = true;
+fetchStats();
+}
+
 </script>
 
 <template>
@@ -20,17 +48,40 @@ onMounted(() => {
 
     <p id="username">@{{ username }}</p>
 
+ <!-- Stats-knapp -->
+    <button @click="openStats" class="statButton">
+      <img src="@/assets/icons/badge-info.svg" alt="Show stats" class="statsIcon" />
+    </button>
+
     <ProgressBar :value="progress" class="xp-bar" />
 
     <div class="stats-row">
       <small id="level">Level: {{ level }}</small>
       <small id="xp">{{ xp }} / {{ LEVELS[level + 1] || xp }} XP</small>
+      </div>
+
+       <!-- Popup -->
+    <div v-if="showStats" class="overlay" @click.self="showStats = false">
+      <div class="modal">
+        <h3>My Stats</h3>
+
+        <div v-if="loading">Loading...</div>
+        <div v-else-if="error" class="error">{{ error }}</div>
+        <div v-else-if="stats">
+          <p><strong>Pomodoros:</strong> {{ stats.totalPomodoro }}</p>
+          <p><strong>Todos:</strong> {{ stats.completedTodos }}</p>
+          <p><strong>Quiz:</strong> {{ stats.completedQuizzes }}</p>
+        </div>
+
+        <button @click="showStats = false" class="close-btn">Close</button>
     </div>
+  </div>
   </div>
 </template>
 
 <style scoped>
 #profile-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -57,6 +108,16 @@ onMounted(() => {
   user-select: all;
 }
 
+/* statbutton */
+.statButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+  transform: translateY(2px); 
+  position: static;          
+}
+
 .xp-bar {
   width: 100%;
   margin-bottom: 6px;
@@ -67,5 +128,60 @@ onMounted(() => {
   justify-content: space-between;
   width: 100%;
   font-size: 0.9em;
+}
+
+/* Modal overlay */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Modal box */
+.modal {
+  background: #1e1e1e;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.3s ease;
+}
+
+.close-btn {
+  margin-top: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.statsIcon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
 }
 </style>
