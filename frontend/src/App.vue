@@ -205,14 +205,56 @@ button {
   .workspace {
     flex: 1;
     margin-left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 80px;
   }
   
   .note-view,
   .quiz-view {
-    max-width: 95%;
+    width: 95%;
+    max-width: 700px;
     height: auto;
     min-height: 70vh;
     font-size: 0.95rem;
+    margin: 0 auto;
+    border-radius: 10px;
+  }
+
+   .quiz-layout {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .editor-panel {
+    width: 95%;
+    max-width: 50px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    border-right: none;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+    .quizzes-container {
+    width: 95%;
+    max-width: 365px;
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    margin: 0 auto;
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+
+  .quizzes-header {
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 10px;
   }
 
   .quiz-editor {
