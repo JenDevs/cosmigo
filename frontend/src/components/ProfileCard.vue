@@ -136,10 +136,22 @@ function openStats() {
   transition: transform 0.2s ease;
 }
 
+/* XP-bar */
 .xp-bar {
   width: 100%;
   margin-bottom: 6px;
+  background-color: rgba(0,0,0, 0.2);
 }
+.xp-bar:deep(.p-progressbar-value){ 
+  background:#763cff; 
+}
+.xp-bar:deep(.p-progressbar){ 
+  background:rgba(255,255,255,.12); 
+}
+.xp-bar:deep(.p-progressbar-label){ 
+  color:#fff; 
+}
+
 
 .stats-row {
   display: flex;

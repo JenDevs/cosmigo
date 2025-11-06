@@ -1,5 +1,3 @@
-
-
 <script setup>
 import { ref } from 'vue';
 import PomodoroTimer from './components/PomodoroTimer.vue'
@@ -13,11 +11,7 @@ const showSidebar = ref(true);
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value;
 }
-
-
-
 </script>
-
 <template>
 
   <button class="toggleSidebarButton" @click="toggleSidebar">
@@ -65,7 +59,25 @@ body {
   padding: 0;
   background-color: #2b2b2b; 
   color: #fff;
-  font-family: system-ui, sans-serif
+  font-family: system-ui, sans-serif;
+  /* cursor*/ 
+  cursor: url('/src/assets/cursor/pcursor.png') 64 64 , auto;
+}
+
+#cursor {
+    position: fixed;
+    z-index: 1000001;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    will-change: transform;
+    transform: translate(-50%, -50%);
+}
+
+#cursor png {
+    width: 20px;
+    height: 20px;
+    transition: 0.3s;
 }
 
 .layout {

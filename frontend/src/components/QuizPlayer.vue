@@ -197,13 +197,13 @@ async function markDone() {
   justify-content:center;
   z-index: 50;
 }
-.card {
-  width: min(720px, 92vw);
-  background:#2b2b2f;
-  color:#fff;
-  border-radius:12px;
-  padding:16px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+.card { 
+  width: min(720px, 92vw); 
+  background:rgb(20, 16, 34); 
+  color:#fff; 
+  border-radius:12px; 
+  padding:16px; 
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4); 
 }
 .header {
   display:flex;
@@ -224,15 +224,15 @@ async function markDone() {
   opacity:.8;
   margin:6px 0 12px;
 }
-.flashcard {
-  background:#3a3a40;
-  border-radius:12px;
-  min-height:220px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  text-align:center;
+.flashcard { 
+  background:rgb(67, 56, 104); 
+  border-radius:12px; 
+  min-height:220px; 
+  display:flex; 
+  align-items:center; 
+  justify-content:center; 
+  padding:16px; 
+  text-align:center; 
 }
 .question, .answer {
   font-size:3rem;
@@ -245,13 +245,13 @@ async function markDone() {
   justify-content:center;
   margin-top:12px;
 }
-.actions button {
-  background:#555;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:8px 14px;
-  cursor:pointer;
+.actions button { 
+  background:#524e64; 
+  color:#fff; 
+  border:none; 
+  border-radius:8px; 
+  padding:8px 14px; 
+  cursor:pointer; 
 }
 .actions button:disabled {
   opacity:.5;

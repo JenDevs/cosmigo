@@ -65,7 +65,7 @@ async function searchAndScroll() {
   width: 360px;
 
   height: 100%;
-  background-color: rgb(63, 63, 70);
+  background-color:rgb(13, 9, 27);
   padding: 12px;
   gap: 8px;
   min-height: 0;
@@ -89,7 +89,7 @@ async function searchAndScroll() {
 }
 
 .new-note-btn {
-  background-color: #4caf50;
+  background-color: rgb(37, 18, 73);
   color: white;
   flex-grow: 1;
   height: 30px;
@@ -98,8 +98,13 @@ async function searchAndScroll() {
   cursor: pointer;
   user-select: none;
 }
+.new.note-btn:hover {
+  background-color: rgb(48, 23, 94);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
 .new-note-btn:active {
-  background-color: #43a346;
+  background-color: rgb(61, 31, 117);
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.3);
   transition: all 0.1s ease;
 }

@@ -289,7 +289,7 @@ function handleRestart() {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  background-color: rgb(42, 42, 48);
+  background-color: rgb(13, 9, 27);
   padding-top: 124px;
   min-height: 100%;
 }
@@ -333,7 +333,7 @@ function handleRestart() {
   content: "";
   height: 100%;
   width: 50%;
-  background-color: rgb(211, 211, 211);
+  background-color: rgb(232, 214, 252);
   border-radius: 8px;
   transition: transform 0.4s;
   transform: translateX(0);
@@ -456,7 +456,7 @@ input:checked + .slider:before {
 }
 
 .btn {
-  background: rgb(15, 137, 238);
+  background: rgb(53, 44, 87);
   color: #fff;
   border: none;
   border-radius: 4px;
