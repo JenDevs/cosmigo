@@ -123,7 +123,7 @@ function openStats() {
 
 /* statbutton */
 .statButton {
-  background-color: white;
+  background-color: rgba(197, 187, 209, 0.9);
   border: 2px solid black;
   border-radius: 50%;
   width: 38px;
@@ -135,6 +135,10 @@ function openStats() {
   cursor: pointer;
   transition: transform 0.2s ease;
 }
+.statButton:hover {
+  transform: scale(1.035);
+  background-color: rgb(204, 193, 216);
+}
 
 /* XP-bar */
 .xp-bar {
@@ -143,7 +147,7 @@ function openStats() {
   background-color: rgba(0,0,0, 0.2);
 }
 .xp-bar:deep(.p-progressbar-value){ 
-  background:#763cff; 
+  background:#a782fd; 
 }
 .xp-bar:deep(.p-progressbar){ 
   background:rgba(255,255,255,.12); 
@@ -176,7 +180,7 @@ function openStats() {
 
 /* Modal box */
 .modal {
-  background: #1e1e1e;
+  background: rgb(36, 28, 51);
   color: white;
   padding: 1.5rem;
   border-radius: 12px;
@@ -188,7 +192,7 @@ function openStats() {
 
 .close-btn {
   margin-top: 1rem;
-  background-color: #007bff;
+  background-color: rgb(37, 18, 73);
   color: white;
   border: none;
   border-radius: 8px;
@@ -197,7 +201,7 @@ function openStats() {
 }
 
 .close-btn:hover {
-  background-color: #0056b3;
+  background-color: rgb(55, 32, 97);
 }
 
 .error {

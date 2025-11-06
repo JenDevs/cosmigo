@@ -33,25 +33,25 @@ function toggleSidebar() {
 
 
   
-<button
-  @click="showTimer = !showTimer"
-  class="floatingClockButton"
-  :class="{ 'is-solid': showTimer }"
-  :aria-pressed="showTimer"
+  <button
+   @click="showTimer = !showTimer"
+    class="floatingClockButton"
+   :class="{ 'is-solid': showTimer }"
+   :aria-pressed="showTimer"
 >
-  <img
-    v-if="!showTimer"
-    src="@/assets/icons/alarm-clock.svg"
-    alt="Show timer"
-    class="clockIcon"
-  />
-  <img
-    v-else
-    src="@/assets/icons/alarm-clock-off.svg"
-    alt="Hide timer"
-    class="clockIcon"
-  />
-</button>
+   <img
+      v-if="!showTimer"
+     src="@/assets/icons/alarm-clock.svg"
+     alt="Show timer"
+      class="clockIcon"
+    />
+   <img
+     v-else
+     src="@/assets/icons/alarm-clock-off.svg"
+     alt="Hide timer"
+     class="clockIcon"
+    />
+  </button>
 
 
   
