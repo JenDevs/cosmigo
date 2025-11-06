@@ -92,7 +92,7 @@ onBeforeUnmount(stopCurrentNoteWatch);
             <option value="justify"></option>
           </select>
         </span>
-        <p class="last-saved">autosaved: {{ savedAtText }}</p>
+        <p class="last-saved">Autosaved {{ savedAtText }}</p>
       </template>
     </Editor>
   </div>
@@ -103,70 +103,21 @@ onBeforeUnmount(stopCurrentNoteWatch);
 </template>
 
 <style scoped>
-/* :deep makes toolbar and editor override primeVue dark theme */
-:deep(.p-editor) {
-  height: 90%;
-  border: none;
-}
-:deep(.p-editor .ql-toolbar) {
-  display: flex;
-  align-items: center;
-  padding: 0 12px 0 12px;
-  background: #f7f7f8;
-  border-radius: 0;
-}
-:deep(.p-editor .ql-toolbar .ql-picker-label),
-:deep(.p-editor .ql-toolbar button) {
-  color: #a7a7a7;
-  border-radius: 4px;
-}
-:deep(.p-editor .ql-toolbar button:hover),
-:deep(.p-editor .ql-toolbar .ql-picker-label:hover) {
-  background: rgba(0, 0, 0, 0.4);
-}
-
-:deep(.p-editor .ql-container) {
-  background: #ffffff;
-  border: 1px solid #d8d8dd;
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-}
-:deep(.p-editor .ql-editor) {
-  color: #2e2e2e;
-  font-family: inherit;
-  min-height: 280px;
-}
-:deep(.p-editor .ql-toolbar),
-:deep(.p-editor .ql-container) {
-  border: 0 !important;
-  box-shadow: none;
-  outline: none;
-}
-
-:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before) {
-  content: "Small";
-}
-:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before) {
-  content: "Large";
-}
-:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before) {
-  content: "Huge";
-}
-:deep(.ql-snow .ql-picker.ql-size .ql-picker-item::before) {
-  content: "Normal";
-}
-
 .note-editor {
   display: flex;
   flex-direction: column;
+  align-content: center;
+  justify-content: start;
   background-color: rgba(255, 255, 255, 0.3);
   border-radius: 12px;
+  box-sizing: border-box;
   margin: 0;
   padding: 12px;
-  width: 80%;
   max-width: 900px;
-  height: 90%;
+  width: 80%;
+  min-height: 0;
   max-height: 100vh;
+  height: 100%;
   overflow: hidden;
 }
 .note-header {
@@ -193,7 +144,6 @@ onBeforeUnmount(stopCurrentNoteWatch);
 .title-input:hover {
   border: #222;
 }
-
 #close-note-btn {
   flex-shrink: 0;
   width: 24px;
@@ -224,8 +174,64 @@ onBeforeUnmount(stopCurrentNoteWatch);
   user-select: none;
   padding-left: auto;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 500;
   color: #969696;
   text-align: right;
+}
+/* :deep makes toolbar and editor override primeVue dark theme */
+:deep(.p-editor) {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  border: none;
+}
+:deep(.p-editor .ql-toolbar) {
+  display: flex;
+  align-items: center;
+  background: #f7f7f8;
+  padding: 0 12px 0 12px;
+  border-radius: 0;
+}
+:deep(.p-editor .ql-toolbar .ql-picker-label),
+:deep(.p-editor .ql-toolbar button) {
+  color: #a7a7a7;
+  border-radius: 4px;
+}
+:deep(.p-editor .ql-toolbar button:hover),
+:deep(.p-editor .ql-toolbar .ql-picker-label:hover) {
+  background: rgba(0, 0, 0, 0.4);
+}
+:deep(.p-editor .ql-container) {
+  border: 0;
+  border-radius: 0 0 6px 6px;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+}
+:deep(.p-editor .ql-editor) {
+  color: #2e2e2e;
+  font-family: inherit;
+  height: 100%;
+  overflow: auto;
+  min-height: 0;
+}
+:deep(.p-editor .ql-toolbar),
+:deep(.p-editor .ql-container) {
+  border: 0 !important;
+  box-shadow: none;
+  outline: none;
+}
+:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="small"]::before) {
+  content: "Small";
+}
+:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="large"]::before) {
+  content: "Large";
+}
+:deep(.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="huge"]::before) {
+  content: "Huge";
+}
+:deep(.ql-snow .ql-picker.ql-size .ql-picker-item::before) {
+  content: "Normal";
 }
 </style>

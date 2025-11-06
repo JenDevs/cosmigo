@@ -27,6 +27,7 @@ async function searchAndScroll() {
   <aside class="sidebar" role="complementary" aria-label="Notes sidebar">
     <ProfileCard />
     <TodoList />
+
     <!-- Notes -->
     <div class="note-list-container">
       <div class="note-list-header" role="search">
@@ -42,6 +43,7 @@ async function searchAndScroll() {
           New
         </button>
       </div>
+
       <NoteList
         ref="noteListRef"
         :notes="notes"
@@ -57,31 +59,41 @@ async function searchAndScroll() {
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  box-sizing: border-box;
+  flex: 0 0 360px;
+  min-width: 360px;
   width: 360px;
+
   height: 100%;
   background-color: rgb(63, 63, 70);
   padding: 12px;
-  display: flex;
-  gap: 12px;
+  gap: 8px;
+  min-height: 0;
 }
 
-/* Notes */
-.note-list {
-  margin-top: auto;
+.note-list-container {
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
 }
+
 .note-list-header {
   display: flex;
   margin-bottom: 10px;
   gap: 6px;
 }
+
 .new-note-btn {
   background-color: #4caf50;
   color: white;
   flex-grow: 1;
   height: 30px;
   border: none;
-  padding: 10px 6px;
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
@@ -91,12 +103,7 @@ async function searchAndScroll() {
   box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.3);
   transition: all 0.1s ease;
 }
-.note-list-container {
-  background-color: rgba(255, 255, 255, 0.12);
-  padding: 12px;
-  border-radius: 8px;
-  color: white;
-}
+
 .note-search {
   flex: 5;
   height: 30px;
@@ -108,11 +115,9 @@ async function searchAndScroll() {
   font-size: 0.9rem;
   transition: all 0.2s ease;
 }
-
 .note-search::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
-
 .note-search:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.4);

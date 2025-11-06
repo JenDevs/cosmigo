@@ -25,8 +25,8 @@ defineExpose({ scrollToNoteId });
 
 <template>
   <div class="note-list">
-    <div class="edge-fade top" aria-hidden="true"></div>
-    <ul role="listbox" aria-label="List of notes">
+    <div class="edge-fade top" aria-hidden="true" />
+    <ul v-if="notes && notes.length" role="list" aria-label="List of notes">
       <NoteItem
         v-for="note in notes"
         :key="note.id"
@@ -42,46 +42,22 @@ defineExpose({ scrollToNoteId });
         "
       />
     </ul>
-    <div class="edge-fade bottom" aria-hidden="true"></div>
+    <p class="no-notes" v-else>No notes yet... 🦗</p>
+    <div class="edge-fade bottom" aria-hidden="true" />
   </div>
 </template>
 
 <style scoped>
 .note-list {
   position: relative;
-  max-height: 320px;
-  border-radius: 12px;
+  flex: 1;
+  min-height: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  scrollbar-gutter: stable both-edges;
   scrollbar-width: none;
+  scrollbar-gutter: stable both-edges;
 }
-.edge-fade {
-  position: sticky;
-  left: 0;
-  right: 0;
-  height: 20px;
-  pointer-events: none;
-  z-index: 2;
-}
-.edge-fade.top {
-  top: 0;
-  background: radial-gradient(
-    ellipse 80% 80% at 50% -40%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.3) 40%,
-    rgba(0, 0, 0, 0) 100%
-  );
-}
-.edge-fade.bottom {
-  bottom: 0;
-  background: radial-gradient(
-    ellipse 80% 70% at 50% 140%,
-    rgba(0, 0, 0, 0.6) 0%,
-    rgba(0, 0, 0, 0.3) 30%,
-    rgba(0, 0, 0, 0) 100%
-  );
-}
+
 .note-list ul {
   display: grid;
   grid-template-columns: repeat(3, 100px);
@@ -91,11 +67,49 @@ defineExpose({ scrollToNoteId });
   list-style: none;
   padding: 0;
   margin: 0;
+  padding-bottom: 18px;
 }
+
+.no-notes {
+  text-align: center;
+  margin: 0;
+}
+
+.edge-fade {
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: var(--fade-h);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.edge-fade.top {
+  top: 0;
+  height: 18px;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% -40%,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+.edge-fade.bottom {
+  position: sticky;
+  bottom: 0;
+  height: 18px;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 140%,
+    rgba(0, 0, 0, 0.7) 0%,
+    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
 .note-item.flash {
-  padding: 0;
   background: rgba(255, 230, 85, 0.5);
   border-radius: 10px;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 </style>
