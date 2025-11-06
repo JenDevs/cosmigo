@@ -150,8 +150,8 @@ button {
   background-color: rgba(197, 187, 209, 0.2);
   border: 2px solid black;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 62px;
+  height: 62px;
   display: flex;
   justify-content: center;
   align-items: center;
