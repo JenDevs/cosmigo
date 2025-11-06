@@ -1,5 +1,3 @@
-
-
 <script setup>
 import { ref } from 'vue';
 import PomodoroTimer from './components/PomodoroTimer.vue'
@@ -13,11 +11,7 @@ const showSidebar = ref(true);
 function toggleSidebar() {
   showSidebar.value = !showSidebar.value;
 }
-
-
-
 </script>
-
 <template>
 
   <button class="toggleSidebarButton" @click="toggleSidebar">
@@ -39,20 +33,26 @@ function toggleSidebar() {
 
 
   
-    <button @click="showTimer = !showTimer" class="floatingClockButton">
-    <img
+  <button
+   @click="showTimer = !showTimer"
+    class="floatingClockButton"
+   :class="{ 'is-solid': showTimer }"
+   :aria-pressed="showTimer"
+>
+   <img
       v-if="!showTimer"
-      src="@/assets/icons/alarm-clock.svg"
-      alt="Show timer"
+     src="@/assets/icons/alarm-clock.svg"
+     alt="Show timer"
       class="clockIcon"
     />
-    <img
-      v-else
-      src="@/assets/icons/alarm-clock-off.svg"
-      alt="Hide timer"
-      class="clockIcon"
+   <img
+     v-else
+     src="@/assets/icons/alarm-clock-off.svg"
+     alt="Hide timer"
+     class="clockIcon"
     />
   </button>
+
 
   
 </template>
@@ -63,9 +63,68 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #2b2b2b; 
+  background-color: rgb(13, 9, 27); 
+  background-color: transparent;
   color: #fff;
-  font-family: system-ui, sans-serif
+  font-family: system-ui, sans-serif;
+  background-image:url('/src/assets/images/skyhorizontal.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+
+
+/* Cursor normal state*/ 
+html, body, #app, * {
+  cursor: url('/src/assets/cursor/pcursor.png') 64 64 , auto !important;
+}
+
+/* Pointer */ 
+a,
+li,
+ul li,
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+button *,
+label.switch,
+.slider,
+.slider::before,
+.flashcard,
+.question,
+.answer,
+.btn,
+.btn *,
+input[type="checkbox"] + .slider,
+.note-item,
+.note-item *,
+.file-tile,
+.file-tile *,
+.delete-note-btn,
+[role="option"],
+.buttonRow button,
+.buttonRow button *,
+.floatingClockButton *,
+.toolbar-button *,
+.switch *,
+#listContainer > li,
+#listContainer > li * {
+ cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer !important;
+}
+
+/* I-beam for text inputs */
+input[type="text"],
+input[type="search"],
+textarea,
+.title-input,
+.q-input,
+.a-input,
+.p-editor,
+.ql-editor {
+  cursor: text !important;
 }
 
 .layout {
@@ -79,7 +138,13 @@ body {
 .sidebar {
   flex: 0 0 300px;
   z-index: 500;
-  background-color: #2b2b2b;
+  /*background-color: transparent;*/
+}
+
+.sidebar {
+  box-shadow:
+    4px 0 10px rgba(0, 0, 0, 0.1),
+    10px 0 30px rgba(0, 0, 0, 0.2);
 }
 
 .workspace {
@@ -115,7 +180,6 @@ header {
   line-height: 1.5;
 }
 
-
 button {
   background-color: white;
 }
@@ -124,17 +188,35 @@ button {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: white;
+  background-color: rgba(197, 187, 209, 0.2);
   border: 2px solid black;
   border-radius: 50%;
-  width: 45px;
-  height: 45px;
+  width: 62px;
+  height: 62px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.floatingClockButton:hover {
+  transform: scale(1.1);
+  background-color: rgba(197, 187, 209, 0.5);
+}
+
+.floatingClockButton:active {
+  transform: scale(0.95);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.floatingClockButton.is-solid {
+  background-color: rgba(197, 187, 209, 0.85);
+}
+
+.floatingClockButton.is-solid:hover {
+  background-color: rgba(197, 187, 209, 1);
 }
 
 .clockIcon {

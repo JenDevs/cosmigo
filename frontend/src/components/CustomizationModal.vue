@@ -100,7 +100,7 @@ const emit = defineEmits(["close"]);
   z-index: 2;
 }
 .modal-content {
-  background: #ffffff;
+  background: rgb(229, 224, 253);
   min-width: 320px;
   max-width: 720px;
   width: 90%;
@@ -114,7 +114,7 @@ const emit = defineEmits(["close"]);
     Arial, sans-serif;
   word-spacing: 5px;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
-  background-color: rgb(18, 185, 124);
+  background-color: rgb(35, 21, 63);
   border-radius: 12px 12px 0 0;
   margin: 0 -1.5rem 24px;
   color: rgb(255, 255, 255);

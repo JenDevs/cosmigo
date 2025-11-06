@@ -250,7 +250,7 @@ async function save() {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  background: #56565c;
+  background: rgb(40, 35, 59);
   border-radius: 12px 0 0 12px;
   padding: 16px 16px 12px;
   width: 100%;
@@ -263,8 +263,9 @@ async function save() {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: linear-gradient(#56565c, rgba(86, 86, 92, 0.95));
-  padding-bottom: 6px;
+  background: linear-gradient(#56565c, rgba(87, 86, 92, 0.95));
+  padding-bottom: none;
+  border-radius: 100%;
 }
 
 /* Scrollable work area */
@@ -353,7 +354,7 @@ button.danger {
   align-items: center;
   gap: 10px;
   padding-top: 8px;
-  background: linear-gradient(rgba(86, 86, 92, 0.6), #56565c 60%);
+  background: transparent;
   backdrop-filter: blur(2px);
 }
 .left-actions {
@@ -372,22 +373,24 @@ button.add:hover {
 
 button.save {
   background: transparent;
-  border-color: rgba(0, 123, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.25);
 }
 button.save:hover {
-  background: rgba(0, 123, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 /* Primary button Start Quiz */
 button.start {
-  background: #0bad77;
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.25);
   color: white;
   font-weight: 600;
   padding: 10px 18px;
   border: none;
 }
 button.start:hover {
-  background: #14ce90;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
   color: black;
 }
 button.start:active {

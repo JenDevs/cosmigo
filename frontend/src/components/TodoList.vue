@@ -1,15 +1,10 @@
 <template>
   <div class="todoList">
-    <h2>
-      My To-Dos
-      <img src="../assets/images/notepad.png" width="100%" height="100%" />
-    </h2>
-
     <div class="row">
       <input
         type="text"
         id="inputBox"
-        placeholder="Write a new task here"
+        placeholder="Write a new task here..."
         v-model="newTask"
         @keyup.enter="addTask"
       />
@@ -47,30 +42,11 @@
 
 <style scoped>
 .todoList {
-  background-color: rgb(255, 180, 180);
+  background-color: rgba(255, 255, 255, 0.12);
   padding: 16px;
   border-radius: 8px;
   color: white;
 }
-
-.todoList h2 {
-  background-color: rgb(92, 0, 0);
-  padding: 8px 16px;
-  border-radius: 8px;
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  white-space: nowrap;
-  font-size: 1.5rem;
-}
-
-.todoList h2 img {
-  height: 2em;
-  width: auto;
-}
-
 .todoList .row {
   display: flex;
   align-items: center;
@@ -80,13 +56,15 @@
 }
 
 .todoList input[type="text"] {
-  flex: 1;
-  padding: 8px;
-  border: none;
+  flex: 5;
+  height: 30px;
+  padding: 0 10px;
   border-radius: 4px;
-  background-color: rgba(0, 0, 0, 0.1);
-  outline: none;
-  color: #222;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f2f2f2;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
 }
 
 .no-todos {
@@ -100,14 +78,14 @@ button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  background: pink;
-  color: black;
-  cursor: pointer;
+  background: rgb(37, 22, 65);
+  color: rgb(232, 214, 252);
+ cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
   transition: background 0.2s ease;
 }
 
 button:hover {
-  background: rgb(255, 200, 200);
+  background: rgb(48, 23, 94);
 }
 
 .todo-scroll {
@@ -168,7 +146,7 @@ button:hover {
   padding-left: 28px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  cursor: pointer;
+  cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
   color: #222;
   background: transparent;
   user-select: none;
@@ -205,7 +183,7 @@ button:hover {
   flex: 1;
   margin-left: 8px;
   text-align: left;
-  color: #222;
+  color: rgb(232, 214, 252);
   transition: color 0.15s ease;
 }
 

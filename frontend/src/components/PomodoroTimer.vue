@@ -63,7 +63,7 @@ onBeforeUnmount (() => {
 .timerCard {
   width: 260px;
   height: 200px;
-  background: #EEECE8;
+  background: rgb(197, 187, 209, 0.7);
   color: #4A3F3A;
   border-radius: 1.2rem;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
@@ -74,6 +74,11 @@ onBeforeUnmount (() => {
   padding: 0.8rem;
   text-align: center;
   transition: all 0.3s ease;
+}
+.timerCard:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.9);
+  background-color: rgb(197, 187, 209);
+  transform: scale(1.05);
 }
 
 .timer-critical {
