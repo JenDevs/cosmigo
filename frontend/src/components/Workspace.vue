@@ -292,6 +292,11 @@ function handleRestart() {
   background-color: rgb(13, 9, 27);
   padding-top: 124px;
   min-height: 100%;
+  background-image:url('/src/assets/images/skyhorizontal.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
 }
 
 /* Toggle */

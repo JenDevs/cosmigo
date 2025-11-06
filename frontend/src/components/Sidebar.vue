@@ -80,6 +80,10 @@ async function searchAndScroll() {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+  background-image:url('/src/assets/images/skyhor2.png');
+  background-size: cover;
+  background-position: right;
+  background-repeat: no-repeat;
 }
 
 .note-list-header {
