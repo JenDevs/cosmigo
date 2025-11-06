@@ -188,23 +188,23 @@ const emit = defineEmits(["close"]);
   padding-top: 24px;
 }
 .primary {
-  background: rgb(7, 173, 112);
+  background: rgb(66, 34, 124);
   color: #fff;
   border: 0;
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
   user-select: none;
-  box-shadow: 0 4px 0px rgb(4, 117, 76);
+  box-shadow: 0 4px 0px rgb(37, 18, 73);
 }
 .primary:hover {
-  background-color: rgb(3, 194, 124);
+  background-color: rgb(85, 45, 158);
 }
 .primary:active {
   transform: translateY(2px);
   transition: 100ms;
-  background-color: rgb(3, 194, 124);
-  box-shadow: 0 2px 0px rgb(4, 117, 76);
+  background-color: rgb(85, 45, 158);
+  box-shadow: 0 2px 0px rgb(37, 18, 73);
 }
 .secondary {
   background: #d13838;

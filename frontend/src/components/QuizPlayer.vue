@@ -34,9 +34,13 @@ const current = computed(() => {
   return props.questions[qIdx] || { text: "", answer: "" };
 });
 
-const isLast = computed(() => hasQuestions.value && idx.value >= total.value - 1);
+const isLast = computed(
+  () => hasQuestions.value && idx.value >= total.value - 1
+);
 const canPrev = computed(() => idx.value > 0);
-const canNext = computed(() => hasQuestions.value && idx.value < total.value - 1);
+const canNext = computed(
+  () => hasQuestions.value && idx.value < total.value - 1
+);
 
 // Shuffle
 function fyShuffle(a) {
@@ -102,10 +106,22 @@ function onKey(e) {
   }
 
   if (e.key === "Escape") emit("close");
-  if (e.key === "ArrowRight") { e.preventDefault(); next(); }
-  if (e.key === "ArrowLeft")  { e.preventDefault(); prev(); }
-  if (e.key.toLowerCase() === "f" || e.key === " ") { e.preventDefault(); flip(); }
-  if (e.key.toLowerCase() === "r" && props.randomize) { e.preventDefault(); reshuffle(); } 
+  if (e.key === "ArrowRight") {
+    e.preventDefault();
+    next();
+  }
+  if (e.key === "ArrowLeft") {
+    e.preventDefault();
+    prev();
+  }
+  if (e.key.toLowerCase() === "f" || e.key === " ") {
+    e.preventDefault();
+    flip();
+  }
+  if (e.key.toLowerCase() === "r" && props.randomize) {
+    e.preventDefault();
+    reshuffle();
+  }
 }
 
 onMounted(() => window.addEventListener("keydown", onKey));
@@ -113,35 +129,49 @@ onBeforeUnmount(() => window.removeEventListener("keydown", onKey));
 
 // Navigation
 function prev() {
-  if (canPrev.value) { idx.value--; showAnswer.value = false; }
+  if (canPrev.value) {
+    idx.value--;
+    showAnswer.value = false;
+  }
 }
 function next() {
   if (!hasQuestions.value) return;
   if (idx.value < total.value - 1) {
-    idx.value++; showAnswer.value = false;
+    idx.value++;
+    showAnswer.value = false;
   } else {
     showEndPrompt.value = true;
   }
 }
-function flip() { showAnswer.value = !showAnswer.value; }
+function flip() {
+  showAnswer.value = !showAnswer.value;
+}
 
 // Slutprompt-knappar
 function doAgain() {
   // Slumpa endast om användaren tidigare valt att slumpa och det är tillåtet
-  if (props.randomize && props.reshuffleOnRestart && lastShuffled.value) buildOrder({ shuffle: true });
+  if (props.randomize && props.reshuffleOnRestart && lastShuffled.value)
+    buildOrder({ shuffle: true });
   idx.value = 0;
   showAnswer.value = false;
   showEndPrompt.value = false;
   emit("restart");
 }
 
-function justClose() { showEndPrompt.value = false; emit("close"); }
+function justClose() {
+  showEndPrompt.value = false;
+  emit("close");
+}
 
 async function markDone() {
   showEndPrompt.value = false;
   emit("archive");
-  try { await userStore.addXP("quiz"); }
-  catch (e) { console.error("Failed to add XP for quiz:", e); }
+  try {
+    await userStore.addXP("quiz");
+  } catch (e) {
+    console.error("Failed to add XP for quiz:", e);
+  }
+  justClose();
 }
 </script>
 
@@ -152,7 +182,9 @@ async function markDone() {
       <div class="header">
         <h3>{{ title }}</h3>
         <div class="header-actions">
-          <button class="close" @click="emit('close')" title="Stäng (Esc)">✖</button>
+          <button class="close" @click="emit('close')" title="Stäng (Esc)">
+            ✖
+          </button>
         </div>
       </div>
 
@@ -164,10 +196,21 @@ async function markDone() {
       </div>
 
       <div class="actions">
-        <button @click="prev" :disabled="!canPrev" title="Previous (<)">◀</button>
+        <button @click="prev" :disabled="!canPrev" title="Previous (<)">
+          ◀
+        </button>
         <button @click="flip" title="Flip for answer (Space/F)">↻</button>
-        <button v-if="props.randomize && total > 1" class="shuffle" @click="reshuffle" title="Shuffle cards (R)" >🔀</button>
-        <button @click="next" :disabled="!hasQuestions" title="Next (>)">{{ isLast ? "Avsluta" : "▶" }}</button>
+        <button
+          v-if="props.randomize && total > 1"
+          class="shuffle"
+          @click="reshuffle"
+          title="Shuffle cards (R)"
+        >
+          🔀
+        </button>
+        <button @click="next" :disabled="!hasQuestions" title="Next (>)">
+          {{ isLast ? "Finish" : "▶" }}
+        </button>
       </div>
     </div>
 
@@ -178,7 +221,9 @@ async function markDone() {
         <p>Would you like to archive your quiz, do it again or exit?</p>
         <div class="modal-actions">
           <button @click="doAgain">Do it again!</button>
-          <button class="primary" @click="markDone">Done and archive the quiz</button>
+          <button class="primary" @click="markDone">
+            Done and archive the quiz
+          </button>
           <button class="ghost" @click="justClose">Exit</button>
         </div>
       </div>
@@ -191,112 +236,122 @@ async function markDone() {
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 50;
 }
-.card { 
-  width: min(720px, 92vw); 
-  background:rgb(20, 16, 34); 
-  color:#fff; 
-  border-radius:12px; 
-  padding:16px; 
-  box-shadow: 0 8px 40px rgba(0,0,0,0.4); 
+.card {
+  width: min(720px, 92vw);
+  background: rgb(20, 16, 34);
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 .header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-.header-actions { display:flex; gap:8px; align-items:center; }
-.close, .shuffle {
-  background:#555;
-  color:#fff;
-  border:none;
-  padding:6px 10px;
-  border-radius:8px;
-  cursor:pointer;
+.header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
-.close { background:#a33; }
+.close,
+.shuffle {
+  background: #555;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.close {
+  background: #a33;
+}
 .counter {
-  opacity:.8;
-  margin:6px 0 12px;
+  opacity: 0.8;
+  margin: 6px 0 12px;
 }
-.flashcard { 
-  background:rgb(67, 56, 104); 
-  border-radius:12px; 
-  min-height:220px; 
-  display:flex; 
-  align-items:center; 
-  justify-content:center; 
-  padding:16px; 
-  text-align:center; 
+.flashcard {
+  background: rgb(67, 56, 104);
+  border-radius: 12px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  text-align: center;
 }
-.question, .answer {
-  font-size:3rem;
-  line-height:1.5;
+.question,
+.answer {
+  font-size: 3rem;
+  line-height: 1.5;
 }
-.answer { color:#b4f0c8; }
+.answer {
+  color: #b4f0c8;
+}
 .actions {
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  margin-top:12px;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 12px;
 }
-.actions button { 
-  background:#524e64; 
-  color:#fff; 
-  border:none; 
-  border-radius:8px; 
-  padding:8px 14px; 
-  cursor:pointer; 
+.actions button {
+  background: #524e64;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
 }
 .actions button:disabled {
-  opacity:.5;
-  cursor:not-allowed;
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* modal */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   z-index: 60;
 }
 .modal {
-  background:#2b2b2f;
-  color:#fff;
-  border-radius:12px;
-  padding:16px;
-  width:min(420px, 92vw);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.45);
+  background: #2b2b2f;
+  color: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  width: min(420px, 92vw);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45);
 }
 .modal-actions {
-  display:flex;
-  gap:10px;
-  justify-content:flex-end;
-  margin-top:14px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
 }
 .modal-actions .primary {
-  background:#007bff;
-  color:#fff;
+  background: #007bff;
+  color: #fff;
 }
 .modal-actions .ghost {
-  background:transparent;
-  border:1px solid #777;
-  color:#fff;
+  background: transparent;
+  border: 1px solid #777;
+  color: #fff;
 }
 .modal-actions button {
-  background:#555;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:8px 12px;
-  cursor:pointer;
+  background: #555;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
 }
 </style>

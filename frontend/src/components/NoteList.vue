@@ -89,8 +89,8 @@ defineExpose({ scrollToNoteId });
   height: 18px;
   background: radial-gradient(
     ellipse 80% 80% at 50% -40%,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.28) 45%,
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -101,8 +101,8 @@ defineExpose({ scrollToNoteId });
   pointer-events: none;
   background: radial-gradient(
     ellipse 80% 80% at 50% 140%,
-    rgba(0, 0, 0, 0.7) 0%,
-    rgba(0, 0, 0, 0.35) 60%,
+    rgba(0, 0, 0, 0.4) 0%,
+    rgba(0, 0, 0, 0.24) 40%,
     rgba(0, 0, 0, 0) 100%
   );
 }

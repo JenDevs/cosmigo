@@ -32,7 +32,7 @@ const items = computed(() =>
     />
   </ul>
 
-  <p v-else class="empty-text">Quiz does not exist yet. Create one?</p>
+  <p v-else class="empty-text">No quizzes yet... 🦗</p>
 </template>
 
 <style scoped>
@@ -49,9 +49,9 @@ const items = computed(() =>
 }
 
 .empty-text {
-  opacity: 0.7;
   font-size: 0.95rem;
-  color: #ddd;
-  margin: 6px 0;
+  color: #ffffff;
+  padding: 6px;
+  text-align: center;
 }
 </style>

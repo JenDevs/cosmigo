@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { COSMIGO_REWARDS, CR_BUNDLED } from "@/constants/cosmigoRewards";
 
 function sanitizeKey(k) {
@@ -21,6 +21,7 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
 
   let tempTimer = null;
   const tempActive = ref(false);
+  const isTempActive = computed(() => tempActive.value);
   const baseKey = ref(null);
   let lastTempAt = 0;
   const DEFAULT_COOLDOWN = 800;
@@ -156,6 +157,7 @@ export const useCosmigoStore = defineStore("cosmigo", () => {
   return {
     unlocked,
     equippedKey,
+    isTempActive,
     fetchProfile,
     unlock,
     equip,

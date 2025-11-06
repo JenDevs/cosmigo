@@ -63,10 +63,10 @@ async function searchAndScroll() {
   flex: 0 0 360px;
   min-width: 360px;
   width: 360px;
-  background-image:url('/src/assets/images/skyhor3.png');
+  background-image: url("/src/assets/images/skyhor3.png");
   background-position: right;
   height: 100%;
-  background-color:rgba(13, 9, 27, 0.9);
+  background-color: rgba(13, 9, 27, 0.9);
   padding: 12px;
   gap: 8px;
   min-height: 0;
@@ -84,7 +84,6 @@ async function searchAndScroll() {
   background-size: cover;
   background-position: right;
   background-repeat: no-repeat;
-  filter: brightness(1.2);
 }
 
 .note-list-header {
@@ -103,7 +102,7 @@ async function searchAndScroll() {
   cursor: pointer;
   user-select: none;
 }
-.new.note-btn:hover {
+.new-note-btn:hover {
   background-color: rgb(48, 23, 94);
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: all 0.2s ease;
@@ -139,7 +138,7 @@ async function searchAndScroll() {
   .sidebar {
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    padding-bottom: 15px; 
+    padding-bottom: 15px;
   }
 }
 </style>
