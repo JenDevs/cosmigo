@@ -35,11 +35,11 @@
             @click.stop="removeTask(i)"
           />
         </li>
+        <p class="no-todos" v-if="!loading && tasks.length === 0">
+          No tasks yet... 🦗
+        </p>
       </ul>
 
-      <p class="no-todos" v-if="!loading && tasks.length === 0">
-        No tasks yet... 🦗
-      </p>
       <div class="edge-fade bottom" aria-hidden="true"></div>
     </div>
   </div>
@@ -113,7 +113,7 @@ button:hover {
 .todo-scroll {
   --row-h: 48px;
   --visible-rows: 3;
-
+  --ul-pad: 4px;
   max-height: calc(var(--visible-rows) * var(--row-h) + 2 * var(--ul-pad));
   overflow: auto;
   scrollbar-width: none;
