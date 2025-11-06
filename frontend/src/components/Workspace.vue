@@ -497,4 +497,27 @@ input:checked + .slider:before {
   background: rgba(255, 255, 255, 0.15);
 }
 
+@media (max-width: 768px) {
+  .quiz-layout {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 1.2rem;
+    width: 100%;
+  }
+
+  .editor-panel,
+  .quizzes-container {
+    width: 95%;
+    max-width: 700px;
+    margin: 0 auto;
+    border-radius: 10px;
+  }
+
+  .quizzes-container {
+    padding: 1rem;
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
 </style>

@@ -119,4 +119,12 @@ async function searchAndScroll() {
   background: rgba(255, 255, 255, 0.12);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 15px; 
+  }
+}
 </style>

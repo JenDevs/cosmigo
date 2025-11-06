@@ -210,6 +210,7 @@ button {
     align-items: center;
     justify-content: flex-start;
     padding-top: 80px;
+    padding-bottom: 120px;
   }
   
   .note-view,
