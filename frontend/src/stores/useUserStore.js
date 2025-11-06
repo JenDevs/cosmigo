@@ -12,7 +12,7 @@ export const useUserStore = defineStore("user", () => {
     todo: 50,
     pomodoro: 20,
     pomodoroStreak: 100,
-    quiz: 200,
+    quiz: 50,
   };
 
   const LEVELS = {
