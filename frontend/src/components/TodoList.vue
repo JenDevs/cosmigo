@@ -35,9 +35,11 @@
             @click.stop="removeTask(i)"
           />
         </li>
+        <p class="no-todos" v-if="!loading && tasks.length === 0">
+          No tasks yet... 🦗
+        </p>
       </ul>
 
-      <p v-if="!loading && tasks.length === 0">No tasks found</p>
       <div class="edge-fade bottom" aria-hidden="true"></div>
     </div>
   </div>
@@ -49,7 +51,6 @@
   padding: 16px;
   border-radius: 8px;
   color: white;
-  margin-top: 16px;
 }
 
 .todoList h2 {
@@ -88,6 +89,13 @@
   color: #222;
 }
 
+.no-todos {
+  text-align: center;
+  margin: 0;
+  padding-bottom: 12px;
+  padding-top: 12px;
+}
+
 button {
   padding: 8px 16px;
   border: none;
@@ -105,8 +113,7 @@ button:hover {
 .todo-scroll {
   --row-h: 48px;
   --visible-rows: 3;
-  --ul-pad: 12px;
-
+  --ul-pad: 4px;
   max-height: calc(var(--visible-rows) * var(--row-h) + 2 * var(--ul-pad));
   overflow: auto;
   scrollbar-width: none;

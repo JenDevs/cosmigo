@@ -25,21 +25,22 @@ async function fetchStats() {
   try {
     loading.value = true;
     error.value = null;
-    const res = await axios.get(`http://localhost:3000/api/statistics/${userStore.userId}`);
+    const res = await axios.get(
+      `http://localhost:3000/api/statistics/${userStore.userId}`
+    );
     stats.value = res.data;
   } catch (err) {
-   console.error(err);
-   error.value = "Could not get stats";
-   } finally {
+    console.error(err);
+    error.value = "Could not get stats";
+  } finally {
     loading.value = false;
   }
 }
 
 function openStats() {
-showStats.value = true;
-fetchStats();
+  showStats.value = true;
+  fetchStats();
 }
-
 </script>
 
 <template>
@@ -49,9 +50,12 @@ fetchStats();
     <div class="user-stats">
       <p id="username">@{{ username }}</p>
       <button @click="openStats" class="statButton">
-      <img src="@/assets/icons/badge-info.svg" alt="Show stats" class="statsIcon" />
-    </button>
-      
+        <img
+          src="@/assets/icons/badge-info.svg"
+          alt="Show stats"
+          class="statsIcon"
+        />
+      </button>
     </div>
 
     <ProgressBar :value="progress" class="xp-bar" />
@@ -59,9 +63,9 @@ fetchStats();
     <div class="stats-row">
       <small id="level">Level: {{ level }}</small>
       <small id="xp">{{ xp }} / {{ LEVELS[level + 1] || xp }} XP</small>
-      </div>
+    </div>
 
-       <!-- Popup -->
+    <!-- Popup -->
     <div v-if="showStats" class="overlay" @click.self="showStats = false">
       <div class="modal">
         <h3>My Stats</h3>
@@ -75,8 +79,8 @@ fetchStats();
         </div>
 
         <button @click="showStats = false" class="close-btn">Close</button>
+      </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -129,7 +133,7 @@ fetchStats();
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  transition: transform 0.2s ease;         
+  transition: transform 0.2s ease;
 }
 
 .xp-bar {
@@ -189,8 +193,13 @@ fetchStats();
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
-
 </style>
