@@ -273,6 +273,7 @@ function handleRestart() {
       :open="playerOpen"
       :title="playerTitle"
       :questions="playerQuestions"
+      :randomize="true"
       @close="handleClose"
       @archive="handleArchive"
       @restart="handleRestart"

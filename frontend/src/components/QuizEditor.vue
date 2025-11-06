@@ -416,4 +416,13 @@ button.start:active {
     text-align: center;
   }
 }
+
+ @media (max-width: 768px) {
+  .editor-header {
+    position: static;
+    top: auto;
+    background: none;
+  }
+}
+
 </style>
