@@ -16,7 +16,7 @@ const notesStore = useNotesStore();
 const { activeNote } = storeToRefs(notesStore);
 
 const quizStore = useQuizStore();
-const { current, list } = storeToRefs(quizStore);
+const { current, list, archived } = storeToRefs(quizStore);
 
 const isQuizEditor = ref(false);
 const selectedQuiz = ref(null);
@@ -30,6 +30,21 @@ const loading = ref(false);
 const error = ref("");
 
 const currentId = computed(() => current.value?.id ?? null);
+
+const showArchived = ref(false);
+const sidebarTitle = computed(() =>
+showArchived.value ? "Archived quizzes" : "Your quizzes");
+
+const visibleQuizzes = computed(() =>
+  showArchived.value ? archived.value : list.value
+);
+
+function toggleArchived() {
+  showArchived.value = !showArchived.value;
+  if (showArchived.value && archived.value.length === 0) {
+    quizStore.loadArchived(USER_ID).catch(() => {});
+  }
+}
 
 function getDraftFromEditor() {
   const draft = quizEditorRef.value?.getCurrentQuizData?.() ?? null;
@@ -212,19 +227,39 @@ function handleRestart() {
 
       <aside class="quizzes-container">
         <div class="quizzes-header">
-          <h3 class="quizzes-title">Your quizzes</h3>
-          <button class="btn" type="button" @click="newQuiz">New quiz</button>
-        </div>
+  <h3 class="quizzes-title">{{ sidebarTitle }}</h3>
+
+  <div class="right-actions">
+    <!-- Knapp för att växla -->
+    <button class="btn ghost" type="button" @click="toggleArchived">
+      {{ showArchived ? "Back to active" : "View archived" }}
+    </button>
+
+    <!-- "New quiz" visas bara i aktiva vyn -->
+    <button
+      v-if="!showArchived"
+      class="btn"
+      type="button"
+      @click="newQuiz"
+    >
+      New quiz
+    </button>
+  </div>
+</div>
 
         <div class="quizzes-body">
           <div class="edge-fade top" aria-hidden="true"></div>
 
           <template v-if="!loading && !error">
             <QuizList
-              :quizzes="list"
-              @select="selectQuiz"
-              @delete="deleteQuiz"
-            />
+  :quizzes="visibleQuizzes"
+  @select="selectQuiz"
+  @delete="deleteQuiz"
+/>
+<p v-if="visibleQuizzes.length === 0" class="q-muted" style="padding:8px;">
+  {{ showArchived ? "No archived quizzes yet." : "No quizzes yet." }}
+</p>
+
           </template>
           <p v-else-if="loading" class="q-muted">Loading…</p>
           <p v-else class="q-error">{{ error }}</p>
@@ -446,34 +481,20 @@ input:checked + .slider:before {
   }
 }
 
-@media (max-width: 768px) {
-  .quiz-layout {
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 1rem;
-    width: 100%;
-  }
+.right-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
 
-  .editor-panel,
-  .quizzes-container {
-    width: 90% !important;
-    max-width: 380px !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
-    border-radius: 10px !important;
-    background-color: rgba(255, 255, 255, 0.08);
-    box-sizing: border-box;
-  }
+.btn.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
 
-  .editor-panel {
-    border-right: none !important;
-  }
-
-  .quizzes-container {
-    margin-top: 0.5rem !important;
-  }
-
+.btn.ghost:hover {
+  background: rgba(255, 255, 255, 0.15);
 }
 
 </style>

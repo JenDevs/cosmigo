@@ -108,8 +108,10 @@ export const useQuizStore = defineStore("quiz", {
 
     setCurrentById(id) {
       const target = asNum(id);
-      const q = this.list.find((x) => asNum(x.id) === target);
-      this.current = q ? { id: q.id, title: q.title } : null;
+      const q =
+   this.list.find((x) => asNum(x.id) === target) ||
+   this.archived.find((x) => asNum(x.id) === target);
+   this.current = q ? { id: q.id, title: q.title } : null;
     },
 
     requestNew() { this.createSignal = Date.now(); },
