@@ -102,8 +102,16 @@ body {
 .sidebar {
   flex: 0 0 300px;
   z-index: 500;
-  background-color: transparent;
+  /*background-color: transparent;*/
 }
+
+.sidebar {
+  box-shadow:
+    4px 0 10px rgba(0, 0, 0, 0.1),
+    10px 0 30px rgba(0, 0, 0, 0.2);
+}
+
+
 
 .workspace {
   flex: 1;
