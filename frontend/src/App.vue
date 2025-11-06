@@ -250,19 +250,19 @@ button {
     display: flex;
     position: fixed;
     top: 12px;
-    right: 12px; 
+    right: 12px;
     z-index: 1100;
-    background-color: white;
-    color: white;
+    background-color: rgba(197, 187, 209, 0.2);  
     border: 2px solid black;
     border-radius: 50%;
     padding: 8px;
-    width: 45px;
-    height: 45px;
+    width: 62px;     
+    height: 62px;
     justify-content: center;
     align-items: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
   }
 
   .sidebar {
@@ -349,7 +349,6 @@ button {
     max-width: 450px !important;
     margin: 40px auto 0 !important;
     padding: 14px !important;
-    background-color: #56565c !important;
     border-radius: 10px !important;
   }
 

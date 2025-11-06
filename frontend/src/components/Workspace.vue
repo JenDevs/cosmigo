@@ -521,8 +521,14 @@ input:checked + .slider:before {
 
   .quizzes-container {
     padding: 1rem;
-    background-color: rgba(255, 255, 255, 0.08);
+  }
+  #toggle-editor {
+    position: static !important;
+    top: auto !important;
+    z-index: auto !important;
+    margin-bottom: 16px;
   }
 }
+
 
 </style>
