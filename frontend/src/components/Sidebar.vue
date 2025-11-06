@@ -63,9 +63,10 @@ async function searchAndScroll() {
   flex: 0 0 360px;
   min-width: 360px;
   width: 360px;
-
+  background-image:url('/src/assets/images/skyhor3.png');
+  background-position: right;
   height: 100%;
-  background-color:rgb(13, 9, 27);
+  background-color:rgba(13, 9, 27, 0.9);
   padding: 12px;
   gap: 8px;
   min-height: 0;
@@ -80,7 +81,6 @@ async function searchAndScroll() {
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
-  background-image:url('/src/assets/images/skyhor3.png');
   background-size: cover;
   background-position: right;
   background-repeat: no-repeat;
