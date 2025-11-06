@@ -46,12 +46,13 @@ fetchStats();
   <div id="profile-card">
     <Cosmigo />
 
-    <p id="username">@{{ username }}</p>
-
- <!-- Stats-knapp -->
-    <button @click="openStats" class="statButton">
+    <div class="user-stats">
+      <p id="username">@{{ username }}</p>
+      <button @click="openStats" class="statButton">
       <img src="@/assets/icons/badge-info.svg" alt="Show stats" class="statsIcon" />
     </button>
+      
+    </div>
 
     <ProgressBar :value="progress" class="xp-bar" />
 
@@ -100,6 +101,14 @@ fetchStats();
   margin-bottom: 10px;
 }
 
+.user-stats {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 6px;
+}
+
 #username {
   align-self: flex-start;
   font-size: 1.2em;
@@ -110,12 +119,17 @@ fetchStats();
 
 /* statbutton */
 .statButton {
-  background: none;
-  border: none;
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   cursor: pointer;
-  margin-left: 6px;
-  transform: translateY(2px); 
-  position: static;          
+  transition: transform 0.2s ease;         
 }
 
 .xp-bar {
@@ -179,9 +193,4 @@ fetchStats();
   to { opacity: 1; transform: scale(1); }
 }
 
-.statsIcon {
-  width: 24px;
-  height: 24px;
-  filter: brightness(0) invert(1);
-}
 </style>
