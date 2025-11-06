@@ -21,7 +21,7 @@ const emit = defineEmits(['start', 'pause', 'stop', 'reset', 'open-settings'])
 }
 
 .buttonRow button {
-  background: #fff;
+  background: rgba(248, 247, 248, 0.973);
   border: 2px solid #4A3F3A;
   border-radius: 50%;
   width: 34px;

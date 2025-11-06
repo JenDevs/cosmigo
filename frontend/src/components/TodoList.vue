@@ -80,7 +80,7 @@ button {
   border-radius: 4px;
   background: rgb(37, 22, 65);
   color: rgb(232, 214, 252);
-  cursor: pointer;
+ cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
   transition: background 0.2s ease;
 }
 
@@ -146,7 +146,7 @@ button:hover {
   padding-left: 28px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  cursor: pointer;
+  cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
   color: #222;
   background: transparent;
   user-select: none;

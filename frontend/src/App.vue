@@ -71,24 +71,60 @@ body {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  /* cursor*/ 
-  cursor: url('/src/assets/cursor/pcursor.png') 64 64 , auto;
 }
 
-#cursor {
-    position: fixed;
-    z-index: 1000001;
-    left: 0;
-    top: 0;
-    pointer-events: none;
-    will-change: transform;
-    transform: translate(-50%, -50%);
+
+
+/* Cursor normal state*/ 
+html, body, #app, * {
+  cursor: url('/src/assets/cursor/pcursor.png') 64 64 , auto !important;
 }
 
-#cursor png {
-    width: 20px;
-    height: 20px;
-    transition: 0.3s;
+/* Pointer */ 
+a,
+li,
+ul li,
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+button *,
+label.switch,
+.slider,
+.slider::before,
+.flashcard,
+.question,
+.answer,
+.btn,
+.btn *,
+input[type="checkbox"] + .slider,
+.note-item,
+.note-item *,
+.file-tile,
+.file-tile *,
+.delete-note-btn,
+[role="option"],
+.buttonRow button,
+.buttonRow button *,
+.floatingClockButton *,
+.toolbar-button *,
+.switch *,
+#listContainer > li,
+#listContainer > li * {
+ cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer !important;
+}
+
+/* I-beam for text inputs */
+input[type="text"],
+input[type="search"],
+textarea,
+.title-input,
+.q-input,
+.a-input,
+.p-editor,
+.ql-editor {
+  cursor: text !important;
 }
 
 .layout {
@@ -110,8 +146,6 @@ body {
     4px 0 10px rgba(0, 0, 0, 0.1),
     10px 0 30px rgba(0, 0, 0, 0.2);
 }
-
-
 
 .workspace {
   flex: 1;
@@ -145,7 +179,6 @@ h1 {
 header {
   line-height: 1.5;
 }
-
 
 button {
   background-color: white;
@@ -185,7 +218,6 @@ button {
 .floatingClockButton.is-solid:hover {
   background-color: rgba(197, 187, 209, 1);
 }
-
 
 .clockIcon {
   width: 35px;
