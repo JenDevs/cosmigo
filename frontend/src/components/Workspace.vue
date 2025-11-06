@@ -6,6 +6,7 @@ import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
 import QuizList from "./QuizList.vue";
+import { useCosmigoStore } from "@/stores/useCosmigoStore";
 
 import { useNotesStore } from "@/stores/useNotesStore";
 import { useQuizStore } from "@/stores/useQuizStore";
@@ -17,6 +18,8 @@ const { activeNote } = storeToRefs(notesStore);
 
 const quizStore = useQuizStore();
 const { current, list, archived } = storeToRefs(quizStore);
+
+const cosmigo = useCosmigoStore();
 
 const isQuizEditor = ref(false);
 const selectedQuiz = ref(null);
@@ -169,6 +172,12 @@ async function handleArchive() {
     window.alert(e?.message || "Could not archive the quiz.");
   } finally {
     if (archived) {
+      // Spin Cosmigo
+      if (typeof cosmigo?.onCompletion === "function") {
+        cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+          restart: false,
+        });
+      }
       resetView();
       await loadQuizzes();
     }
