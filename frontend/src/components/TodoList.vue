@@ -67,6 +67,11 @@
   transition: all 0.2s ease;
 }
 
+.todoList input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+  opacity: 1;
+}
+
 .no-todos {
   text-align: center;
   margin: 0;
@@ -78,14 +83,22 @@ button {
   padding: 8px 16px;
   border: none;
   border-radius: 4px;
-  background: rgb(37, 22, 65);
-  color: rgb(232, 214, 252);
- cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
+  background: rgb(37, 18, 73);
+  color: rgb(255, 255, 255);
+  cursor: url("/src/assets/cursor/cursorpixel64x.png") 32 32, pointer;
   transition: background 0.2s ease;
 }
 
 button:hover {
-  background: rgb(48, 23, 94);
+  background-color: rgb(48, 23, 94);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+button:active {
+  background-color: rgb(61, 31, 117);
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
 }
 
 .todo-scroll {
@@ -146,7 +159,7 @@ button:hover {
   padding-left: 28px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
   border-radius: 8px;
-  cursor: url('/src/assets/cursor/cursorpixel64x.png') 32 32, pointer;
+  cursor: url("/src/assets/cursor/cursorpixel64x.png") 32 32, pointer;
   color: #222;
   background: transparent;
   user-select: none;

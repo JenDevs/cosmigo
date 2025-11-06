@@ -33,7 +33,12 @@ const avatarSrc = computed(
       alt="Customization"
       @click="openModal"
     />
-    <img id="avatar" :src="avatarSrc" alt="Avatar" />
+    <img
+      id="avatar"
+      :src="avatarSrc"
+      alt="Avatar"
+      :class="{ 'no-hover': cosmigo.isTempActive }"
+    />
     <CustomizationModal v-if="isModalOpen" @close="closeModal" />
   </div>
 </template>
@@ -47,8 +52,15 @@ const avatarSrc = computed(
 #avatar:hover {
   cursor: pointer;
   transform: scale(1.05);
-  filter: drop-shadow(0 0 2px rgba(70, 196, 255, 0.6));
+  filter: drop-shadow(0 0 5px rgba(255, 202, 133, 0.6));
   transition: all 0.1s linear;
+}
+
+#avatar.no-hover:hover {
+  cursor: default;
+  transform: none;
+  filter: none;
+  transition: none;
 }
 #cosmigo-component {
   display: flex;

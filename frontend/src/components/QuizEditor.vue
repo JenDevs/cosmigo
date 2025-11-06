@@ -381,15 +381,15 @@ button.save:hover {
 
 /* Primary button Start Quiz */
 button.start {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.25);
+  background: rgb(73, 49, 158);
+  border-color: rgb(73, 49, 158);
+  border-width: 2px;
   color: white;
   font-weight: 600;
   padding: 10px 18px;
-  border: none;
 }
 button.start:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.2);
   border-color: rgba(255, 255, 255, 0.25);
   color: black;
 }
@@ -420,12 +420,11 @@ button.start:active {
   }
 }
 
- @media (max-width: 768px) {
+@media (max-width: 768px) {
   .editor-header {
     position: static;
     top: auto;
     background: none;
   }
 }
-
 </style>

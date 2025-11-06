@@ -6,6 +6,7 @@ import NoteEditor from "./NoteEditor.vue";
 import QuizEditor from "./QuizEditor.vue";
 import QuizPlayer from "./QuizPlayer.vue";
 import QuizList from "./QuizList.vue";
+import { useCosmigoStore } from "@/stores/useCosmigoStore";
 
 import { useNotesStore } from "@/stores/useNotesStore";
 import { useQuizStore } from "@/stores/useQuizStore";
@@ -17,6 +18,8 @@ const { activeNote } = storeToRefs(notesStore);
 
 const quizStore = useQuizStore();
 const { current, list, archived } = storeToRefs(quizStore);
+
+const cosmigo = useCosmigoStore();
 
 const isQuizEditor = ref(false);
 const selectedQuiz = ref(null);
@@ -33,7 +36,8 @@ const currentId = computed(() => current.value?.id ?? null);
 
 const showArchived = ref(false);
 const sidebarTitle = computed(() =>
-showArchived.value ? "Archived quizzes" : "Your quizzes");
+  showArchived.value ? "Archived quizzes" : "Quizzes"
+);
 
 const visibleQuizzes = computed(() =>
   showArchived.value ? archived.value : list.value
@@ -168,6 +172,12 @@ async function handleArchive() {
     window.alert(e?.message || "Could not archive the quiz.");
   } finally {
     if (archived) {
+      // Spin Cosmigo
+      if (typeof cosmigo?.onCompletion === "function") {
+        cosmigo.onCompletion("cosmigo_completion_rolling", 850, {
+          restart: false,
+        });
+      }
       resetView();
       await loadQuizzes();
     }
@@ -227,39 +237,35 @@ function handleRestart() {
 
       <aside class="quizzes-container">
         <div class="quizzes-header">
-  <h3 class="quizzes-title">{{ sidebarTitle }}</h3>
+          <h3 class="quizzes-title">{{ sidebarTitle }}</h3>
 
-  <div class="right-actions">
-    <!-- Knapp för att växla -->
-    <button class="btn ghost" type="button" @click="toggleArchived">
-      {{ showArchived ? "Back to active" : "View archived" }}
-    </button>
+          <div class="right-actions">
+            <!-- Knapp för att växla -->
+            <button class="btn ghost" type="button" @click="toggleArchived">
+              {{ showArchived ? "Back to active" : "View archived" }}
+            </button>
 
-    <!-- "New quiz" visas bara i aktiva vyn -->
-    <button
-      v-if="!showArchived"
-      class="btn"
-      type="button"
-      @click="newQuiz"
-    >
-      New quiz
-    </button>
-  </div>
-</div>
+            <!-- "New quiz" visas bara i aktiva vyn -->
+            <button
+              v-if="!showArchived"
+              class="btn"
+              type="button"
+              @click="newQuiz"
+            >
+              New quiz
+            </button>
+          </div>
+        </div>
 
         <div class="quizzes-body">
           <div class="edge-fade top" aria-hidden="true"></div>
 
           <template v-if="!loading && !error">
             <QuizList
-  :quizzes="visibleQuizzes"
-  @select="selectQuiz"
-  @delete="deleteQuiz"
-/>
-<p v-if="visibleQuizzes.length === 0" class="q-muted" style="padding:8px;">
-  {{ showArchived ? "No archived quizzes yet." : "No quizzes yet." }}
-</p>
-
+              :quizzes="visibleQuizzes"
+              @select="selectQuiz"
+              @delete="deleteQuiz"
+            />
           </template>
           <p v-else-if="loading" class="q-muted">Loading…</p>
           <p v-else class="q-error">{{ error }}</p>
@@ -292,7 +298,7 @@ function handleRestart() {
   background-color: rgb(13, 9, 27);
   padding-top: 124px;
   min-height: 100%;
-  background-image:url('/src/assets/images/skyhorizontal.png');
+  background-image: url("/src/assets/images/skyhorizontal.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -408,9 +414,9 @@ input:checked + .slider:before {
 .quizzes-header {
   flex: 0 0 auto;
   display: flex;
+  flex-direction: column; /* stack vertically instead of side-by-side */
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   background: rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   padding: 8px 10px;
@@ -461,7 +467,7 @@ input:checked + .slider:before {
 }
 
 .btn {
-  background: rgb(53, 44, 87);
+  background: rgb(73, 49, 158);
   color: #fff;
   border: none;
   border-radius: 4px;
@@ -529,6 +535,5 @@ input:checked + .slider:before {
     margin-bottom: 16px;
   }
 }
-
 
 </style>
