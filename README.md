@@ -53,7 +53,13 @@ Use Insomnia (or Postman) to create a user by sending a POST request to your bac
 
 POST http://localhost:3000/api/users
 
-Include the required fields (e.g. username, email).
+Include the required fields:
+{
+    "userName": "user",
+    "userEmail": "user@test.com",
+    "userLevel": "1",
+    "userExperience": "0"
+}
 
 6. Run with Docker (optional)
 
