@@ -45,7 +45,7 @@ npm install express
 ```bash
 Run all SQL commands found in the provided DB file to create the necessary tables:
 
-db.sql
+db.sql found in backend.
 ```
 ### 5. Create a user
 ```bash
@@ -84,6 +84,7 @@ Access the app in your browser at http://localhost:5173 (or whatever port Vue ru
 
 Your Pomodoro Gamification App is now running locally.
 Stay productive and have fun while working! ☕🔥
+
 
 
 
