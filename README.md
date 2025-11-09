@@ -19,8 +19,8 @@ A web application that gamifies the Pomodoro technique to make productivity more
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/<your-username>/<your-repo-name>.git
-cd <your-repo-name>
+git clone https://github.com/JenDevs/cosmigo.git
+cd cosmigo
 
 2. MySQL connection
 
@@ -84,4 +84,5 @@ Access the app in your browser at http://localhost:5173 (or whatever port Vue ru
 
 Your Pomodoro Gamification App is now running locally.
 Stay productive and have fun while working! ☕🔥
+
 
