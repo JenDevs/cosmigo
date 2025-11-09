@@ -21,15 +21,15 @@ A web application that gamifies the Pomodoro technique to make productivity more
 ```bash
 git clone https://github.com/JenDevs/cosmigo.git
 cd cosmigo
-
+```
 ### 2. MySQL connection
-
+```bash
 You’ll find the MySQL connection configuration in the backend.
 
 Make sure your database is running before starting the backend.
-
+```
 ### 3. Install dependencies
-
+```bash
 Run the following commands in both the frontend and backend folders:
 
 npm install
@@ -40,15 +40,15 @@ npm install primevue quill pinia
 
 Backend:
 npm install express
-
+```
 ### 4. Database setup
-
+```bash
 Run all SQL commands found in the provided DB file to create the necessary tables:
 
 db.sql
-
+```
 ### 5. Create a user
-
+```bash
 Use Insomnia (or Postman) to create a user by sending a POST request to your backend’s user endpoint, for example:
 
 POST http://localhost:3000/api/users
@@ -60,17 +60,17 @@ Include the required fields:
     "userLevel": "1",
     "userExperience": "0"
 }
-
+```
 ### 6. Run with Docker (optional)
-
+```bash
 If Docker is configured:
 
 docker-compose up --build
 
 This will spin up containers for both backend and database.
-
+```
 ### 7. Start the application
-
+```bash
 Start frontend:
 
 npm run dev
@@ -79,11 +79,12 @@ Start backend:
 node app.js
 
 Access the app in your browser at http://localhost:5173 (or whatever port Vue runs on).
-
+```
 ✅ Done!
 
 Your Pomodoro Gamification App is now running locally.
 Stay productive and have fun while working! ☕🔥
+
 
 
 
